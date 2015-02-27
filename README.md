@@ -18,6 +18,7 @@ It's based on the wagtail demo blog but is closer to a standard Wordpress blog s
 Work in progress?
 
 - Wordpress importer
+- Comments
 
 # Installation
 
