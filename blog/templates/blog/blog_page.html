@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+    {% include 'blog/blog_post.html' with blog=self %}
+{% endblock %}
