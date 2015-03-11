@@ -76,7 +76,7 @@ class BlogCategory(models.Model):
         return super(BlogCategory, self).save(*args, **kwargs)
 
 
-class BlogCategoryBlogPage(Orderable, models.Model):
+class BlogCategoryBlogPage(models.Model):
     category = models.ForeignKey(BlogCategory, related_name="+")
     page = ParentalKey('BlogPage', related_name='categories')
     panels = [
