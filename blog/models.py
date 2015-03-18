@@ -1,12 +1,13 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import models
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailcore.models import Page, Orderable
+from wagtail.wagtailcore.models import Page
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
+from wagtail.wagtailsearch import index
 from taggit.models import TaggedItemBase
 from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
@@ -16,14 +17,11 @@ class BlogIndexPage(Page):
     @property
     def blogs(self):
         # Get list of blog pages that are descendants of this page
-        blogs = BlogPage.objects.filter(
-            live=True,
-            path__startswith=self.path
-        )
+        blogs = BlogPage.objects.descendant_of(self).live()
         blogs = blogs.order_by('-date')
         return blogs
 
-    def serve(self, request, tag=None, category=None):
+    def get_context(self, request, tag=None, category=None):
         blogs = self.blogs
 
         if tag is None:
@@ -49,12 +47,12 @@ class BlogIndexPage(Page):
         except EmptyPage:
             blogs = paginator.page(paginator.num_pages)
 
-        return render(request, self.template, {
+        return {
             'self': self,
             'blogs': blogs,
             'category': category,
             'tag': tag,
-        })
+        }
 
 
 @register_snippet
@@ -99,20 +97,14 @@ class BlogPage(Page):
         on_delete=models.SET_NULL,
         related_name='+'
     )
-    indexed_fields = ('body', )
 
-    @property
-    def blog_index(self):
-        # Find closest ancestor which is a blog index
-        return self.get_ancestors().type(BlogIndexPage).last()
+    search_fields = Page.search_fields + (
+        index.SearchField('body'),
+    )
 
     def get_blog_index(self):
-        blog_index_page = None
-        for index_page in BlogIndexPage.objects.all():
-            if self in index_page.blogs:
-                blog_index_page = index_page
-                return blog_index_page
-        return blog_index_page
+        # Find closest ancestor which is a blog index
+        return self.get_ancestors().type(BlogIndexPage).last()
 
 BlogPage.content_panels = [
     FieldPanel('title', classname="full title"),
