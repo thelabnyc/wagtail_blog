@@ -1,8 +1,6 @@
 # wagtail_blog
 A wordpress like blog app implemented in wagtail.
 
-This is an initial release and will likely change. Use at your own risk.
-
 # What is it
 
 After reimplimenting wordpress like blogs over and over again in wagtail I decided to just make this. 
