@@ -45,6 +45,12 @@
                 {% endfor %} | 
         {% endif %}
 
-        <a href="{% pageurl blog %}#disqus_thread">No Comments</a>
+        <div id="comments" class="comments">
+        {% if COMMENTS_APP == 'django_comments_xtd' %}
+            {% include 'blog/blog_post_comments_xtd_link.html' with blog=blog %}
+        {% elif False %}
+            <a href="{% pageurl blog %}#disqus_thread">No Comments</a>
+        {% endif %}
+        </div>
     </div>
 </div>

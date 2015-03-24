@@ -1,0 +1,9 @@
+{% load wagtailcore_tags comments %}
+
+{% get_comment_count for blog as comment_count %}
+<p>
+    <a href="{% pageurl blog %}#comments">
+        {{ comment_count }} comment{{ comment_count|pluralize }}
+    </a>
+    {{ comment_count|pluralize:"has,have" }} been posted.
+</p>

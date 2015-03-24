@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
@@ -13,6 +14,9 @@ from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
 
 
+COMMENTS_APP = getattr(settings, 'COMMENTS_APP', None)
+
+
 class BlogIndexPage(Page):
     @property
     def blogs(self):
@@ -21,7 +25,9 @@ class BlogIndexPage(Page):
         blogs = blogs.order_by('-date')
         return blogs
 
-    def get_context(self, request, tag=None, category=None):
+    def get_context(self, request, tag=None, category=None, *args, **kwargs):
+        context = super(BlogIndexPage, self).get_context(
+            request, *args, **kwargs)
         blogs = self.blogs
 
         if tag is None:
@@ -47,12 +53,12 @@ class BlogIndexPage(Page):
         except EmptyPage:
             blogs = paginator.page(paginator.num_pages)
 
-        return {
-            'self': self,
-            'blogs': blogs,
-            'category': category,
-            'tag': tag,
-        }
+        context['blogs'] = blogs
+        context['category'] = category
+        context['tag'] = tag
+        context['COMMENTS_APP'] = COMMENTS_APP
+
+        return context
 
 
 @register_snippet
@@ -102,9 +108,17 @@ class BlogPage(Page):
         index.SearchField('body'),
     )
 
+    def get_absolute_url(self):
+        return self.url
+
     def get_blog_index(self):
         # Find closest ancestor which is a blog index
         return self.get_ancestors().type(BlogIndexPage).last()
+
+    def get_context(self, request, *args, **kwargs):
+        context = super(BlogPage, self).get_context(request, *args, **kwargs)
+        context['COMMENTS_APP'] = COMMENTS_APP
+        return context
 
 BlogPage.content_panels = [
     FieldPanel('title', classname="full title"),

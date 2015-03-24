@@ -14,11 +14,12 @@ It's based on the wagtail demo blog but is closer to a standard Wordpress blog s
 - Categories and tags with views
 - RSS
 - Basic starter templates with pagination
+- Comments
 
 Work in progress?
 
 - Wordpress importer
-- Comments
+- Disqus comments
 
 # Installation
 
@@ -26,3 +27,12 @@ Work in progress?
 2. Add `blog` to INSTALLED_APPS
 3. Add `url(r'blog/', include('blog.urls')),` to urls.py
 4. Override templates as needed.
+
+# Comments
+
+django-comments-xtd comments work out of the box. Just install it as directed [here](http://django-comments-xtd.readthedocs.org/en/latest/). 
+Customizing the xtd comment templates should be all you need - but feel free to review this apps templates which you may want to override.
+
+Out of box Disqus coming someday - but it's pretty easy to add manually following the discus documentation and overriding templates.
+
+Feel free to contribute other comment implimentations.
