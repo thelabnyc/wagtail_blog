@@ -55,6 +55,7 @@ class BlogIndexPage(Page):
 
         context['blogs'] = blogs
         context['category'] = category
+        context['all_categories'] = BlogCategory.objects.all()
         context['tag'] = tag
         context['COMMENTS_APP'] = COMMENTS_APP
 
@@ -117,6 +118,7 @@ class BlogPage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super(BlogPage, self).get_context(request, *args, **kwargs)
+        context['all_categories'] = BlogCategory.objects.all()
         context['COMMENTS_APP'] = COMMENTS_APP
         return context
 
