@@ -31,6 +31,6 @@ Work in progress?
 django-comments-xtd comments work out of the box. Just install it as directed [here](http://django-comments-xtd.readthedocs.org/en/latest/). 
 Customizing the xtd comment templates should be all you need - but feel free to review this apps templates which you may want to override.
 
-Out of box Disqus coming someday - but it's pretty easy to add manually following the discus documentation and overriding templates.
+Out of box Disqus coming someday - but it's pretty easy to add manually following the Disqus documentation and overriding templates.
 
 Feel free to contribute other comment implimentations.
