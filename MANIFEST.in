@@ -1,2 +1,3 @@
 recursive-include blog/templates *
 recursive-include blog/static *
+recursive-include blog/locale *
