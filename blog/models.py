@@ -76,6 +76,10 @@ class BlogCategory(models.Model):
         ordering = ['name']
         verbose_name = _("Blog Category")
         verbose_name_plural = _("Blog Categories")
+    
+    panels = [
+        FieldPanel('name')
+    ]
 
     def __str__(self):
         return self.name
