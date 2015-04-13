@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel
@@ -61,16 +62,24 @@ class BlogIndexPage(Page):
 
         return context
 
+    class Meta:
+        verbose_name = _('Blog index')
+
 
 @register_snippet
 class BlogCategory(models.Model):
     name = models.CharField(
-        max_length=80, unique=True, verbose_name='Category Name')
+        max_length=80, unique=True, verbose_name=_('Category Name'))
     slug = models.SlugField(unique=True, max_length=80)
 
     class Meta:
         ordering = ['name']
-        verbose_name_plural = "Blog Categories"
+        verbose_name = _("Blog Category")
+        verbose_name_plural = _("Blog Categories")
+    
+    panels = [
+        FieldPanel('name')
+    ]
 
     def __str__(self):
         return self.name
@@ -82,7 +91,7 @@ class BlogCategory(models.Model):
 
 
 class BlogCategoryBlogPage(models.Model):
-    category = models.ForeignKey(BlogCategory, related_name="+")
+    category = models.ForeignKey(BlogCategory, related_name="+", verbose_name=_('Category'))
     page = ParentalKey('BlogPage', related_name='categories')
     panels = [
         FieldPanel('category'),
@@ -94,15 +103,16 @@ class BlogPageTag(TaggedItemBase):
 
 
 class BlogPage(Page):
-    body = RichTextField()
+    body = RichTextField(verbose_name=_('body'))
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
-    date = models.DateField("Post date")
+    date = models.DateField(_("Post date"))
     header_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+'
+        related_name='+',
+        verbose_name=_('Header image')
     )
 
     search_fields = Page.search_fields + (
@@ -122,11 +132,16 @@ class BlogPage(Page):
         context['COMMENTS_APP'] = COMMENTS_APP
         return context
 
+    class Meta:
+        verbose_name = _('Blog page')
+        verbose_name_plural = _('Blog pages')
+
+
 BlogPage.content_panels = [
     FieldPanel('title', classname="full title"),
     FieldPanel('date'),
     FieldPanel('tags'),
     ImageChooserPanel('header_image'),
-    InlinePanel(BlogPage, 'categories', label="Categories"),
+    InlinePanel(BlogPage, 'categories', label=_("Categories")),
     FieldPanel('body', classname="full"),
 ]
