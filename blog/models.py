@@ -119,6 +119,7 @@ class BlogPage(Page):
     def get_context(self, request, *args, **kwargs):
         context = super(BlogPage, self).get_context(request, *args, **kwargs)
         context['all_categories'] = BlogCategory.objects.all()
+        context['blogs'] = self.get_blog_index().blogindexpage.blogs
         context['COMMENTS_APP'] = COMMENTS_APP
         return context
 
