@@ -1,6 +1,9 @@
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -16,6 +19,17 @@ from modelcluster.fields import ParentalKey
 
 
 COMMENTS_APP = getattr(settings, 'COMMENTS_APP', None)
+
+
+def get_blog_context(context):
+    """ Get context data useful on all blog related pages """
+    context['authors'] = get_user_model().objects.filter(
+        owned_pages__live=True,
+        owned_pages__content_type__model='blogpage'
+    ).annotate(Count('owned_pages'))
+    context['all_categories'] = BlogCategory.objects.all()
+    context['root_categories'] = BlogCategory.objects.filter(parent=None)
+    return context
 
 
 class BlogIndexPage(Page):
@@ -56,9 +70,9 @@ class BlogIndexPage(Page):
 
         context['blogs'] = blogs
         context['category'] = category
-        context['all_categories'] = BlogCategory.objects.all()
         context['tag'] = tag
         context['COMMENTS_APP'] = COMMENTS_APP
+        context = get_blog_context(context)
 
         return context
 
@@ -71,18 +85,36 @@ class BlogCategory(models.Model):
     name = models.CharField(
         max_length=80, unique=True, verbose_name=_('Category Name'))
     slug = models.SlugField(unique=True, max_length=80)
+    parent = models.ForeignKey(
+        'self', blank=True, null=True, related_name="children",
+        help_text=_(
+            'Categories, unlike tags, can have a hierarchy. You might have a '
+            'Jazz category, and under that have children categories for Bebop'
+            ' and Big Band. Totally optional.')
+    )
+    description = models.CharField(max_length=500, blank=True)
 
     class Meta:
         ordering = ['name']
         verbose_name = _("Blog Category")
         verbose_name_plural = _("Blog Categories")
-    
+
     panels = [
-        FieldPanel('name')
+        FieldPanel('name'),
+        FieldPanel('parent'),
+        FieldPanel('description'),
     ]
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.parent:
+            parent = self.parent
+            if self.parent == self:
+                raise ValidationError('Parent category cannot be self.')
+            if parent.parent and parent.parent == self:
+                raise ValidationError('Cannot have circular Parents.')
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -91,7 +123,8 @@ class BlogCategory(models.Model):
 
 
 class BlogCategoryBlogPage(models.Model):
-    category = models.ForeignKey(BlogCategory, related_name="+", verbose_name=_('Category'))
+    category = models.ForeignKey(
+        BlogCategory, related_name="+", verbose_name=_('Category'))
     page = ParentalKey('BlogPage', related_name='categories')
     panels = [
         FieldPanel('category'),
@@ -118,6 +151,8 @@ class BlogPage(Page):
     search_fields = Page.search_fields + (
         index.SearchField('body'),
     )
+    blog_categories = models.ManyToManyField(
+        BlogCategory, through=BlogCategoryBlogPage, blank=True)
 
     def get_absolute_url(self):
         return self.url
@@ -128,8 +163,8 @@ class BlogPage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super(BlogPage, self).get_context(request, *args, **kwargs)
-        context['all_categories'] = BlogCategory.objects.all()
         context['blogs'] = self.get_blog_index().blogindexpage.blogs
+        context = get_blog_context(context)
         context['COMMENTS_APP'] = COMMENTS_APP
         return context
 
