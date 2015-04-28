@@ -23,8 +23,8 @@ Work in progress?
 
 1. `pip install wagtail-blog`
 2. Add `blog` to INSTALLED_APPS
-3. Add `url(r'blog/', include('blog.urls')),` to urls.py
-4. Override templates as needed.
+3. Add `url(r'^blog/', include('blog.urls')),` to urls.py
+4. Override [templates](/blog/templates/blog/) as needed.
 
 # Comments
 
@@ -34,3 +34,13 @@ Customizing the xtd comment templates should be all you need - but feel free to 
 Out of box Disqus coming someday - but it's pretty easy to add manually following the Disqus documentation and overriding templates.
 
 Feel free to contribute other comment implimentations.
+
+# Hacking
+
+The included docker-compose file should make it easy to get up and running. 
+
+1. Install docker and docker-compose
+2. `docker-compose up`
+3. `docker-compose run --rm web ./manage.py migrate`
+4. `docker-compose run --rm web ./manage.py createsuperuser`
+5. Log in and create a blog index page with blog pages to see a very basic implimentation.
