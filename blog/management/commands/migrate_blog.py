@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand, CommandErrors
 import os
 import sys
 import json
@@ -11,46 +11,58 @@ from django.db.utils import IntegrityError
 """
 This is a management command to migrate a Wordpress site to Wagtail. 
 
+Users will first need to make sure the WP REST API(WP API) plugin is installed on the self-hosted Wordpress site to migrate.
 """
 
 class Command(BaseCommand):
 	
-	
 	def handle(self, *args, **options):
 		"""gets data from WordPress site"""
-		#need to get install plugin to get site info
-		query_string = "https://public-api.wordpress.com/rest/v1.1/%s" % site_info
-		#I copied the headers part from the sternb0t github script - not sure if I will end up needing it
-		headers = {
-                "Authorization": 'Bearer {}'.format(settings.WP_API_TMP_AUTH_TOKEN)
-                }
-		result = requests.get(query_string, headers=headers)
-		posts =  result.json()
-		
-		#go through json and make python objects for each Wagtail_blog model
+                base_url = args[0]
+                posts_url = ''.join((base_url,'/wp-json/posts'))
+                tax_url = ''.join((base_url,'/wp-json/taxonomies'))
+                try:
+                    fetched_posts = requests.get(posts_url)
+		except ConnectionError:
+                    raise CommandError('There was a problem with the blog entry url.')
+
+		posts = fetched_posts.json()
+		#create BlogPage object for each record
 		for post in posts:
-		    #going to create BlogPage objects for each record
-		    BlogPage.objects.create(...)
-		
-		
-		#request to a url to get blog categories
-		categories_query = ""
-		categories_result = requests.get(categories_query, headers=headers)
-		categories = categories_result.json()
-		#create BlogCategory objects, make sure we don't have repeats, etc
-		for c in categories:
-		    #make sure no duplicates
-		    BlogCategory.objects.create(...)
-		
-		#request to a different url to get blog tags
-		tag_query = ""
-		tag_result = requests.get(tag_query, headers=headers)
-		tags = tag_result.json()
-		for t in tags:
-		    #make sure we don't have duplicates
-		    BlogPageTag.objects.create(...)
-		
-		
+		    title = post.get('title')
+                    slug = post.get('slug')
+                    description = post.get('description')
+                    excerpt = post.get('excerpt')
+                    status = post.get('status')
+                    body = post.get('content')
+                    author = post.get('author')
+                    #author data comes in a dictionary - could create user objects with this 
+                    date = post.get('date')
+                    date_modified = post.get('modified')
+
+                    #BlogPage.objects.create(...)
+		"""
+                Get site taxonomies - includes tags and categories.
+                Gets whichever taxonomies are registered on the site 
+                
+                Might go ahead and grab this data first and then add it when creating BlogPage objects
+                """
+		try:
+                    fetched_tags_and_categories = requests.get(tax_url)
+                except ConnectionError:
+                    raise CommandError('There was a problem with the taxonomy URL')
+
+                taxonomies = fetched_tags_and_categories.json()
+
+                #still figuring out how the wordpress data works for categories and tags
+                #might get them from separate URLs
+                for t in taxonomies:
+                    if t['name'] == 'Categories':
+                        name = t.get('name')
+                        slug = t.get('slug')
+                        parent_item = t.get('parent_item')
+                    #if t['name'] == 'Tags':
+                           
 		#will take care of BlogPageIndex stuff too
 		    
 		    
