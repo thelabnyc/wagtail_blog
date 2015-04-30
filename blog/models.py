@@ -78,6 +78,7 @@ class BlogIndexPage(Page):
 
     class Meta:
         verbose_name = _('Blog index')
+    subpage_types = ['blog.BlogPage']
 
 
 @register_snippet
