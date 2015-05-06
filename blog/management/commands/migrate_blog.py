@@ -12,15 +12,21 @@ from django.contrib.auth.models import User
 This is a management command to migrate a Wordpress site to Wagtail. Two arguments can be used - the site to be migrated and the site it is being migrated to.
 
 Users will first need to make sure the WP REST API(WP API) plugin is installed on the self-hosted Wordpress site to migrate.
+
+args0 = url of blog to migrate
+args1 = title
+args2 = slug
 """
 class Command(BaseCommand):
 	
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
+        #first create BlogIndexPage object with title and slug for blog to be migrated    
+        new_blog_index = BlogIndexPage.objects.create(title=args[1], slug=args[2])
+        new_blog_index.save()
         generic_user = User.objects.get_or_create(username="admin")
         generic_user = generic_user[0]
-        print(generic_user)
         if args[0].startswith('http://'):
             base_url = args[0]
         else:
@@ -51,14 +57,15 @@ class Command(BaseCommand):
             date_modified = post.get('modified')
             content_obj = ContentType.objects.get_for_model(model=BlogPage)
             new_entry = BlogPage.objects.create(id=1, content_type=content_obj, title=title, slug=slug, search_description="description", first_published_at=date, latest_revision_created_at=date_modified, depth=1, date=date, url_path=url_path, path=url_path, owner=generic_user)
-            #need to first set up the parent - can't create children without a parent
-            #new_entry.save()
+            
+            new_entry.save()
+            
             #Get site taxonomies - includes tags and categories.
             #Gets whichever taxonomies are registered on the site 
                 
             #Might go ahead and grab this data first and then add it when creating BlogPage objects
-"""
 
+        #still testing this
         try:
             fetched_tags_and_categories = requests.get(tax_url)
         except ConnectionError:
@@ -66,19 +73,21 @@ class Command(BaseCommand):
 
         taxonomies = fetched_tags_and_categories.json()
 
-                #still figuring out how the wordpress data works for categories and tags
-                #might get them from separate URLs
         for t in taxonomies:
             if t['name'] == 'Categories':
                 name = t.get('name')
                 slug = t.get('slug')
                 parent_item = t.get('parent_item')
-                    #if t['name'] == 'Tags':
+                category = BlogCategory.objects.create(name=name, slug=slug, parent_item=parent_item)
+                category.save()
+                    if t['name'] == 'Tags':
+                        name = t.get('name')
+                        slug = t.get('slug')
+                        parent_item = t.get('parent_item')
+                        tag = BlogPageTag.objects.create(name=name, slug=slug, parent_item=parent_item)
+                        tag.save()
+        
                            
-		#will take care of BlogPageIndex stuff too
-		    
-		    
-               
- """              
+              
                
  
