@@ -3,7 +3,7 @@ import os
 import sys
 import json
 import requests
-from blog.models import BlogPage, BlogPageTag, BlogIndexPage
+from blog.models import BlogPage, BlogPageTag, BlogIndexPage, BlogCategory
 from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
