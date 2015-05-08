@@ -9,7 +9,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailcore.models import Page
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 from wagtail.wagtailsearch import index
@@ -142,9 +142,8 @@ class BlogPage(Page):
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
     date = models.DateField(
         _("Post date"), default=datetime.datetime.today,
-        help_text=_("This date may be displayed on the blog post. To schedule"
-                    " a blog post to go live at a later date click Settings, Go"
-                    " live date.")
+        help_text=_("This date may be displayed on the blog post. It is not "
+                    "used to schedule posts to go live at a later date.")
     )
     header_image = models.ForeignKey(
         'wagtailimages.Image',
@@ -182,9 +181,14 @@ class BlogPage(Page):
 
 BlogPage.content_panels = [
     FieldPanel('title', classname="full title"),
-    FieldPanel('date'),
-    FieldPanel('tags'),
+    MultiFieldPanel([
+        FieldPanel('tags'),
+        InlinePanel(BlogPage, 'categories', label=_("Categories")),
+    ], heading="Tags and Categories"),
     ImageChooserPanel('header_image'),
-    InlinePanel(BlogPage, 'categories', label=_("Categories")),
     FieldPanel('body', classname="full"),
+]
+
+BlogPage.settings_panels += [
+    FieldPanel('date'),
 ]
