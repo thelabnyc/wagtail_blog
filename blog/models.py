@@ -16,6 +16,7 @@ from wagtail.wagtailsearch import index
 from taggit.models import TaggedItemBase
 from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
+import datetime
 
 
 COMMENTS_APP = getattr(settings, 'COMMENTS_APP', None)
@@ -139,7 +140,12 @@ class BlogPageTag(TaggedItemBase):
 class BlogPage(Page):
     body = RichTextField(verbose_name=_('body'))
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
-    date = models.DateField(_("Post date"))
+    date = models.DateField(
+        _("Post date"), default=datetime.datetime.today,
+        help_text=_("This date may be displayed on the blog post. To schedule"
+                    " a blog post to go live at a later date click Settings, Go"
+                    " live date.")
+    )
     header_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
