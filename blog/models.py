@@ -9,7 +9,8 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailcore.models import Page
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
+from wagtail.wagtailadmin.edit_handlers import (
+    FieldPanel, InlinePanel, MultiFieldPanel)
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 from wagtail.wagtailsearch import index
@@ -177,6 +178,7 @@ class BlogPage(Page):
     class Meta:
         verbose_name = _('Blog page')
         verbose_name_plural = _('Blog pages')
+BlogPage._meta.get_field('owner').editable = True
 
 
 BlogPage.content_panels = [
@@ -191,4 +193,5 @@ BlogPage.content_panels = [
 
 BlogPage.settings_panels += [
     FieldPanel('date'),
+    FieldPanel('owner'),
 ]
