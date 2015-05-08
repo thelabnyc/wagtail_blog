@@ -14,7 +14,7 @@ from wagtail.wagtailadmin.edit_handlers import (
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 from wagtail.wagtailsearch import index
-from taggit.models import TaggedItemBase
+from taggit.models import TaggedItemBase, Tag
 from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
 import datetime
@@ -136,6 +136,12 @@ class BlogCategoryBlogPage(models.Model):
 
 class BlogPageTag(TaggedItemBase):
     content_object = ParentalKey('BlogPage', related_name='tagged_items')
+
+
+@register_snippet
+class BlogTag(Tag):
+    class Meta:
+        proxy = True
 
 
 class BlogPage(Page):
