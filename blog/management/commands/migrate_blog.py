@@ -3,7 +3,7 @@ import os
 import sys
 import json
 import requests
-from blog.models import BlogPage, BlogPageTag, BlogIndexPage, BlogCategory
+from blog.models import BlogPage, BlogPageTag, BlogIndexPage, BlogCategory, BlogCategoryBlogPage
 from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 This is a management command to migrate a Wordpress site to Wagtail. Two arguments can be used - the site to be migrated and the site it is being migrated to.
 
 Users will first need to make sure the WP REST API(WP API) plugin is installed on the self-hosted Wordpress site to migrate.
-
+Next users will need to create a BlogIndex object in this GUI. This will be used as a parent object for the child blog page objects.
 args0 = url of blog to migrate
 args1 = title of BlogIndex
 """
@@ -28,12 +28,10 @@ class Command(BaseCommand):
             raise CommandError("Have you created an index yet?")
         generic_user = User.objects.get_or_create(username="admin")
         generic_user = generic_user[0]
-        print(generic_user)
         if args[0].startswith('http://'):
             base_url = args[0]
         else:
             base_url = ''.join(('http://', args[0]))
-        print(base_url)
         posts_url = ''.join((base_url,'/wp-json/posts'))
         tax_url = ''.join((base_url,'/wp-json/taxonomies'))
         try:
@@ -42,33 +40,8 @@ class Command(BaseCommand):
             raise CommandError('There was a problem with the blog entry url.')
             pass
         posts = fetched_posts.json()
-        
-        #create BlogPage object for each record
-        for post in posts:
-            title = post.get('title')
-            slug = post.get('slug')
-            #format for url purposes
-            formatted_slug = slug.replace("-","_")
-            description = post.get('description')
-            url_path = args[1] + '/blog/' + formatted_slug
-            excerpt = post.get('excerpt')
-            status = post.get('status')
-            body = post.get('content')
-            author = post.get('author')
-            owner = author['username']
-            #author data comes in a dictionary - could create user objects with this 
-            date = post.get('date')[:10]
-            date_modified = post.get('modified')
-            content_obj = ContentType.objects.get_for_model(model=BlogPage)
-            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, url_path=url_path, depth=4, owner=generic_user))
-            
-            #new_entry.save()
-                   
-            #Get site taxonomies - includes tags and categories.
-            #Gets whichever taxonomies are registered on the site 
-                
-            #Might go ahead and grab this data first and then add it when creating BlogPage objects
-        """
+
+
         #still testing this
         try:
             fetched_tags_and_categories = requests.get(tax_url)
@@ -76,7 +49,7 @@ class Command(BaseCommand):
             raise CommandError('There was a problem with the taxonomy URL')
 
         taxonomies = fetched_tags_and_categories.json()
-
+        """
         for t in taxonomies:
             if t['name'] == 'Categories':
                 name = t.get('name')
@@ -91,9 +64,43 @@ class Command(BaseCommand):
                         tag = BlogPageTag.objects.create(name=name, slug=slug, parent_item=parent_item)
                         tag.save()
         
-                          
-              
+       """               
+       # new_category = blog_index.add_child(instance=BlogCategory(name="newcaadfasfsdftegory", slug="somekindofuniqueslug"))
+        new_category = BlogCategory.objects.create(name="slkjfsdkjlskdjflkdj", slug="slkjflskjdflksjdflksjdflkdsj")
+        
                
  
      
-        """
+        
+        
+        #create BlogPage object for each record
+        for post in posts:
+            title = post.get('title')
+            slug = post.get('slug')
+            #format for url purposes
+            formatted_slug = slug.replace("-","_")
+            description = post.get('description')
+            url_path = args[1] + '/blog/' + formatted_slug
+            excerpt = post.get('excerpt')
+            status = post.get('status')
+            body = post.get('content')
+            #author/user data
+            author = post.get('author')
+            username = author['username']
+            #date user has registered
+            registered = author['registered']
+            name = author['name']
+            first_name = author['first_name']
+            last_name = author['last_name']
+            avatar = author['avatar']
+            description = author['description']
+            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
+            date = post.get('date')[:10]
+            date_modified = post.get('modified')
+            content_obj = ContentType.objects.get_for_model(model=BlogPage)
+            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, url_path=url_path, depth=4, owner=user))
+            connection = BlogCategoryBlogPage.objects.create(category=new_category, page=new_entry)
+            new_entry.save()
+            connection.save()     
+                   
+             
