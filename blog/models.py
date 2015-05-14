@@ -62,13 +62,18 @@ class BlogIndexPage(Page):
 
         # Pagination
         page = request.GET.get('page')
-        paginator = Paginator(blogs, 10)  # Show 10 blogs per page
-        try:
-            blogs = paginator.page(page)
-        except PageNotAnInteger:
-            blogs = paginator.page(1)
-        except EmptyPage:
-            blogs = paginator.page(paginator.num_pages)
+        page_size = 10
+        if hasattr(settings, 'BLOG_PAGINATION_PER_PAGE'):
+            page_size = settings.BLOG_PAGINATION_PER_PAGE
+
+        if page_size is not None:
+            paginator = Paginator(blogs, page_size)  # Show 10 blogs per page
+            try:
+                blogs = paginator.page(page)
+            except PageNotAnInteger:
+                blogs = paginator.page(1)
+            except EmptyPage:
+                blogs = paginator.page(paginator.num_pages)
 
         context['blogs'] = blogs
         context['category'] = category
