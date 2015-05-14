@@ -97,10 +97,27 @@ class Command(BaseCommand):
             user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
             date = post.get('date')[:10]
             date_modified = post.get('modified')
-            content_obj = ContentType.objects.get_for_model(model=BlogPage)
+            
             new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, url_path=url_path, depth=4, owner=user))
-            connection = BlogCategoryBlogPage.objects.create(category=new_category, page=new_entry)
-            new_entry.save()
-            connection.save()     
-                   
+            #categories
+            categories = post.get('terms')
+            categories_for_blog_entry = []
+            for c in categories.values():
+                category_name = c[0]['name']
+                category_slug = c[0]['slug']
+                new_category = BlogCategory.objects.create(name=category_name, slug=category_slug)   
+                categories_for_blog_entry.append(new_category)            
+
+
+            #loop through categories_for_blog_entry and create BlogCategoryBlogPages(bcbp) for each category for this blog page
+            bcbp = []
+            for category in categories_for_blog_entry:
+                connection = BlogCategoryBlogPage.objects.create(category=category, page=new_entry)
+                bcbp.append(connection)
+            
+            #save BlogCategoryBlogPage objects
+            for each in bcbp:
+                each.save()
+            #save blog entry
+            new_entry.save()       
              
