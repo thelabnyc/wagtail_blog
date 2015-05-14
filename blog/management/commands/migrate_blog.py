@@ -24,7 +24,7 @@ class Command(BaseCommand):
         #first create BlogIndexPage object in GUI
         try:
             blog_index = BlogIndexPage.objects.get(title=args[1])
-        except IndexDoesNotExist:
+        except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
         generic_user = User.objects.get_or_create(username="admin")
         generic_user = generic_user[0]
@@ -60,7 +60,7 @@ class Command(BaseCommand):
             date = post.get('date')[:10]
             date_modified = post.get('modified')
             content_obj = ContentType.objects.get_for_model(model=BlogPage)
-            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", first_published_at=date, latest_revision_created_at=date_modified, path=int("00100010001"), date=date, url_path=url_path, depth=4, owner=generic_user))
+            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, url_path=url_path, depth=4, owner=generic_user))
             
             #new_entry.save()
                    
