@@ -1,14 +1,16 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
+from django.conf import settings
 import os
 import sys
 import json
 import requests
+from bs4 import BeautifulSoup
 from blog.models import BlogPage, BlogTag, BlogPageTag, BlogIndexPage, BlogCategory, BlogCategoryBlogPage
 from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-
+from wagtail.wagtailimages.models import Image
 """
 This is a management command to migrate a Wordpress site to Wagtail. Two arguments can be used - the site to be migrated and the site it is being migrated to.
 
@@ -54,7 +56,17 @@ class Command(BaseCommand):
             excerpt = post.get('excerpt')
             status = post.get('status')
             body = post.get('content')
+            #get image info from content and create image objects
+            soup = BeautifulSoup(body)
+            for img in soup.findAll('img'):
+                path,file=os.path.split(img['src'])
+                alt_tag = img['alt']
+                width = img['width']
+                height = img['height']
+                image = Image.objects.create(title=alt_tag, file=file, width=width, height=height)
             featured_image = post.get('featured_image')
+            if featured_image:
+                print(True)
             #author/user data
             author = post.get('author')
             username = author['username']
@@ -64,6 +76,7 @@ class Command(BaseCommand):
             first_name = author['first_name']
             last_name = author['last_name']
             avatar = author['avatar']
+            #need to turn these into images as well
             description = author['description']
             try:
                 user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
@@ -73,11 +86,10 @@ class Command(BaseCommand):
             date = post.get('date')[:10]
             date_modified = post.get('modified')
             
-            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, owner=user))
-            #if there is a featured image, add it to the new entry
-            if featured_image:
-                new_entry.header_image = featured_image
-            #images - still working on this
+            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, owner=user))
+            #if there is a featured image, create Image object and add it to the new BlogPage
+            #if featured_image:
+            #    new_entry.header_image = featured_image
             
             #for image_tag in re.findall("(<img\s[^>]*?src\s*=\s*['\"]([^'\"]*?)['\"][^>]*?>)", body):
             #    image_tag_text = image_tag[0]
@@ -96,10 +108,9 @@ class Command(BaseCommand):
                     if record[0]['taxonomy'] == 'post_tag':
                         tag_name = record[0]['name']
                         tag_slug = record[0]['slug']
-                        new_tag = BlogPageTag.objects.get_or_create(name=tag_name, slug=tag_slug, content_object=new_entry)
+                        new_tag = BlogTag.objects.get_or_create(name=tag_name, slug=tag_slug)
                         tags_for_blog_entry.append(new_tag)
                     if record[0]['taxonomy'] == 'category':
-                        print('category')
                         category_name = record[0]['name']
                         category_slug = record[0]['slug']
                         new_category = BlogCategory.objects.get_or_create(name=category_name, slug=category_slug)
@@ -109,14 +120,17 @@ class Command(BaseCommand):
             bcbp = []
             for category in categories_for_blog_entry:
                 category = category[0]
-                connection = BlogCategoryBlogPage.objects.create(category=category, page=new_entry)
+                connection = BlogCategoryBlogPage.objects.get_or_create(category=category, page=new_entry)
                 bcbp.append(connection)
+            for tag in tags_for_blog_entry:
+                tag = tag[0]
+                connection = BlogPageTag.objects.get_or_create(tag=tag, content_object=new_entry)
             
             #save BlogCategoryBlogPage objects
-            for blog_category in bcbp:
-                blog_category.save()
-            for blog_tag in tags_for_blog_entry:
-                blog_tag.save()
+            #for category in bcbp:
+            #    category.save()
+            #for tag in tags_for_blog_entry:
+            #    tag[0].save()
             #save blog entry
             new_entry.save()       
             
