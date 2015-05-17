@@ -26,6 +26,10 @@ Work in progress?
 3. Add `url(r'^blog/', include('blog.urls')),` to urls.py
 4. Override [templates](/blog/templates/blog/) as needed.
 
+# Settings
+
+`BLOG_PAGINATION_PER_PAGE` (Default 10) Set to change the number of blogs per page. Set to None to disable (useful if using your own pagination implimentation).
+
 # Comments
 
 django-comments-xtd comments work out of the box. Just install it as directed [here](http://django-comments-xtd.readthedocs.org/en/latest/). 

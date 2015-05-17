@@ -9,13 +9,15 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailcore.models import Page
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.wagtailadmin.edit_handlers import (
+    FieldPanel, InlinePanel, MultiFieldPanel)
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 from wagtail.wagtailsearch import index
-from taggit.models import TaggedItemBase
+from taggit.models import TaggedItemBase, Tag
 from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
+import datetime
 
 
 COMMENTS_APP = getattr(settings, 'COMMENTS_APP', None)
@@ -60,13 +62,18 @@ class BlogIndexPage(Page):
 
         # Pagination
         page = request.GET.get('page')
-        paginator = Paginator(blogs, 10)  # Show 10 blogs per page
-        try:
-            blogs = paginator.page(page)
-        except PageNotAnInteger:
-            blogs = paginator.page(1)
-        except EmptyPage:
-            blogs = paginator.page(paginator.num_pages)
+        page_size = 10
+        if hasattr(settings, 'BLOG_PAGINATION_PER_PAGE'):
+            page_size = settings.BLOG_PAGINATION_PER_PAGE
+
+        if page_size is not None:
+            paginator = Paginator(blogs, page_size)  # Show 10 blogs per page
+            try:
+                blogs = paginator.page(page)
+            except PageNotAnInteger:
+                blogs = paginator.page(1)
+            except EmptyPage:
+                blogs = paginator.page(paginator.num_pages)
 
         context['blogs'] = blogs
         context['category'] = category
@@ -78,6 +85,7 @@ class BlogIndexPage(Page):
 
     class Meta:
         verbose_name = _('Blog index')
+    subpage_types = ['blog.BlogPage']
 
 
 @register_snippet
@@ -135,10 +143,20 @@ class BlogPageTag(TaggedItemBase):
     content_object = ParentalKey('BlogPage', related_name='tagged_items')
 
 
+@register_snippet
+class BlogTag(Tag):
+    class Meta:
+        proxy = True
+
+
 class BlogPage(Page):
     body = RichTextField(verbose_name=_('body'))
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
-    date = models.DateField(_("Post date"))
+    date = models.DateField(
+        _("Post date"), default=datetime.datetime.today,
+        help_text=_("This date may be displayed on the blog post. It is not "
+                    "used to schedule posts to go live at a later date.")
+    )
     header_image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -171,13 +189,20 @@ class BlogPage(Page):
     class Meta:
         verbose_name = _('Blog page')
         verbose_name_plural = _('Blog pages')
+BlogPage._meta.get_field('owner').editable = True
 
 
 BlogPage.content_panels = [
     FieldPanel('title', classname="full title"),
-    FieldPanel('date'),
-    FieldPanel('tags'),
+    MultiFieldPanel([
+        FieldPanel('tags'),
+        InlinePanel(BlogPage, 'categories', label=_("Categories")),
+    ], heading="Tags and Categories"),
     ImageChooserPanel('header_image'),
-    InlinePanel(BlogPage, 'categories', label=_("Categories")),
     FieldPanel('body', classname="full"),
+]
+
+BlogPage.settings_panels += [
+    FieldPanel('date'),
+    FieldPanel('owner'),
 ]
