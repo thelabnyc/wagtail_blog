@@ -29,8 +29,6 @@ class Command(BaseCommand):
             blog_index = BlogIndexPage.objects.get(title=args[1])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
-        generic_user = User.objects.get_or_create(username="admin")
-        generic_user = generic_user[0]
         if args[0].startswith('http://'):
             base_url = args[0]
         else:
@@ -49,24 +47,21 @@ class Command(BaseCommand):
         for post in posts:
             title = post.get('title')
             slug = post.get('slug')
-            #format for url purposes
-            formatted_slug = slug.replace("-","_")
             description = post.get('description')
-            url_path = args[1] + '/blog/' + formatted_slug
+            url_path = args[1] + '/blog/' + slug
             excerpt = post.get('excerpt')
             status = post.get('status')
             body = post.get('content')
             featured_image = post.get('featured_image')
-
             #get image info from content and create image objects        
-            urls_to_switch = {}
             soup = BeautifulSoup(body)
             for img in soup.findAll('img'):
                 old_url = img['src']
+                #get image filename
                 path,file=os.path.split(img['src'])
                 new_url = "{{MEDIA_URL}}/wagtail_images/%s" % file
+                #replace image sources with MEDIA_URL
                 body = body.replace(old_url,new_url)
-                urls_to_switch[old_url] = new_url
                 alt_tag = img['alt']
                 width = img['width']
                 height = img['height']
@@ -84,22 +79,22 @@ class Command(BaseCommand):
             first_name = author['first_name']
             last_name = author['last_name']
             avatar = author['avatar']
-            #need to turn these into images as well
+            #need to turn avatars into image objects as well maybe? I currently do nothing with the data.
             description = author['description']
             try:
-                user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
-            except IntegrityError:
                 user = User.objects.get(username=username)
-
+            except User.DoesNotExist:
+                user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
+            #format the date
             date = post.get('date')[:10]
             date_modified = post.get('modified')
-            
             new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, header_image=header_image, owner=user))
 
             #categories
             categories_for_blog_entry = []
             tags_for_blog_entry = []
             categories = post.get('terms')
+            #not all of the posts have categories/tags
             if len(categories) > 0: 
                 for record in categories.values():
                     if record[0]['taxonomy'] == 'post_tag':
@@ -113,23 +108,14 @@ class Command(BaseCommand):
                         new_category = BlogCategory.objects.get_or_create(name=category_name, slug=category_slug)
                         categories_for_blog_entry.append(new_category)
 
-            #loop through categories_for_blog_entry and create BlogCategoryBlogPages(bcbp) for each category for this blog page
-            bcbp = []
+            #loop through list of BlogCategory and BlogTag objects and create BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects for each tag for this blog page
             for category in categories_for_blog_entry:
                 category = category[0]
                 connection = BlogCategoryBlogPage.objects.get_or_create(category=category, page=new_entry)
-                bcbp.append(connection)
             for tag in tags_for_blog_entry:
                 tag = tag[0]
                 connection = BlogPageTag.objects.get_or_create(tag=tag, content_object=new_entry)
-            
-            #save BlogCategoryBlogPage objects
-            for category in bcbp:
-                #category.save()
-                print(category)
-            for tag in tags_for_blog_entry:
-                #tag.save()
-                print(tag)
+         
             #save blog entry
             new_entry.save()       
             
