@@ -56,17 +56,25 @@ class Command(BaseCommand):
             excerpt = post.get('excerpt')
             status = post.get('status')
             body = post.get('content')
-            #get image info from content and create image objects
+            featured_image = post.get('featured_image')
+
+            #get image info from content and create image objects        
+            urls_to_switch = {}
             soup = BeautifulSoup(body)
             for img in soup.findAll('img'):
+                old_url = img['src']
                 path,file=os.path.split(img['src'])
+                new_url = "{{MEDIA_URL}}/wagtail_images/%s" % file
+                body = body.replace(old_url,new_url)
+                urls_to_switch[old_url] = new_url
                 alt_tag = img['alt']
                 width = img['width']
                 height = img['height']
                 image = Image.objects.create(title=alt_tag, file=file, width=width, height=height)
-            featured_image = post.get('featured_image')
             if featured_image:
-                print(True)
+                header_image = Image.objects.get(title=alt_tag)
+            else:
+                header_image = None
             #author/user data
             author = post.get('author')
             username = author['username']
@@ -86,19 +94,8 @@ class Command(BaseCommand):
             date = post.get('date')[:10]
             date_modified = post.get('modified')
             
-            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, owner=user))
-            #if there is a featured image, create Image object and add it to the new BlogPage
-            #if featured_image:
-            #    new_entry.header_image = featured_image
-            
-            #for image_tag in re.findall("(<img\s[^>]*?src\s*=\s*['\"]([^'\"]*?)['\"][^>]*?>)", body):
-            #    image_tag_text = image_tag[0]
-            #    image_tag_src = image_tag[1]
-            #    filename = re.findall("/([^/]*)$", image_tag_src)[0]
-            #    urllib.urlretrieve(image_tag_src, os.path.join(settings.MEDIA_ROOT, "images", filename))
-            #    new_url = settings.MEDIA_URL + 'images/' + filename
-            #    body = body.replace(image_tag_src, new_url)            
-            
+            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, header_image=header_image, owner=user))
+
             #categories
             categories_for_blog_entry = []
             tags_for_blog_entry = []
@@ -127,10 +124,12 @@ class Command(BaseCommand):
                 connection = BlogPageTag.objects.get_or_create(tag=tag, content_object=new_entry)
             
             #save BlogCategoryBlogPage objects
-            #for category in bcbp:
-            #    category.save()
-            #for tag in tags_for_blog_entry:
-            #    tag[0].save()
+            for category in bcbp:
+                #category.save()
+                print(category)
+            for tag in tags_for_blog_entry:
+                #tag.save()
+                print(tag)
             #save blog entry
             new_entry.save()       
             
