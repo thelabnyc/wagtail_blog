@@ -33,14 +33,13 @@ class Command(BaseCommand):
         self.create_blog_pages(posts, blog_index)
             
     def get_posts_data(self, *args):
+        """get json data from a given wordpress site"""
         self.url = args[0]        
         if self.url.startswith('http://'):
             base_url = url
         else:
             base_url = ''.join(('http://', args[0]))
         posts_url = ''.join((base_url,'/wp-json/posts'))
-        tax_url = ''.join((base_url,'/wp-json/taxonomies'))
-        #import pdb; pdb.set_trace()
         try:
             fetched_posts = requests.get(posts_url)
         except ConnectionError:
@@ -127,15 +126,21 @@ class Command(BaseCommand):
             title = post.get('title')
             slug = post.get('slug')
             description = post.get('description')
-            #url_path = args[1] + '/blog/' + slug
             excerpt = post.get('excerpt')
             status = post.get('status')
             body = post.get('content')
+            #get image info from content and create image objects  
             self.create_images_from_urls_in_content(body)
             print("Creating Images")
-            featured_image = post.get('featured_image')
-            #print(featured_image)
-            #get image info from content and create image objects        
+            #author/user data
+            author = post.get('author')
+            user = self.create_user(author)
+            categories = post.get('terms')
+            #format the date
+            date = post.get('date')[:10]
+            date_modified = post.get('modified')
+            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, owner=user))
+            featured_image = post.get('featured_image')      
             if featured_image is not None:
                 title = post['featured_image']['title']
                 try:
@@ -145,14 +150,7 @@ class Command(BaseCommand):
                     header_image = None
             else:
                 header_image = None
-            #author/user data
-            author = post.get('author')
-            user = self.create_user(author)
-            categories = post.get('terms')
-            #format the date
-            date = post.get('date')[:10]
-            date_modified = post.get('modified')
-            new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, header_image=header_image, owner=user))
+            new_entry.header_image = header_image
             new_entry.save()
             print("Saving New BlogPage entry")
             self.create_categories_and_tags(new_entry, categories)   
