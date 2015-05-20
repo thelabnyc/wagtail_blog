@@ -72,8 +72,9 @@ class Command(BaseCommand):
             else:
                 width = 100
                 height = 100
-            image = Image.objects.create(title=alt_tag, file=file, width=width, height=height)
-            print(Image.objects.filter(title=alt_tag)) 
+
+            image = Image.objects.get_or_create(title=alt_tag, file=file, width=width, height=height) 
+            #returns body content with new img tags, as well as a list of any images that were not migrated for whatever reason
         return body, images_that_did_not_migrate
             
     def create_user(self, author):
@@ -130,8 +131,9 @@ class Command(BaseCommand):
             status = post.get('status')
             body = post.get('content')
             #get image info from content and create image objects  
-            self.create_images_from_urls_in_content(body)
-            print("Creating Images")
+            new_body = self.create_images_from_urls_in_content(body)
+            #body content returned after images created has updated URLs in the image tags
+            body = new_body[0]
             #author/user data
             author = post.get('author')
             user = self.create_user(author)
