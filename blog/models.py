@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailadmin.edit_handlers import (
-    FieldPanel, InlinePanel, MultiFieldPanel)
+    FieldPanel, InlinePanel, MultiFieldPanel, FieldRowPanel)
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 from wagtail.wagtailsearch import index
@@ -172,6 +172,17 @@ class BlogPage(Page):
     blog_categories = models.ManyToManyField(
         BlogCategory, through=BlogCategoryBlogPage, blank=True)
 
+    settings_panels = [
+        MultiFieldPanel([
+            FieldRowPanel([
+                FieldPanel('go_live_at'),
+                FieldPanel('expire_at'),
+            ], classname="label-above"),
+        ], 'Scheduled publishing', classname="publishing"),
+        FieldPanel('date'),
+        FieldPanel('owner'),
+    ]
+
     def get_absolute_url(self):
         return self.url
 
@@ -200,9 +211,4 @@ BlogPage.content_panels = [
     ], heading="Tags and Categories"),
     ImageChooserPanel('header_image'),
     FieldPanel('body', classname="full"),
-]
-
-BlogPage.settings_panels += [
-    FieldPanel('date'),
-    FieldPanel('owner'),
 ]
