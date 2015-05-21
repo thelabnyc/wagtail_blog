@@ -200,6 +200,8 @@ class BlogPage(Page):
     class Meta:
         verbose_name = _('Blog page')
         verbose_name_plural = _('Blog pages')
+
+    parent_page_types = ['blog.BlogIndexPage']
 BlogPage._meta.get_field('owner').editable = True
 
 
