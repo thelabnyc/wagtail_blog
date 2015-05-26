@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
 from django.conf import settings
+import urllib.request 
 import os
 import sys
 import json
@@ -11,6 +12,7 @@ from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from wagtail.wagtailimages.models import Image
+from demo import settings
 """
 This is a management command to migrate a Wordpress site to Wagtail. Two arguments should be used - the site to be migrated and the site it is being migrated to.
 
@@ -30,8 +32,7 @@ class Command(BaseCommand):
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
         posts = self.get_posts_data(args[0])
-        self.create_blog_pages(posts, blog_index)
-            
+        self.create_blog_pages(posts, blog_index)  
     def get_posts_data(self, *args):
         """get json data from a given wordpress site"""
         self.url = args[0]        
@@ -52,15 +53,6 @@ class Command(BaseCommand):
         soup = BeautifulSoup(body)
         for img in soup.findAll('img'):
             old_url = img['src']
-            #get image filename
-            try:
-                path,file=os.path.split(img['src'])
-                new_url = "{{MEDIA_URL}}/wagtail_images/%s" % file
-            except FileNotFoundError:
-                new_url = "{{MEDIA_URL}}/wagtail_images/"
-                images_that_did_not_migrate.append(img)
-            #replace image sources with MEDIA_URL
-            body = body.replace(old_url,new_url)
             if 'alt_tag' in img:
                 alt_tag = img['alt']
             else:
@@ -72,12 +64,31 @@ class Command(BaseCommand):
             else:
                 width = 100
                 height = 100
-
-            image = Image.objects.get_or_create(title=alt_tag, file=file, width=width, height=height) 
+            from wagtail.wagtailimages.models import get_upload_to
+            #get image filename,
+            try:
+                path,file=os.path.split(img['src'])
+                print(img['src'])
+                #copy image file over to MEDIA_ROOT location
+                website = urllib.request.urlretrieve(img['src'], file)
+                print(website)
+                image = Image.objects.get_or_create(title=alt_tag, file=website[0], width=width, height=height)
+                print(image[0].file)
+                image[0].save()
+                #old_image = urlretrieve(old_url, os.path.join(settings.MEDIA_ROOT, file))
+                new_url = settings.MEDIA_URL + file
+            except FileNotFoundError:
+                #if there is a problem and the file doesn't migrate, leave the old URL as is
+                new_url = old_url
+                images_that_did_not_migrate.append(img)
+                pass
+            #replace image sources with MEDIA_URL
+            body = body.replace(old_url,new_url) 
             #returns body content with new img tags, as well as a list of any images that were not migrated for whatever reason
         return body, images_that_did_not_migrate
             
     def create_user(self, author):
+        """create users for each author on blog entries"""
         username = author['username']
         #date user has registered
         registered = author['registered']
@@ -94,7 +105,7 @@ class Command(BaseCommand):
         return
         
     def create_categories_and_tags(self, page, categories):
-        #categories
+        """Create Category and Tag objects"""
         categories_for_blog_entry = []
         tags_for_blog_entry = []
         #not all of the posts have categories/tags
@@ -106,9 +117,7 @@ class Command(BaseCommand):
                     new_tag = BlogTag.objects.get_or_create(name=tag_name, slug=tag_slug)
                     tags_for_blog_entry.append(new_tag)
                 if record[0]['taxonomy'] == 'category':
-                    print(record)
                     category_name = record[0]['name']
-                    
                     category_slug = record[0]['slug']
                     new_category = BlogCategory.objects.get_or_create(name=category_name, slug=category_slug)
                     categories_for_blog_entry.append(new_category)
@@ -122,7 +131,7 @@ class Command(BaseCommand):
         return "Categories and Tags Printed"
 
     def create_blog_pages(self, posts, blog_index, *args):
-        #create BlogPage object for each record
+        """create BlogPage object for each record"""
         for post in posts:
             title = post.get('title')
             slug = post.get('slug')
@@ -154,8 +163,7 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            print("Saving New BlogPage entry")
             self.create_categories_and_tags(new_entry, categories)   
-            print("Creating categories and tags for the entry")
+            return
            
             
