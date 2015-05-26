@@ -64,18 +64,14 @@ class Command(BaseCommand):
             else:
                 width = 100
                 height = 100
-            from wagtail.wagtailimages.models import get_upload_to
-            #get image filename,
             try:
                 path,file=os.path.split(img['src'])
-                print(img['src'])
                 #copy image file over to MEDIA_ROOT location
+                copy_image = os.path.join(settings.MEDIA_ROOT, file)
                 website = urllib.request.urlretrieve(img['src'], file)
-                print(website)
                 image = Image.objects.get_or_create(title=alt_tag, file=website[0], width=width, height=height)
-                print(image[0].file)
+                #print(image[0].file)
                 image[0].save()
-                #old_image = urlretrieve(old_url, os.path.join(settings.MEDIA_ROOT, file))
                 new_url = settings.MEDIA_URL + file
             except FileNotFoundError:
                 #if there is a problem and the file doesn't migrate, leave the old URL as is
@@ -102,7 +98,7 @@ class Command(BaseCommand):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
-        return
+        
         
     def create_categories_and_tags(self, page, categories):
         """Create Category and Tag objects"""
@@ -164,6 +160,6 @@ class Command(BaseCommand):
             new_entry.header_image = header_image
             new_entry.save()
             self.create_categories_and_tags(new_entry, categories)   
-            return
+            
            
             
