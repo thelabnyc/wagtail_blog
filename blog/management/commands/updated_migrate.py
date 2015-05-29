@@ -74,7 +74,6 @@ class Command(BaseCommand):
                 copy_image = os.path.join(settings.MEDIA_ROOT, file)
                 website = urllib.request.urlretrieve(img['src'], file)
                 image = Image.objects.get_or_create(title=alt_tag, file=website[0], width=width, height=height)
-                #print(image[0].file)
                 image[0].save()
                 new_url = settings.MEDIA_URL + file
             except FileNotFoundError:
@@ -90,7 +89,7 @@ class Command(BaseCommand):
     def create_user(self, author):
         """create users for each author on blog entries"""
         username = author['username']
-        #date user has registered
+        #date user registered on site
         registered = author['registered']
         name = author['name']
         first_name = author['first_name']
