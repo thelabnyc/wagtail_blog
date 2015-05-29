@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from wagtail.wagtailimages.models import Image
 from demo import settings
+
 """
 This is a management command to migrate a Wordpress site to Wagtail. Two arguments should be used - the site to be migrated and the site it is being migrated to.
 
@@ -36,13 +37,16 @@ class Command(BaseCommand):
     def get_posts_data(self, *args):
         """get json data from a given wordpress site"""
         self.url = args[0]        
+        headers = {
+            'Authorization': 'Bearer {}'.format(settings.WP_API_AUTH_TOKEN)
+        }
         if self.url.startswith('http://'):
             base_url = url
         else:
             base_url = ''.join(('http://', args[0]))
         posts_url = ''.join((base_url,'/wp-json/posts'))
         try:
-            fetched_posts = requests.get(posts_url)
+            fetched_posts = requests.get(posts_url, headers=headers)
         except ConnectionError:
             raise CommandError('There was a problem with the blog entry url.')
             pass
@@ -91,8 +95,6 @@ class Command(BaseCommand):
         name = author['name']
         first_name = author['first_name']
         last_name = author['last_name']
-        avatar = author['avatar']
-        #need to turn avatars into image objects as well maybe? I currently do nothing with the data.
         description = author['description']
         try:
             user = User.objects.get(username=username)
