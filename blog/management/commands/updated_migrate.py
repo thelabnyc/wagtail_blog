@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 path,file=os.path.split(img['src'])
                 #copy image file over to MEDIA_ROOT location
                 copy_image = os.path.join(settings.MEDIA_ROOT, file)
-                website = urllib.request.urlretrieve(img['src'], file)
+                website = urllib.request.urlretrieve(img['src'], os.path.join(settings.MEDIA_ROOT, file))
                 image = Image.objects.get_or_create(title=alt_tag, file=website[0], width=width, height=height)
                 image[0].save()
                 new_url = settings.MEDIA_URL + file
@@ -151,8 +151,18 @@ class Command(BaseCommand):
             featured_image = post.get('featured_image')      
             if featured_image is not None:
                 title = post['featured_image']['title']
+                source = post['featured_image']['source']
+                path,file=os.path.split(source)
+                #copy image file over to MEDIA_ROOT location
+                copy_image = os.path.join(settings.MEDIA_ROOT, file)
+                website = urllib.request.urlretrieve(source, os.path.join(settings.MEDIA_ROOT, file))
+                width = 640
+                height = 290
+                #print(post['featured_image']['width'])
                 try:
-                    header_image = Image.objects.get(title=title)
+                    header_image = Image.objects.get_or_create(title=title, width=width, height=height, file=website[0])
+                    header_image = header_image[0]
+                    print(header_image)
                 except Image.DoesNotExist:
                     print("Could not find the Featured Image for post %s in wagtail images" % title)
                     header_image = None
