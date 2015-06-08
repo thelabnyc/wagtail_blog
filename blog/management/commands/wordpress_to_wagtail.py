@@ -23,7 +23,10 @@ args0 = url of blog to migrate
 args1 = title of BlogIndex that you created in the GUI
 """
 class Command(BaseCommand):
-	
+    def add_arguments(self, parser):
+        """have to add this to use args in django 1.8"""
+        parser.add_argument('args')
+        parser.add_argument('args')	
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
