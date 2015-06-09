@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
-from django.conf import settings
+from django.conf import settings 
 import urllib.request 
 import os
 import sys
@@ -12,7 +12,7 @@ from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from wagtail.wagtailimages.models import Image
-from demo import settings
+
 
 """
 This is a management command to migrate a Wordpress site to Wagtail. Two arguments should be used - the site to be migrated and the site it is being migrated to.
@@ -23,30 +23,32 @@ args0 = url of blog to migrate
 args1 = title of BlogIndex that you created in the GUI
 """
 class Command(BaseCommand):
+
+    #can_import_settings = True    
+
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
-        parser.add_argument('args')
-        parser.add_argument('args')	
+        parser.add_argument('blog_to_migrate')
+        parser.add_argument('blog_index')	
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
         #first create BlogIndexPage object in GUI
         try:
-            blog_index = BlogIndexPage.objects.get(title=args[1])
+            blog_index = BlogIndexPage.objects.get(title=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
-        posts = self.get_posts_data(args[0])
+        posts = self.get_posts_data(options['blog_to_migrate'])
         self.create_blog_pages(posts, blog_index)  
-    def get_posts_data(self, *args):
-        """get json data from a given wordpress site"""
-        self.url = args[0]        
+    def get_posts_data(self, blog, *args, **options):
+        self.url = blog         
         headers = {
-            'Authorization': 'Bearer {}'.format(settings.WP_API_AUTH_TOKEN)
+            #'Authorization': 'Bearer {}'.format(settings.WP_API_AUTH_TOKEN)
         }
         if self.url.startswith('http://'):
             base_url = url
         else:
-            base_url = ''.join(('http://', args[0]))
+            base_url = ''.join(('http://', self.url))
         posts_url = ''.join((base_url,'/wp-json/posts'))
         try:
             fetched_posts = requests.get(posts_url, headers=headers)
@@ -56,6 +58,7 @@ class Command(BaseCommand):
         return fetched_posts.json()
         
     def create_images_from_urls_in_content(self, body):
+        """create Image objects and transfer image files to media root"""
         images_that_did_not_migrate = []
         soup = BeautifulSoup(body)
         for img in soup.findAll('img'):
@@ -90,7 +93,6 @@ class Command(BaseCommand):
         return body, images_that_did_not_migrate
             
     def create_user(self, author):
-        """create users for each author on blog entries"""
         username = author['username']
         #date user registered on site
         registered = author['registered']
@@ -105,7 +107,6 @@ class Command(BaseCommand):
         
         
     def create_categories_and_tags(self, page, categories):
-        """Create Category and Tag objects"""
         categories_for_blog_entry = []
         tags_for_blog_entry = []
         #not all of the posts have categories/tags
@@ -131,7 +132,7 @@ class Command(BaseCommand):
         return "Categories and Tags Printed"
 
     def create_blog_pages(self, posts, blog_index, *args):
-        """create BlogPage object for each record"""
+        """create Blog post entries from wordpress data"""
         for post in posts:
             title = post.get('title')
             slug = post.get('slug')
@@ -161,11 +162,9 @@ class Command(BaseCommand):
                 website = urllib.request.urlretrieve(source, os.path.join(settings.MEDIA_ROOT, file))
                 width = 640
                 height = 290
-                #print(post['featured_image']['width'])
                 try:
                     header_image = Image.objects.get_or_create(title=title, width=width, height=height, file=website[0])
                     header_image = header_image[0]
-                    print(header_image)
                 except Image.DoesNotExist:
                     print("Could not find the Featured Image for post %s in wagtail images" % title)
                     header_image = None
@@ -176,4 +175,4 @@ class Command(BaseCommand):
             self.create_categories_and_tags(new_entry, categories)   
             
            
-            
+
