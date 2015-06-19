@@ -39,7 +39,17 @@ class Command(BaseCommand):
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
         posts = self.get_posts_data(options['blog_to_migrate'])
-        self.create_blog_pages(posts, blog_index)  
+        self.create_blog_pages(posts, blog_index)
+
+    def convert_html_entities(self, text, *args, **options):
+        """converts html symbols so they show up correctly in wagtail"""
+        list_of_symbols = {'&#8221;': ' ', '&8217;': "'", '&lt;': '<', '&#60;': '<', '&gt;': '>', '&#62;': '>', '&#47;': '/', '&#93;': ']', '&#91;': '[', '&quot;': '"', '&#34;': '"', '&#39;': '\'', '&ldquo;': '“', '&#8220;': '“', '&rdquo;': '”', '&#8220;': '”', '&amp;': '&', '&#38;': '&', '&lsquo;': "'", '&#8216;': "'", '&rsquo;': "'", '&#8217;': "'", '&#038;': '&'}
+        for i,j in list_of_symbols.items():
+            if i in text:
+                text = text.replace(i, j)
+        return text
+
+  
     def get_posts_data(self, blog, *args, **options):
         self.url = blog         
         headers = {
@@ -79,7 +89,7 @@ class Command(BaseCommand):
                 #copy image file over to MEDIA_ROOT location
                 copy_image = os.path.join(settings.MEDIA_ROOT, file)
                 website = urllib.request.urlretrieve(img['src'], os.path.join(settings.MEDIA_ROOT, file))
-                image = Image.objects.get_or_create(title=alt_tag, file=website[0], width=width, height=height)
+                image = Image.objects.get_or_create(title=file, file=website[0], width=width, height=height)
                 image[0].save()
                 new_url = settings.MEDIA_URL + file
             except FileNotFoundError:
@@ -89,6 +99,7 @@ class Command(BaseCommand):
                 pass
             #replace image sources with MEDIA_URL
             body = body.replace(old_url,new_url) 
+            body = self.convert_html_entities(body)
             #returns body content with new img tags, as well as a list of any images that were not migrated for whatever reason
         return body, images_that_did_not_migrate
             
@@ -135,8 +146,13 @@ class Command(BaseCommand):
         """create Blog post entries from wordpress data"""
         for post in posts:
             title = post.get('title')
+            if title:
+                new_title = self.convert_html_entities(title)
+                title = new_title
             slug = post.get('slug')
             description = post.get('description')
+            if description:
+                description = self.convert_html_entities(description)
             excerpt = post.get('excerpt')
             status = post.get('status')
             body = post.get('content')
@@ -153,7 +169,6 @@ class Command(BaseCommand):
             date_modified = post.get('modified')
             try:
                 new_entry = BlogPage.objects.get(slug=slug)
-                print(new_entry)
             except BlogPage.DoesNotExist:    
                 new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, owner=user))
             featured_image = post.get('featured_image')      
