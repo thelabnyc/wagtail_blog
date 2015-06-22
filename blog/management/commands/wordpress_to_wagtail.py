@@ -1,29 +1,25 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.db import IntegrityError
 from django.conf import settings
+from django.core.files.storage import default_storage
 import urllib.request
 import os
-import sys
-import json
 import requests
 from bs4 import BeautifulSoup
-from blog.models import BlogPage, BlogTag, BlogPageTag, BlogIndexPage, BlogCategory, BlogCategoryBlogPage
-from django.template.defaultfilters import slugify
-from django.contrib.contenttypes.models import ContentType
+from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
+                         BlogCategory, BlogCategoryBlogPage)
 from django.contrib.auth.models import User
 from wagtail.wagtailimages.models import Image
 
 
-"""
-This is a management command to migrate a Wordpress site to Wagtail. Two arguments should be used - the site to be migrated and the site it is being migrated to.
-
-Users will first need to make sure the WP REST API(WP API) plugin is installed on the self-hosted Wordpress site to migrate.
-Next users will need to create a BlogIndex object in this GUI. This will be used as a parent object for the child blog page objects.
-args0 = url of blog to migrate
-args1 = title of BlogIndex that you created in the GUI
-"""
 class Command(BaseCommand):
+    """
+    This is a management command to migrate a Wordpress site to Wagtail. Two arguments should be used - the site to be migrated and the site it is being migrated to.
 
+    Users will first need to make sure the WP REST API(WP API) plugin is installed on the self-hosted Wordpress site to migrate.
+    Next users will need to create a BlogIndex object in this GUI. This will be used as a parent object for the child blog page objects.
+    args0 = url of blog to migrate
+    args1 = title of BlogIndex that you created in the GUI
+    """
     #can_import_settings = True
 
     def add_arguments(self, parser):
@@ -73,10 +69,6 @@ class Command(BaseCommand):
         soup = BeautifulSoup(body)
         for img in soup.findAll('img'):
             old_url = img['src']
-            if 'alt_tag' in img:
-                alt_tag = img['alt']
-            else:
-                alt_tag = ""
             if 'width' in img:
                 width = img['width']
             if 'height' in img:
@@ -84,19 +76,18 @@ class Command(BaseCommand):
             else:
                 width = 100
                 height = 100
-            try:
-                path,file=os.path.split(img['src'])
-                #copy image file over to MEDIA_ROOT location
-                copy_image = os.path.join(settings.MEDIA_ROOT, file)
-                website = urllib.request.urlretrieve(img['src'], os.path.join(settings.MEDIA_ROOT, file))
-                image = Image.objects.get_or_create(title=file, file=website[0], width=width, height=height)
-                image[0].save()
-                new_url = settings.MEDIA_URL + file
-            except FileNotFoundError:
-                #if there is a problem and the file doesn't migrate, leave the old URL as is
-                new_url = old_url
-                images_that_did_not_migrate.append(img)
-                pass
+            path, file_ = os.path.split(img['src'])
+            # copy image file over to MEDIA_ROOT location
+            website = urllib.request.urlretrieve(
+                img['src'], os.path.join(settings.MEDIA_ROOT, file_))
+            image = Image.objects.get_or_create(
+                title=file_, file=website[0], width=width, height=height)
+            image[0].save()
+            new_url = settings.MEDIA_URL + file_
+            #except FileNotFoundError:
+            #    #if there is a problem and the file doesn't migrate, leave the old URL as is
+            #    new_url = old_url
+            #    images_that_did_not_migrate.append(img)
             #replace image sources with MEDIA_URL
             body = body.replace(old_url,new_url)
             body = self.convert_html_entities(body)

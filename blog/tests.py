@@ -25,4 +25,4 @@ class BlogTests(TestCase):
         page = BlogPage.objects.get()
         self.assertEqual(page.title, "My wordpress title")
         self.assertInHTML("<strong>Bold here</strong>", page.body)
-        self.assertTrue("static" in page.body)
+        self.assertTrue("media" in page.body)
