@@ -1,13 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from django.core.files.storage import default_storage
+from django.core.files import File
+from django.contrib.auth.models import User
 import urllib.request
 import os
 import requests
 from bs4 import BeautifulSoup
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
-from django.contrib.auth.models import User
 from wagtail.wagtailimages.models import Image
 
 
@@ -55,7 +55,7 @@ class Command(BaseCommand):
             base_url = url
         else:
             base_url = ''.join(('http://', self.url))
-        posts_url = ''.join((base_url,'/wp-json/posts'))
+        posts_url = ''.join((base_url, '/wp-json/posts'))
         try:
             fetched_posts = requests.get(posts_url, headers=headers)
         except ConnectionError:
@@ -77,13 +77,11 @@ class Command(BaseCommand):
                 width = 100
                 height = 100
             path, file_ = os.path.split(img['src'])
-            # copy image file over to MEDIA_ROOT location
-            website = urllib.request.urlretrieve(
-                img['src'], os.path.join(settings.MEDIA_ROOT, file_))
-            image = Image.objects.get_or_create(
-                title=file_, file=website[0], width=width, height=height)
-            image[0].save()
-            new_url = settings.MEDIA_URL + file_
+            remote_image = urllib.request.urlretrieve(img['src'])
+            image = Image(title=file_, width=width, height=height)
+            image.file.save('imported', File(open(remote_image[0], 'rb')))
+            image.save()
+            new_url = image.file.url
             #except FileNotFoundError:
             #    #if there is a problem and the file doesn't migrate, leave the old URL as is
             #    new_url = old_url
@@ -161,28 +159,22 @@ class Command(BaseCommand):
             try:
                 new_entry = BlogPage.objects.get(slug=slug)
             except BlogPage.DoesNotExist:
-                new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, owner=user))
+                new_entry = blog_index.add_child(instance=BlogPage(
+                    title=title, slug=slug, search_description="description",
+                    date=date, body=body, owner=user))
             featured_image = post.get('featured_image')
             if featured_image is not None:
                 title = post['featured_image']['title']
                 source = post['featured_image']['source']
-                path,file=os.path.split(source)
-                #copy image file over to MEDIA_ROOT location
-                copy_image = os.path.join(settings.MEDIA_ROOT, file)
-                website = urllib.request.urlretrieve(source, os.path.join(settings.MEDIA_ROOT, file))
+                path, file_ = os.path.split(source)
+                remote_image = urllib.request.urlretrieve(source)
                 width = 640
                 height = 290
-                try:
-                    header_image = Image.objects.get_or_create(title=title, width=width, height=height, file=website[0])
-                    header_image = header_image[0]
-                except Image.DoesNotExist:
-                    print("Could not find the Featured Image for post %s in wagtail images" % title)
-                    header_image = None
+                header_image = Image(title=title, width=width, height=height)
+                header_image.file.save(
+                    'imported', File(open(remote_image[0], 'rb')))
             else:
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
             self.create_categories_and_tags(new_entry, categories)
-
-
-
