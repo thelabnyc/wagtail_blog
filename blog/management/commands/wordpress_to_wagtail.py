@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
-from django.conf import settings 
-import urllib.request 
+from django.conf import settings
+import urllib.request
 import os
 import sys
 import json
@@ -24,12 +24,12 @@ args1 = title of BlogIndex that you created in the GUI
 """
 class Command(BaseCommand):
 
-    #can_import_settings = True    
+    #can_import_settings = True
 
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
         parser.add_argument('blog_to_migrate')
-        parser.add_argument('blog_index')	
+        parser.add_argument('blog_index')
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
@@ -49,9 +49,9 @@ class Command(BaseCommand):
                 text = text.replace(i, j)
         return text
 
-  
+
     def get_posts_data(self, blog, *args, **options):
-        self.url = blog         
+        self.url = blog
         headers = {
             #'Authorization': 'Bearer {}'.format(settings.WP_API_AUTH_TOKEN)
         }
@@ -66,7 +66,7 @@ class Command(BaseCommand):
             raise CommandError('There was a problem with the blog entry url.')
             pass
         return fetched_posts.json()
-        
+
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
         images_that_did_not_migrate = []
@@ -98,11 +98,11 @@ class Command(BaseCommand):
                 images_that_did_not_migrate.append(img)
                 pass
             #replace image sources with MEDIA_URL
-            body = body.replace(old_url,new_url) 
+            body = body.replace(old_url,new_url)
             body = self.convert_html_entities(body)
             #returns body content with new img tags, as well as a list of any images that were not migrated for whatever reason
         return body, images_that_did_not_migrate
-            
+
     def create_user(self, author):
         username = author['username']
         #date user registered on site
@@ -115,13 +115,13 @@ class Command(BaseCommand):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
-        
-        
+
+
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
         #not all of the posts have categories/tags
-        if len(categories) > 0: 
+        if len(categories) > 0:
             for record in categories.values():
                 if record[0]['taxonomy'] == 'post_tag':
                     tag_name = record[0]['name']
@@ -156,7 +156,7 @@ class Command(BaseCommand):
             excerpt = post.get('excerpt')
             status = post.get('status')
             body = post.get('content')
-            #get image info from content and create image objects  
+            #get image info from content and create image objects
             new_body = self.create_images_from_urls_in_content(body)
             #body content returned after images created has updated URLs in the image tags
             body = new_body[0]
@@ -169,9 +169,9 @@ class Command(BaseCommand):
             date_modified = post.get('modified')
             try:
                 new_entry = BlogPage.objects.get(slug=slug)
-            except BlogPage.DoesNotExist:    
+            except BlogPage.DoesNotExist:
                 new_entry = blog_index.add_child(instance=BlogPage(title=title, slug=slug, search_description="description", date=date, body=body, owner=user))
-            featured_image = post.get('featured_image')      
+            featured_image = post.get('featured_image')
             if featured_image is not None:
                 title = post['featured_image']['title']
                 source = post['featured_image']['source']
@@ -191,7 +191,7 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            self.create_categories_and_tags(new_entry, categories)   
-            
-           
+            self.create_categories_and_tags(new_entry, categories)
+
+
 

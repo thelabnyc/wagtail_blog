@@ -1,27 +1,23 @@
 from django.test import TestCase
-import requests
-from bs4 import BeautifulSoup
+import json
+from wagtail.wagtailcore.models import Page
+from django.contrib.auth.models import User
+from .models import BlogIndexPage
+from .management.commands.wordpress_to_wagtail import Command
+
 
 class BlogTests(TestCase):
     def setUp(self):
-        self.blog_index = BlogIndex.objects.get(title="myindex")
-        self.author = {} #json string
-        fake_content_blurb = {} #json string
-        self.soup = BeautifulSoup(fake_content_blurb)
-        print(data_url)
+        home = Page.objects.get(slug='home')
+        self.user = User.objects.create_user('test', 'test@test.test', 'pass')
+        self.blog_index = home.add_child(instance=BlogIndexPage(
+            title='Blog Index', slug='blog', search_description="x",
+            owner=self.user
+        ))
 
-
-    def test_posts_link(self, url)
-        pass
-
-    def test_create_images_from_content(self):
-        pass
-
-    def test_create_users_from_author_data(self):
-        pass
-
-    def test_create_blog_pages(self):
-        pass
-
-    def test_create_blog_tags_and_categories(self):
-        pass
+    def test_import(self):
+        command = Command()
+        with open('test-data.json') as test_json:
+            posts = json.load(test_json)
+        command.create_blog_pages(posts, self.blog_index)
+        self.assertEquals(Page.objects.all().count(), 4)
