@@ -13,10 +13,10 @@ It's based on the wagtail demo blog but is closer to a standard Wordpress blog s
 - RSS
 - Basic starter templates with pagination
 - Comments
+- Wordpress importer
 
 Work in progress?
 
-- Wordpress importer
 - Disqus comments
 
 # Installation
@@ -29,6 +29,12 @@ Work in progress?
 # Settings
 
 `BLOG_PAGINATION_PER_PAGE` (Default 10) Set to change the number of blogs per page. Set to None to disable (useful if using your own pagination implimentation).
+
+# Import from wordpress
+
+1. Enable wordpress json api
+2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
+3. Run `./manage.py wordpress_to_wagtail http://myblog.com blog username password` the username if your wordpress username with full access to the api. Without this you can't access all blog posts.
 
 # Comments
 
