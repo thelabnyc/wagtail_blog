@@ -2,7 +2,7 @@ from django.test import TestCase
 import json
 from wagtail.wagtailcore.models import Page
 from django.contrib.auth.models import User
-from .models import BlogIndexPage
+from .models import BlogIndexPage, BlogPage
 from .management.commands.wordpress_to_wagtail import Command
 
 
@@ -21,3 +21,8 @@ class BlogTests(TestCase):
             posts = json.load(test_json)
         command.create_blog_pages(posts, self.blog_index)
         self.assertEquals(Page.objects.all().count(), 4)
+        self.assertEquals(BlogPage.objects.all().count(), 1)
+        page = BlogPage.objects.get()
+        self.assertEqual(page.title, "My wordpress title")
+        self.assertInHTML("<strong>Bold here</strong>", page.body)
+        self.assertTrue("static" in page.body)
