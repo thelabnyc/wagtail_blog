@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.conf import settings
 from django.core.files import File
 from django.contrib.auth.models import User
 import urllib.request
 import os
+import json
 import requests
 from bs4 import BeautifulSoup
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
@@ -31,10 +31,14 @@ class Command(BaseCommand):
         """gets data from WordPress site"""
         #first create BlogIndexPage object in GUI
         try:
-            blog_index = BlogIndexPage.objects.get(title=options['blog_index'])
+            blog_index = BlogIndexPage.objects.get(title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
-        posts = self.get_posts_data(options['blog_to_migrate'])
+        if options['blog_to_migrate'] == "just_testing":
+            with open('test-data.json') as test_json:
+                posts = json.load(test_json)
+        else:
+            posts = self.get_posts_data(options['blog_to_migrate'])
         self.create_blog_pages(posts, blog_index)
 
     def convert_html_entities(self, text, *args, **options):
@@ -79,7 +83,7 @@ class Command(BaseCommand):
             path, file_ = os.path.split(img['src'])
             remote_image = urllib.request.urlretrieve(img['src'])
             image = Image(title=file_, width=width, height=height)
-            image.file.save('imported', File(open(remote_image[0], 'rb')))
+            image.file.save(img['src'].split('/')[-1], File(open(remote_image[0], 'rb')))
             image.save()
             new_url = image.file.url
             #except FileNotFoundError:
@@ -172,7 +176,7 @@ class Command(BaseCommand):
                 height = 290
                 header_image = Image(title=title, width=width, height=height)
                 header_image.file.save(
-                    'imported', File(open(remote_image[0], 'rb')))
+                    source.split('/')[-1], File(open(remote_image[0], 'rb')))
             else:
                 header_image = None
             new_entry.header_image = header_image
