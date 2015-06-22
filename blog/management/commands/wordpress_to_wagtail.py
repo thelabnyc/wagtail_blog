@@ -1,10 +1,16 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth.models import User
+from base64 import b64encode
 import urllib.request
 import os
 import json
 import requests
+try:
+    import html
+except ImportError:  # 2.x
+    import HTMLParser
+    html = HTMLParser.HTMLParser()
 from bs4 import BeautifulSoup
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
@@ -13,25 +19,37 @@ from wagtail.wagtailimages.models import Image
 
 class Command(BaseCommand):
     """
-    This is a management command to migrate a Wordpress site to Wagtail. Two arguments should be used - the site to be migrated and the site it is being migrated to.
+    This is a management command to migrate a Wordpress site to Wagtail.
+    Two arguments should be used - the site to be migrated and the site it is
+    being migrated to.
 
-    Users will first need to make sure the WP REST API(WP API) plugin is installed on the self-hosted Wordpress site to migrate.
-    Next users will need to create a BlogIndex object in this GUI. This will be used as a parent object for the child blog page objects.
-    args0 = url of blog to migrate
-    args1 = title of BlogIndex that you created in the GUI
+    Users will first need to make sure the WP REST API(WP API) plugin is
+    installed on the self-hosted Wordpress site to migrate.
+    Next users will need to create a BlogIndex object in this GUI.
+    This will be used as a parent object for the child blog page objects.
     """
-    #can_import_settings = True
-
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
-        parser.add_argument('blog_to_migrate')
-        parser.add_argument('blog_index')
+        parser.add_argument('blog_to_migrate',
+                            help="Base url of wordpress instance")
+        parser.add_argument('blog_index',
+                            help="Title of blog index page to attach blogs")
+        parser.add_argument('username',
+                            default=False,
+                            help='Username for basic Auth')
+        parser.add_argument('password',
+                            default=False,
+                            help='Password for basic Auth')
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
-        #first create BlogIndexPage object in GUI
+        if 'username' in options:
+            self.username = options['username']
+        if 'password' in options:
+            self.password = options['password']
         try:
-            blog_index = BlogIndexPage.objects.get(title__icontains=options['blog_index'])
+            blog_index = BlogIndexPage.objects.get(
+                title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
         if options['blog_to_migrate'] == "just_testing":
@@ -43,29 +61,30 @@ class Command(BaseCommand):
 
     def convert_html_entities(self, text, *args, **options):
         """converts html symbols so they show up correctly in wagtail"""
-        list_of_symbols = {'&#8221;': ' ', '&8217;': "'", '&lt;': '<', '&#60;': '<', '&gt;': '>', '&#62;': '>', '&#47;': '/', '&#93;': ']', '&#91;': '[', '&quot;': '"', '&#34;': '"', '&#39;': '\'', '&ldquo;': '“', '&#8220;': '“', '&rdquo;': '”', '&#8220;': '”', '&amp;': '&', '&#38;': '&', '&lsquo;': "'", '&#8216;': "'", '&rsquo;': "'", '&#8217;': "'", '&#038;': '&'}
-        for i,j in list_of_symbols.items():
-            if i in text:
-                text = text.replace(i, j)
-        return text
-
+        return html.unescape(text)
 
     def get_posts_data(self, blog, *args, **options):
         self.url = blog
         headers = {
-            #'Authorization': 'Bearer {}'.format(settings.WP_API_AUTH_TOKEN)
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
         }
+        if self.username and self.password:
+            username = 'moshman@thelabnyc.com'
+            password = 'password'
+            auth = b64encode(str.encode('{}:{}'.format(username, password)))
+            headers['Authorization'] = 'Basic {}'.format(auth)
         if self.url.startswith('http://'):
-            base_url = url
+            base_url = self.url
         else:
             base_url = ''.join(('http://', self.url))
         posts_url = ''.join((base_url, '/wp-json/posts'))
-        try:
-            fetched_posts = requests.get(posts_url, headers=headers)
-        except ConnectionError:
-            raise CommandError('There was a problem with the blog entry url.')
-            pass
-        return fetched_posts.json()
+        fetched_posts = requests.get(posts_url, headers=headers)
+        data = fetched_posts.text
+        # I have no idea what this junk is
+        for bad_data in ['8db4ac', '\r\n', '\r\n0']:
+            data = data.strip(bad_data)
+        return json.loads(data)
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
