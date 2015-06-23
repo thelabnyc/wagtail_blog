@@ -70,9 +70,8 @@ class Command(BaseCommand):
             'Accept': 'application/json',
         }
         if self.username and self.password:
-            username = 'moshman@thelabnyc.com'
-            password = 'password'
-            auth = b64encode(str.encode('{}:{}'.format(username, password)))
+            auth = b64encode(
+                str.encode('{}:{}'.format(self.username, self.password)))
             headers['Authorization'] = 'Basic {}'.format(auth)
         if self.url.startswith('http://'):
             base_url = self.url
