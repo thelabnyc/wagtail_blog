@@ -13,6 +13,11 @@ def category_view(request, category):
     return index.serve(request, category=category)
 
 
+def author_view(request, author):
+    index = BlogIndexPage.objects.first()
+    return index.serve(request, author=author)
+
+
 class LatestEntriesFeed(Feed):
     title = "Blog"
     link = "/blog/"

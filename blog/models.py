@@ -3,7 +3,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -42,7 +42,8 @@ class BlogIndexPage(Page):
         blogs = blogs.order_by('-date')
         return blogs
 
-    def get_context(self, request, tag=None, category=None, *args, **kwargs):
+    def get_context(self, request, tag=None, category=None, author=None, *args,
+                    **kwargs):
         context = super(BlogIndexPage, self).get_context(
             request, *args, **kwargs)
         blogs = self.blogs
@@ -59,6 +60,8 @@ class BlogIndexPage(Page):
             if not request.GET.get('category'):
                 category = get_object_or_404(BlogCategory, slug=category)
             blogs = blogs.filter(categories__category__name=category)
+        if author:
+            blogs = blogs.filter(Q(owner_id=author) | Q(owner__username=author))
 
         # Pagination
         page = request.GET.get('page')
