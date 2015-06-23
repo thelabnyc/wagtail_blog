@@ -99,16 +99,15 @@ class Command(BaseCommand):
                 width = 100
                 height = 100
             path, file_ = os.path.split(img['src'])
-            remote_image = urllib.request.urlretrieve(img['src'])
+            try:
+                remote_image = urllib.request.urlretrieve(img['src'])
+            except urllib.error.HTTPError:
+                print("Unable to import " + img['src'])
+                continue
             image = Image(title=file_, width=width, height=height)
-            image.file.save(img['src'].split('/')[-1], File(open(remote_image[0], 'rb')))
+            image.file.save(file_, File(open(remote_image[0], 'rb')))
             image.save()
             new_url = image.file.url
-            #except FileNotFoundError:
-            #    #if there is a problem and the file doesn't migrate, leave the old URL as is
-            #    new_url = old_url
-            #    images_that_did_not_migrate.append(img)
-            #replace image sources with MEDIA_URL
             body = body.replace(old_url,new_url)
             body = self.convert_html_entities(body)
             #returns body content with new img tags, as well as a list of any images that were not migrated for whatever reason
