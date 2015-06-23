@@ -81,6 +81,8 @@ class Command(BaseCommand):
         fetched_posts = requests.get(posts_url, headers=headers)
         data = fetched_posts.text
         # I have no idea what this junk is
+        garbage_data = data.split("[")[0]
+        data = data.strip(garbage_data)
         for bad_data in ['8db4ac', '\r\n', '\r\n0']:
             data = data.strip(bad_data)
         return json.loads(data)
@@ -155,6 +157,7 @@ class Command(BaseCommand):
     def create_blog_pages(self, posts, blog_index, *args):
         """create Blog post entries from wordpress data"""
         for post in posts:
+            print(post.get('slug'))
             title = post.get('title')
             if title:
                 new_title = self.convert_html_entities(title)
