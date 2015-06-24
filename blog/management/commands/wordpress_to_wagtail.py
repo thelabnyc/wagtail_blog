@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from base64 import b64encode
 import urllib.request
 import os
@@ -89,7 +90,6 @@ class Command(BaseCommand):
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
-        images_that_did_not_migrate = []
         soup = BeautifulSoup(body)
         for img in soup.findAll('img'):
             old_url = img['src']
@@ -115,49 +115,48 @@ class Command(BaseCommand):
             image.file.save(file_, File(open(remote_image[0], 'rb')))
             image.save()
             new_url = image.file.url
-            body = body.replace(old_url,new_url)
+            body = body.replace(old_url, new_url)
             body = self.convert_html_entities(body)
-            #returns body content with new img tags, as well as a list of any images that were not migrated for whatever reason
-        return body, images_that_did_not_migrate
+        return body
 
     def create_user(self, author):
         username = author['username']
-        #date user registered on site
-        registered = author['registered']
-        name = author['name']
         first_name = author['first_name']
         last_name = author['last_name']
-        description = author['description']
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
-
+            user = User.objects.create_user(
+                username=username, first_name=first_name, last_name=last_name)
+        return user
 
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
-        #not all of the posts have categories/tags
-        if len(categories) > 0:
-            for record in categories.values():
-                if record[0]['taxonomy'] == 'post_tag':
-                    tag_name = record[0]['name']
-                    tag_slug = record[0]['slug']
-                    new_tag = BlogTag.objects.get_or_create(name=tag_name, slug=tag_slug)
+        for records in categories.values():
+            if records[0]['taxonomy'] == 'post_tag':
+                for record in records:
+                    tag_name = record['name']
+                    tag_slug = record['slug']
+                    new_tag = BlogTag.objects.get_or_create(
+                        name=tag_name, slug=tag_slug)[0]
                     tags_for_blog_entry.append(new_tag)
-                if record[0]['taxonomy'] == 'category':
-                    category_name = record[0]['name']
-                    category_slug = record[0]['slug']
-                    new_category = BlogCategory.objects.get_or_create(name=category_name, slug=category_slug)
+            if records[0]['taxonomy'] == 'category':
+                for record in records:
+                    category_name = record['name']
+                    category_slug = record['slug']
+                    new_category = BlogCategory.objects.get_or_create(
+                        name=category_name, slug=category_slug)[0]
                     categories_for_blog_entry.append(new_category)
-        #loop through list of BlogCategory and BlogTag objects and create BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects for each tag for this blog page
+        # loop through list of BlogCategory and BlogTag objects and create
+        # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
+        # for each tag for this blog page
         for category in categories_for_blog_entry:
-            category = category[0]
-            connection = BlogCategoryBlogPage.objects.get_or_create(category=category, page=page)
+            BlogCategoryBlogPage.objects.get_or_create(
+                category=category, page=page)[0]
         for tag in tags_for_blog_entry:
-            tag = tag[0]
-            connection = BlogPageTag.objects.get_or_create(tag=tag, content_object=page)
-        return "Categories and Tags Printed"
+            BlogPageTag.objects.get_or_create(
+                tag=tag, content_object=page)[0]
 
     def create_blog_pages(self, posts, blog_index, *args):
         """create Blog post entries from wordpress data"""
@@ -175,9 +174,7 @@ class Command(BaseCommand):
             status = post.get('status')
             body = post.get('content')
             #get image info from content and create image objects
-            new_body = self.create_images_from_urls_in_content(body)
-            #body content returned after images created has updated URLs in the image tags
-            body = new_body[0]
+            body = self.create_images_from_urls_in_content(body)
             #author/user data
             author = post.get('author')
             user = self.create_user(author)
@@ -201,7 +198,8 @@ class Command(BaseCommand):
                 height = 290
                 header_image = Image(title=title, width=width, height=height)
                 header_image.file.save(
-                    source.split('/')[-1], File(open(remote_image[0], 'rb')))
+                    file_, File(open(remote_image[0], 'rb')))
+                header_image.save()
             else:
                 header_image = None
             new_entry.header_image = header_image
