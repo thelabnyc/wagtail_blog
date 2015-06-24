@@ -101,6 +101,8 @@ class Command(BaseCommand):
                 width = 100
                 height = 100
             path, file_ = os.path.split(img['src'])
+            if not img['src']:
+                continue  # Blank image
             try:
                 remote_image = urllib.request.urlretrieve(img['src'])
             except urllib.error.HTTPError:
