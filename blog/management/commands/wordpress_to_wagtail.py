@@ -108,6 +108,9 @@ class Command(BaseCommand):
             except urllib.error.HTTPError:
                 print("Unable to import " + img['src'])
                 continue
+            except urllib.error.URLError:
+                print("URL error - try again " + img['src'])
+                continue
             image = Image(title=file_, width=width, height=height)
             image.file.save(file_, File(open(remote_image[0], 'rb')))
             image.save()
