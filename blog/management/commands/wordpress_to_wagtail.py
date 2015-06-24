@@ -181,6 +181,10 @@ class Command(BaseCommand):
             date = post.get('date')[:10]
             try:
                 new_entry = BlogPage.objects.get(slug=slug)
+                new_entry.title = title
+                new_entry.body = body
+                new_entry.owner = user
+                new_entry.save()
             except BlogPage.DoesNotExist:
                 new_entry = blog_index.add_child(instance=BlogPage(
                     title=title, slug=slug, search_description="description",
