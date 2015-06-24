@@ -28,3 +28,4 @@ class BlogTests(TestCase):
         self.assertTrue("media" in page.body)
         self.assertEqual(page.categories.count(), 2)
         self.assertEqual(page.tags.count(), 11)
+        self.assertEqual(page.owner.id, 2)

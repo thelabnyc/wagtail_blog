@@ -170,18 +170,15 @@ class Command(BaseCommand):
             description = post.get('description')
             if description:
                 description = self.convert_html_entities(description)
-            excerpt = post.get('excerpt')
-            status = post.get('status')
             body = post.get('content')
-            #get image info from content and create image objects
+            # get image info from content and create image objects
             body = self.create_images_from_urls_in_content(body)
-            #author/user data
+            # author/user data
             author = post.get('author')
             user = self.create_user(author)
             categories = post.get('terms')
-            #format the date
+            # format the date
             date = post.get('date')[:10]
-            date_modified = post.get('modified')
             try:
                 new_entry = BlogPage.objects.get(slug=slug)
             except BlogPage.DoesNotExist:
