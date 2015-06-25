@@ -145,6 +145,13 @@ class Command(BaseCommand):
                 for record in records:
                     category_name = record['name']
                     category_slug = record['slug']
+                    if record['parent'] is not None:
+                        parent_category = BlogCategory.objects.get_or_create(name=record['parent']['name'])
+                        parent_category[0].slug = record['parent']['slug']
+                        parent_category.save()
+                        parent = parent_category
+                    else:
+                        parent = None
                     new_category = BlogCategory.objects.get_or_create(
                         name=category_name, slug=category_slug)[0]
                     categories_for_blog_entry.append(new_category)
