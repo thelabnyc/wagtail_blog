@@ -147,7 +147,17 @@ class Command(BaseCommand):
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
                         name=category_name, slug=category_slug)[0]
+                    if record['parent'] is not None:
+                        parent_category = BlogCategory.objects.get_or_create(name=record['parent']['name'])
+                        parent_category[0].slug = record['parent']['slug']
+                        parent_category[0].save()
+                        parent = parent_category[0]
+                        new_category.parent = parent
+                    else:
+                        parent = None
+                    
                     categories_for_blog_entry.append(new_category)
+                    new_category.save()
         # loop through list of BlogCategory and BlogTag objects and create
         # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
         # for each tag for this blog page
