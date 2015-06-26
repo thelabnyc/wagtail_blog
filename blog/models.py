@@ -30,7 +30,13 @@ def get_blog_context(context):
         owned_pages__content_type__model='blogpage'
     ).annotate(Count('owned_pages'))
     context['all_categories'] = BlogCategory.objects.all()
-    context['root_categories'] = BlogCategory.objects.filter(parent=None)
+    context['root_categories'] = BlogCategory.objects.filter(
+        parent=None,
+    ).prefetch_related(
+        'children',
+    ).annotate(
+        blog_count=Count('blogpage'),
+    )
     return context
 
 
@@ -39,7 +45,13 @@ class BlogIndexPage(Page):
     def blogs(self):
         # Get list of blog pages that are descendants of this page
         blogs = BlogPage.objects.descendant_of(self).live()
-        blogs = blogs.order_by('-date')
+        blogs = blogs.order_by(
+            '-date'
+        ).prefetch_related(
+            'tagged_items__tag',
+            'categories',
+            'categories__category',
+        )
         return blogs
 
     def get_context(self, request, tag=None, category=None, author=None, *args,
