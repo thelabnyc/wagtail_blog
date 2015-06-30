@@ -14,7 +14,9 @@ class BlogTests(TestCase):
             title='Blog Index', slug='blog', search_description="x",
             owner=self.user
         ))
-
+        self.parent_blog_category = BlogCategory.objects.create(name="first category", slug="first-category")
+        self.child_blog_category = BlogCategory.objects.create(name="second category", slug="second-category", parent=self.parent_blog_category)
+        
     def test_import(self):
         command = Command()
         with open('test-data.json') as test_json:
@@ -29,3 +31,5 @@ class BlogTests(TestCase):
         self.assertEqual(page.categories.count(), 2)
         self.assertEqual(page.tags.count(), 11)
         self.assertEqual(page.owner.id, 2)
+        self.assertEqual(self.child_blog_category.parent, self.parent_blog_category)
+        
