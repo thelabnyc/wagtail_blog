@@ -34,8 +34,19 @@ class BlogTests(TestCase):
         self.assertEqual(page.categories.count(), 2)
         self.assertEqual(page.tags.count(), 11)
         self.assertEqual(page.owner.id, 2)
+        self.assertEqual(BlogCategory.objects.all().count(), 2)
+        self.assertEqual(BlogTag.objects.all().count(), 11)
+        self.assertEqual(BlogPageBlogCategory.objects.all().count(), 2)
+        self.assertEqual(BlogPageTag.objects.all().count(), 11)
+        parent_category = BlogCategory.objects.get(slug="writing-wisdom")
+        child_category = BlogCategory.objects.get(slug="swoon-reads")
+        self.assertEqual(child_category.parent, parent_category)
+        self.assertEqual(child_category.slug, "swoon-reads")
+        self.assertEqual(parent_category.slug, "writing-wisdom")        
+        
         
     def test_blog_categories_and_tags(self):
+        """Test to make sure that categories and tags are """
         self.assertEqual(BlogCategory.objects.all().count(), 2)
         blog_category_child = BlogCategory.objects.get(name="second category")
         blog_category_parent = BlogCategory.objects.get(name="first category")

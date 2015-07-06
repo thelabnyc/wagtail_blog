@@ -337,7 +337,19 @@
           "slug": "swoon-reads",
           "description": "",
           "taxonomy": "category",
-          "parent": null,
+          "parent": {"ID":97,
+				"name":"Writing Wisdom",
+				"slug":"writing-wisdom",
+				"description":"Editorial musings on the writing process",
+				"taxonomy":"category",
+				"parent":null,
+				"count":89,
+				"link":"http:\/\/dev.swoonreads.com\/blog\/category\/writing-wisdom",
+				"meta":
+					{"links":
+						{"collection":"http:\/\/dev.swoonreads.com\/wp-json\/taxonomies\/category\/terms",
+						"self":"http:\/\/dev.swoonreads.com\/wp-json\/taxonomies\/category\/terms\/97"}
+					}},
           "count": 58,
           "link": "http://dev.swoonreads.com/blog/category/swoon-reads",
           "meta": {
