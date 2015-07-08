@@ -63,7 +63,7 @@ class Command(BaseCommand):
         """converts html symbols so they show up correctly in wagtail"""
         return html.unescape(text)
 
-    def get_posts_data(self, blog, *args, **options):
+    def get_posts_data(self, blog, id=None, comments=False, *args, **options):
         self.url = blog
         headers = {
             'Content-Type': 'application/json',
@@ -78,14 +78,25 @@ class Command(BaseCommand):
         else:
             base_url = ''.join(('http://', self.url))
         posts_url = ''.join((base_url, '/wp-json/posts'))
-        fetched_posts = requests.get(posts_url, headers=headers)
-        data = fetched_posts.text
-        # I have no idea what this junk is
-        garbage_data = data.split("[")[0]
-        data = data.strip(garbage_data)
-        for bad_data in ['8db4ac', '\r\n', '\r\n0']:
-            data = data.strip(bad_data)
-        return json.loads(data)
+        comments_url = ''.join((posts_url, '/%s/comments')) % id            
+        if comments == True:
+            comments_url = ''.join((posts_url, '/%s/comments')) % id
+            fetched_comments = requests.get(comments_url, headers=headers)
+            comments_data = fetched_comments.text
+            comments_garbage = comments.split("[")[0]
+            comments_data = comments_data.strip(comments_garbage)
+            for bad_data in ['8db4ac', '\r\n', '\r\n0']:
+                comments_data = comments_data.strip(bad_data)
+            return json.loads(comments_data)
+        else:
+            fetched_posts = requests.get(posts_url, headers=headers)
+            data = fetched_posts.text
+            # I have no idea what this junk is
+            garbage_data = data.split("[")[0]
+            data = data.strip(garbage_data)
+            for bad_data in ['8db4ac', '\r\n', '\r\n0']:
+                data = data.strip(bad_data)
+            return json.loads(data)
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
@@ -158,6 +169,8 @@ class Command(BaseCommand):
         """create Blog post entries from wordpress data"""
         for post in posts:
             print(post.get('slug'))
+            post_id = post.get('ID')
+            #import_comments(post_id)
             title = post.get('title')
             if title:
                 new_title = self.convert_html_entities(title)
@@ -202,3 +215,6 @@ class Command(BaseCommand):
             new_entry.header_image = header_image
             new_entry.save()
             self.create_categories_and_tags(new_entry, categories)
+            
+        def import_comments(self, post_id):
+            comments = get_post_data(options['blog_to_migrate'])
