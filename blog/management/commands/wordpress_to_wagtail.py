@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth.models import User
+from django.contrib.comments import Comment
 from base64 import b64encode
 import urllib.request
 import os
@@ -217,4 +218,22 @@ class Command(BaseCommand):
             self.create_categories_and_tags(new_entry, categories)
             
         def import_comments(self, post_id):
-            comments = get_post_data(options['blog_to_migrate'])
+            comments = get_post_data(options['blog_to_migrate'], id=post_id, comments=True)
+            for comment in comments:
+                comment_text = comment.get('content')
+                comment_text = self.convert_html_entities(comment_text)
+                date = comment.get('date')[:10]
+                status = comment.get('status')
+                comment_author = comment.get('author')
+                new_comment = Comment.objects.create(comment=comment_text, submit_date=date)
+                if comment_author is not None:
+                    #avatar = comment['author']['avatar']
+                    user_name = comment['author']['name']
+                    user_name = self.create_user(comment_author)
+                    user_url = comment['author']['URL']
+                    #figure out if user is logged in user
+                    new_comment.user = user
+                    new_comment.user_name = user_name
+                    new_comment.user_url = user_url
+                
+                
