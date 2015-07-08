@@ -1,5 +1,6 @@
 from django.test import TestCase
 import json
+from django.contrib.comments import Comment
 from wagtail.wagtailcore.models import Page
 from django.contrib.auth.models import User
 from .models import BlogIndexPage, BlogPage
@@ -26,3 +27,22 @@ class BlogTests(TestCase):
         self.assertEqual(page.title, "My wordpress title")
         self.assertInHTML("<strong>Bold here</strong>", page.body)
         self.assertTrue("media" in page.body)
+<<<<<<< HEAD
+=======
+        self.assertEqual(page.categories.count(), 2)
+        self.assertEqual(page.tags.count(), 11)
+        self.assertEqual(page.owner.id, 2)
+        self.assertEqual(BlogCategory.objects.all().count(), 2)
+        self.assertEqual(BlogTag.objects.all().count(), 11)
+        self.assertEqual(BlogPageBlogCategory.objects.all().count(), 2)
+        self.assertEqual(BlogPageTag.objects.all().count(), 11)
+        parent_category = BlogCategory.objects.get(slug="writing-wisdom")
+        child_category = BlogCategory.objects.get(slug="swoon-reads")
+        self.assertEqual(child_category.parent, parent_category)
+        self.assertEqual(child_category.slug, "swoon-reads")
+        self.assertEqual(parent_category.slug, "writing-wisdom")        
+        comments = Comment.objects.all()
+        self.assertEqual(comments.count(), 2)        
+
+        
+>>>>>>> 983d450... added failing test to check that comments are imported
