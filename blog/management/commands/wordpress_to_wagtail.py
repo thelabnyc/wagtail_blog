@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth.models import User
-from django.contrib.comments import Comment
+from django_comments.models import Comment
+from django_comments_xtd.models import XtdComment
 from base64 import b64encode
 import urllib.request
 import os
@@ -64,7 +65,7 @@ class Command(BaseCommand):
         """converts html symbols so they show up correctly in wagtail"""
         return html.unescape(text)
 
-    def get_posts_data(self, blog, id=None, comments=False, *args, **options):
+    def get_posts_data(self, blog, id=None, get_comments=False, *args, **options):
         self.url = blog
         headers = {
             'Content-Type': 'application/json',
@@ -80,11 +81,12 @@ class Command(BaseCommand):
             base_url = ''.join(('http://', self.url))
         posts_url = ''.join((base_url, '/wp-json/posts'))
         comments_url = ''.join((posts_url, '/%s/comments')) % id            
-        if comments == True:
+        if get_comments == True:
             comments_url = ''.join((posts_url, '/%s/comments')) % id
+            print(comments_url)
             fetched_comments = requests.get(comments_url, headers=headers)
             comments_data = fetched_comments.text
-            comments_garbage = comments.split("[")[0]
+            comments_garbage = comments_data.split("[")[0]
             comments_data = comments_data.strip(comments_garbage)
             for bad_data in ['8db4ac', '\r\n', '\r\n0']:
                 comments_data = comments_data.strip(bad_data)
@@ -140,6 +142,27 @@ class Command(BaseCommand):
         except User.DoesNotExist:
             user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
 
+    def import_comments(self, post_id, *args, **options):
+        comments = self.get_posts_data('dev.swoonreads.com', post_id, get_comments=True)
+        for comment in comments:
+            comment_text = comment.get('content')
+            comment_text = self.convert_html_entities(comment_text)
+            date = comment.get('date')[:10]
+            status = comment.get('status')
+            comment_author = comment.get('author')
+            new_comment = XtdComment.objects.create(comment=comment_text, submit_date=date)
+            if comment_author is not None:
+                #avatar = comment['author']['avatar']
+                user_name = comment['author']['name']
+                user_name = self.create_user(comment_author)
+                user_url = comment['author']['URL']
+                #figure out if user is logged in user
+                new_comment.user = user
+                new_comment.user_name = user_name
+                new_comment.user_url = user_url
+            new_comment.save()
+        return
+
 
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
@@ -171,7 +194,7 @@ class Command(BaseCommand):
         for post in posts:
             print(post.get('slug'))
             post_id = post.get('ID')
-            #import_comments(post_id)
+            self.import_comments(post_id)
             title = post.get('title')
             if title:
                 new_title = self.convert_html_entities(title)
@@ -217,23 +240,7 @@ class Command(BaseCommand):
             new_entry.save()
             self.create_categories_and_tags(new_entry, categories)
             
-        def import_comments(self, post_id):
-            comments = get_post_data(options['blog_to_migrate'], id=post_id, comments=True)
-            for comment in comments:
-                comment_text = comment.get('content')
-                comment_text = self.convert_html_entities(comment_text)
-                date = comment.get('date')[:10]
-                status = comment.get('status')
-                comment_author = comment.get('author')
-                new_comment = Comment.objects.create(comment=comment_text, submit_date=date)
-                if comment_author is not None:
-                    #avatar = comment['author']['avatar']
-                    user_name = comment['author']['name']
-                    user_name = self.create_user(comment_author)
-                    user_url = comment['author']['URL']
-                    #figure out if user is logged in user
-                    new_comment.user = user
-                    new_comment.user_name = user_name
-                    new_comment.user_url = user_url
+
+
                 
                 
