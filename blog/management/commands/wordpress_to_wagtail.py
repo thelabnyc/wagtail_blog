@@ -171,14 +171,20 @@ class Command(BaseCommand):
             comment_id = comment.get('ID')
             comment_status = comment.get('status')
             comment_parent = comment.get('parent')
-            if comment_parent is not None:
-                comment.parent_id = comment_parent['ID']
             comment_text = comment.get('content')
             comment_text = self.convert_html_entities(comment_text)
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
             new_comment = XtdComment.objects.create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)
+            if comment_parent is not None:
+                new_comment.parent_id = comment_parent
+                for comment in comments:
+                    if comment['ID'] == comment_parent:
+                        parent_comment = comment
+                        print("parent comment: ")
+                        print(parent_comment['ID'])
+                        parent = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
             if comment_author:
                 #avatar = comment['author']['avatar']
                 user_name = comment['author']['username']
@@ -201,8 +207,8 @@ class Command(BaseCommand):
         while self.thread_level <= max_thread_level:
             try:
                 comment_parent = XtdComment.objects.get(comment=comment_parent.comment)
-                parent = comment_
-            except XtdComment.DoesNotExist
+                
+            except XtdComment.DoesNotExist:
                 pass
             
 
