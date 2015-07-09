@@ -41,7 +41,7 @@ class BlogTests(TestCase):
         self.assertEqual(child_category.parent, parent_category)
         self.assertEqual(child_category.slug, "swoon-reads")
         self.assertEqual(parent_category.slug, "writing-wisdom")        
-        comments = Comment.objects.all()
+        comments = XtdComment.objects.all()
         self.assertEqual(comments.count(), 2)        
 
         
