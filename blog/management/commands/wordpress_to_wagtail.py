@@ -168,19 +168,20 @@ class Command(BaseCommand):
             except Site.DoesNotExist:
                 print('site does not exist')
                 pass
+            comment_id = comment.get('ID')
+            comment_status = comment.get('status')
+            comment_parent = comment.get('parent')
+            if comment_parent is not None:
+                comment.parent_id = comment_parent['ID']
             comment_text = comment.get('content')
             comment_text = self.convert_html_entities(comment_text)
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
-            #print(comment_author)
-            new_comment = XtdComment.objects.create(user_name="anonymous", site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)
+            new_comment = XtdComment.objects.create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)
             if comment_author:
                 #avatar = comment['author']['avatar']
-                #user_name = str(comment['author']['username'])
-                user_name = "sldkfjdslkj"
-                print(user_name)
-                #user_name = self.create_user(comment_author)
+                user_name = comment['author']['username']
                 user_url = comment['author']['URL']
                 try:
                     current_user = User.objects.get(username=user_name)
@@ -188,13 +189,22 @@ class Command(BaseCommand):
                 except User.DoesNotExist:
                     pass
                 
-                #new_comment.user_name = user_name
+                new_comment.user_name = user_name
                 #new_comment.user_url = user_url
             elif user_name is None:
                 new_comment.user_name = 'anonymous'
             new_comment.save()
         return
 
+    def order_comments(self, max_thread_level, comment, comment_parent):
+        self.thread_level = 0
+        while self.thread_level <= max_thread_level:
+            try:
+                comment_parent = XtdComment.objects.get(comment=comment_parent.comment)
+                parent = comment_
+            except XtdComment.DoesNotExist
+                pass
+            
 
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
