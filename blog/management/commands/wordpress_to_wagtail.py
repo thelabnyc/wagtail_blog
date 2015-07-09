@@ -3,7 +3,10 @@ from django.core.files import File
 from django.contrib.auth.models import User
 from django_comments.models import Comment
 from django_comments_xtd.models import XtdComment
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from base64 import b64encode
+from blog.models import BlogPage
 import urllib.request
 import os
 import json
@@ -142,24 +145,45 @@ class Command(BaseCommand):
         except User.DoesNotExist:
             user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
 
-    def import_comments(self, post_id, *args, **options):
+    def import_comments(self, post_id, slug, *args, **options):
         comments = self.get_posts_data('dev.swoonreads.com', post_id, get_comments=True)
         for comment in comments:
+            try:
+                blog_post = BlogPage.objects.get(slug=slug)
+                blog_post_type = ContentType.objects.get_for_model(blog_post)
+            except BlogPage.DoesNotExist:
+                print('cannot find this blog post')
+                pass
+            try:
+                mysite = Site.objects.get_current()
+                site_id = mysite.id
+            except Site.DoesNotExist:
+                print('site does not exist')
+                pass
             comment_text = comment.get('content')
             comment_text = self.convert_html_entities(comment_text)
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
-            new_comment = XtdComment.objects.create(comment=comment_text, submit_date=date)
-            if comment_author is not None:
+            #print(comment_author)
+            new_comment = XtdComment.objects.create(user_name="anonymous", site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)
+            if comment_author:
                 #avatar = comment['author']['avatar']
-                user_name = comment['author']['name']
-                user_name = self.create_user(comment_author)
+                #user_name = str(comment['author']['username'])
+                user_name = "sldkfjdslkj"
+                print(user_name)
+                #user_name = self.create_user(comment_author)
                 user_url = comment['author']['URL']
-                #figure out if user is logged in user
-                new_comment.user = user
-                new_comment.user_name = user_name
-                new_comment.user_url = user_url
+                try:
+                    current_user = User.objects.get(username=user_name)
+                    new_comment.user = current_user
+                except User.DoesNotExist:
+                    pass
+                
+                #new_comment.user_name = user_name
+                #new_comment.user_url = user_url
+            elif user_name is None:
+                new_comment.user_name = 'anonymous'
             new_comment.save()
         return
 
@@ -194,7 +218,6 @@ class Command(BaseCommand):
         for post in posts:
             print(post.get('slug'))
             post_id = post.get('ID')
-            self.import_comments(post_id)
             title = post.get('title')
             if title:
                 new_title = self.convert_html_entities(title)
@@ -238,6 +261,7 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
+            self.import_comments(post_id, slug)
             self.create_categories_and_tags(new_entry, categories)
             
 
