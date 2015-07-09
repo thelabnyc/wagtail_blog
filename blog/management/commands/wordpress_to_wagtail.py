@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from base64 import b64encode
 from blog.models import BlogPage
+from optparse import make_option
 import urllib.request
 import os
 import json
@@ -33,6 +34,7 @@ class Command(BaseCommand):
     Next users will need to create a BlogIndex object in this GUI.
     This will be used as a parent object for the child blog page objects.
     """
+
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
         parser.add_argument('blog_to_migrate',
@@ -45,7 +47,11 @@ class Command(BaseCommand):
         parser.add_argument('password',
                             default=False,
                             help='Password for basic Auth')
-
+        parser.add_argument('--import-comments',
+                           action='store_false',
+                           default=False,
+                           help="import Wordpress comments to Django Xtd")
+    
     def handle(self, *args, **options):
         """gets data from WordPress site"""
         if 'username' in options:
@@ -62,6 +68,8 @@ class Command(BaseCommand):
                 posts = json.load(test_json)
         else:
             posts = self.get_posts_data(options['blog_to_migrate'])
+        if '--import-comments' in options:
+            print('we are really importing comments')
         self.create_blog_pages(posts, blog_index)
 
     def convert_html_entities(self, text, *args, **options):
@@ -213,7 +221,7 @@ class Command(BaseCommand):
             connection = BlogPageTag.objects.get_or_create(tag=tag, content_object=page)
         return "Categories and Tags Printed"
 
-    def create_blog_pages(self, posts, blog_index, *args):
+    def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
         for post in posts:
             print(post.get('slug'))
@@ -261,9 +269,10 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            self.import_comments(post_id, slug)
             self.create_categories_and_tags(new_entry, categories)
-            
+            #if '--import-comments' in options:
+            print('importing comments')
+            self.import_comments(post_id, slug)
 
 
                 
