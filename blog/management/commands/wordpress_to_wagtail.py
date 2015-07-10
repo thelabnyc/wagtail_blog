@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
+from django.conf import settings
 from django.contrib.auth.models import User
 from django_comments.models import Comment
 from django_comments_xtd.models import XtdComment
@@ -176,15 +177,31 @@ class Command(BaseCommand):
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
-            new_comment = XtdComment.objects.create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)
-            if comment_parent is not None:
-                new_comment.parent_id = comment_parent
-                for comment in comments:
-                    if comment['ID'] == comment_parent:
-                        parent_comment = comment
-                        print("parent comment: ")
-                        print(parent_comment['ID'])
-                        parent = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
+            new_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
+            comment_parent = comment.get('parent')
+            thread_level = 0
+            if comment_parent is not None and comment_parent is not 0:
+                while thread_level <= settings.COMMENTS_XTD_MAX_THREAD_LEVEL:
+                    for parent_comment in comments:
+                        if parent_comment['ID'] == comment_parent:
+                            parent_comment_content = parent_comment['content']
+                            grandparent = parent_comment['parent']
+                            if grandparent is not None and grandparent is not 0:
+                                for grandparent_comment in comments:
+                                    if grandparent_comment['ID'] == grandparent:
+                                        grandparent_content = grandparent_comment['content']
+                                        grandparent_date = grandparent_comment['date'][:10]
+                                        gp_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=grandparent_content, submit_date=grandparent_date)[0]
+                                        gp_comment.thread_id = 2
+                                        gp_comment.save()
+                            parent = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=parent_comment_content, submit_date=date)[0]
+                            parent.thread_id = 1
+                            parent.save()
+                            thread_level +=1
+                        else:
+                            continue
+            else:
+                new_comment.thread_id = 0   
             if comment_author:
                 #avatar = comment['author']['avatar']
                 user_name = comment['author']['username']
@@ -196,22 +213,13 @@ class Command(BaseCommand):
                     pass
                 
                 new_comment.user_name = user_name
-                #new_comment.user_url = user_url
+                new_comment.user_url = user_url
             elif user_name is None:
                 new_comment.user_name = 'anonymous'
             new_comment.save()
-        return
-
-    def order_comments(self, max_thread_level, comment, comment_parent):
-        self.thread_level = 0
-        while self.thread_level <= max_thread_level:
-            try:
-                comment_parent = XtdComment.objects.get(comment=comment_parent.comment)
-                
-            except XtdComment.DoesNotExist:
-                pass
+        return             
             
-
+    
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
