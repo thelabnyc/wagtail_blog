@@ -95,7 +95,6 @@ class Command(BaseCommand):
         comments_url = ''.join((posts_url, '/%s/comments')) % id            
         if get_comments == True:
             comments_url = ''.join((posts_url, '/%s/comments')) % id
-            print(comments_url)
             fetched_comments = requests.get(comments_url, headers=headers)
             comments_data = fetched_comments.text
             comments_garbage = comments_data.split("[")[0]
