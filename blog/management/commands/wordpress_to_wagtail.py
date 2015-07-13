@@ -214,8 +214,7 @@ class Command(BaseCommand):
                 
                     new_comment.user_name = user_name
                     new_comment.user_url = user_url
-                elif user_name is None:
-                    new_comment.user_name = 'anonymous'
+                
             new_comment.save()
         return             
             
