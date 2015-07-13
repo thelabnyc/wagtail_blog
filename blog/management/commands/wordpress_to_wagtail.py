@@ -203,9 +203,8 @@ class Command(BaseCommand):
             else:
                 new_comment.thread_id = 0   
             if comment_author:
-                print(comment_author)
                 #avatar = comment['author']['avatar']
-                if comment['author']['username']:
+                if 'username' in comment['author']:
                     user_name = comment['author']['username']
                     user_url = comment['author']['URL']
                     try:
