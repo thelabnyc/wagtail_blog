@@ -1,8 +1,19 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
+<<<<<<< HEAD
 from django.contrib.auth import get_user_model
 User = get_user_model()
+=======
+from django.conf import settings
+from django.contrib.auth.models import User
+from django_comments.models import Comment
+from django_comments_xtd.models import XtdComment
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
+>>>>>>> blog-comments
 from base64 import b64encode
+from blog.models import BlogPage
+from optparse import make_option
 import urllib.request
 import os
 import json
@@ -29,6 +40,7 @@ class Command(BaseCommand):
     Next users will need to create a BlogIndex object in this GUI.
     This will be used as a parent object for the child blog page objects.
     """
+
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
         parser.add_argument('blog_to_migrate',
@@ -41,7 +53,11 @@ class Command(BaseCommand):
         parser.add_argument('password',
                             default=False,
                             help='Password for basic Auth')
-
+        parser.add_argument('--import-comments',
+                           action='store_false',
+                           default=False,
+                           help="import Wordpress comments to Django Xtd")
+    
     def handle(self, *args, **options):
         """gets data from WordPress site"""
         if 'username' in options:
@@ -58,13 +74,15 @@ class Command(BaseCommand):
                 posts = json.load(test_json)
         else:
             posts = self.get_posts_data(options['blog_to_migrate'])
+        if '--import-comments' in options:
+            print('we are really importing comments')
         self.create_blog_pages(posts, blog_index)
 
     def convert_html_entities(self, text, *args, **options):
         """converts html symbols so they show up correctly in wagtail"""
         return html.unescape(text)
 
-    def get_posts_data(self, blog, *args, **options):
+    def get_posts_data(self, blog, id=None, get_comments=False, *args, **options):
         self.url = blog
         headers = {
             'Content-Type': 'application/json',
@@ -79,14 +97,25 @@ class Command(BaseCommand):
         else:
             base_url = ''.join(('http://', self.url))
         posts_url = ''.join((base_url, '/wp-json/posts'))
-        fetched_posts = requests.get(posts_url, headers=headers)
-        data = fetched_posts.text
-        # I have no idea what this junk is
-        garbage_data = data.split("[")[0]
-        data = data.strip(garbage_data)
-        for bad_data in ['8db4ac', '\r\n', '\r\n0']:
-            data = data.strip(bad_data)
-        return json.loads(data)
+        comments_url = ''.join((posts_url, '/%s/comments')) % id            
+        if get_comments == True:
+            comments_url = ''.join((posts_url, '/%s/comments')) % id
+            fetched_comments = requests.get(comments_url, headers=headers)
+            comments_data = fetched_comments.text
+            comments_garbage = comments_data.split("[")[0]
+            comments_data = comments_data.strip(comments_garbage)
+            for bad_data in ['8db4ac', '\r\n', '\r\n0']:
+                comments_data = comments_data.strip(bad_data)
+            return json.loads(comments_data)
+        else:
+            fetched_posts = requests.get(posts_url, headers=headers)
+            data = fetched_posts.text
+            # I have no idea what this junk is
+            garbage_data = data.split("[")[0]
+            data = data.strip(garbage_data)
+            for bad_data in ['8db4ac', '\r\n', '\r\n0']:
+                data = data.strip(bad_data)
+            return json.loads(data)
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
@@ -126,10 +155,81 @@ class Command(BaseCommand):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
+<<<<<<< HEAD
             user = User.objects.create_user(
                 username=username, first_name=first_name, last_name=last_name)
         return user
 
+=======
+            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
+
+    def import_comments(self, post_id, slug, *args, **options):
+        comments = self.get_posts_data('dev.swoonreads.com', post_id, get_comments=True)
+        for comment in comments:
+            try:
+                blog_post = BlogPage.objects.get(slug=slug)
+                blog_post_type = ContentType.objects.get_for_model(blog_post)
+            except BlogPage.DoesNotExist:
+                print('cannot find this blog post')
+                pass
+            try:
+                mysite = Site.objects.get_current()
+                site_id = mysite.id
+            except Site.DoesNotExist:
+                print('site does not exist')
+                pass
+            comment_id = comment.get('ID')
+            comment_status = comment.get('status')
+            comment_parent = comment.get('parent')
+            comment_text = comment.get('content')
+            comment_text = self.convert_html_entities(comment_text)
+            date = comment.get('date')[:10]
+            status = comment.get('status')
+            comment_author = comment.get('author')
+            new_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
+            comment_parent = comment.get('parent')
+            thread_level = 0
+            if comment_parent is not None and comment_parent is not 0:
+                while thread_level <= settings.COMMENTS_XTD_MAX_THREAD_LEVEL:
+                    for parent_comment in comments:
+                        if parent_comment['ID'] == comment_parent:
+                            parent_comment_content = parent_comment['content']
+                            grandparent = parent_comment['parent']
+                            if grandparent is not None and grandparent is not 0:
+                                for grandparent_comment in comments:
+                                    if grandparent_comment['ID'] == grandparent:
+                                        grandparent_content = grandparent_comment['content']
+                                        grandparent_date = grandparent_comment['date'][:10]
+                                        gp_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=grandparent_content, submit_date=grandparent_date)[0]
+                                        gp_comment.thread_id = 2
+                                        gp_comment.save()
+                            parent = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=parent_comment_content, submit_date=date)[0]
+                            parent.thread_id = 1
+                            parent.save()
+                            thread_level +=1
+                        else:
+                            continue
+            else:
+                new_comment.thread_id = 0   
+            if comment_author:
+                #avatar = comment['author']['avatar']
+                if 'username' in comment['author']:
+                    user_name = comment['author']['username']
+                    user_url = comment['author']['URL']
+                    try:
+                        current_user = User.objects.get(username=user_name)
+                        new_comment.user = current_user
+                    except User.DoesNotExist:
+                        pass
+                
+                    new_comment.user_name = user_name
+                    new_comment.user_url = user_url
+                
+            new_comment.save()
+        return             
+            
+    
+>>>>>>> blog-comments
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
@@ -168,10 +268,11 @@ class Command(BaseCommand):
             BlogPageTag.objects.get_or_create(
                 tag=tag, content_object=page)[0]
 
-    def create_blog_pages(self, posts, blog_index, *args):
+    def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
         for post in posts:
             print(post.get('slug'))
+            post_id = post.get('ID')
             title = post.get('title')
             if title:
                 new_title = self.convert_html_entities(title)
@@ -216,3 +317,10 @@ class Command(BaseCommand):
             new_entry.header_image = header_image
             new_entry.save()
             self.create_categories_and_tags(new_entry, categories)
+            #if '--import-comments' in options:
+            print('importing comments')
+            self.import_comments(post_id, slug)
+
+
+                
+                
