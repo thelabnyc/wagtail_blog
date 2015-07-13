@@ -203,19 +203,21 @@ class Command(BaseCommand):
             else:
                 new_comment.thread_id = 0   
             if comment_author:
+                print(comment_author)
                 #avatar = comment['author']['avatar']
-                user_name = comment['author']['username']
-                user_url = comment['author']['URL']
-                try:
-                    current_user = User.objects.get(username=user_name)
-                    new_comment.user = current_user
-                except User.DoesNotExist:
-                    pass
+                if comment['author']['username']:
+                    user_name = comment['author']['username']
+                    user_url = comment['author']['URL']
+                    try:
+                        current_user = User.objects.get(username=user_name)
+                        new_comment.user = current_user
+                    except User.DoesNotExist:
+                        pass
                 
-                new_comment.user_name = user_name
-                new_comment.user_url = user_url
-            elif user_name is None:
-                new_comment.user_name = 'anonymous'
+                    new_comment.user_name = user_name
+                    new_comment.user_url = user_url
+                elif user_name is None:
+                    new_comment.user_name = 'anonymous'
             new_comment.save()
         return             
             
