@@ -126,4 +126,4 @@ COMPRESS_PRECOMPILERS = (
 MEDIA_URL = '/media/'
 
 COMMENTS_APP = "django_comments_xtd"
-
+COMMENTS_XTD_MAX_THREAD_LEVEL = 2
