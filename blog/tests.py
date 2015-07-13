@@ -35,10 +35,6 @@ class BlogTests(TestCase):
         self.assertEqual(page.title, "My wordpress title")
         self.assertInHTML("<strong>Bold here</strong>", page.body)
         self.assertTrue("media" in page.body)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> blog-comments
         self.assertEqual(page.categories.count(), 2)
         self.assertEqual(page.tags.count(), 11)
         self.assertEqual(page.owner.id, 2)
@@ -51,15 +47,10 @@ class BlogTests(TestCase):
         self.assertEqual(child_category.parent, parent_category)
         self.assertEqual(child_category.slug, "swoon-reads")
         self.assertEqual(parent_category.slug, "writing-wisdom")        
-<<<<<<< HEAD
-        
-
-=======
         comments = XtdComment.objects.all()
         self.assertEqual(comments.count(), 2)        
         parent_comment = XtdComment.objects.get(thread_id=0)
         child_comment = XtdComment.objects.get(thread_id=1)
         #test to make sure nested comments are attached to the same blog post
         self.assertEqual(parent_comment.content_type, child_comment.content_type)
->>>>>>> blog-comments
         
