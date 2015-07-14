@@ -101,6 +101,7 @@ class Command(BaseCommand):
         comments_url = ''.join((posts_url, '/%s/comments')) % id            
         if get_comments == True:
             comments_url = ''.join((posts_url, '/%s/comments')) % id
+            print(comments_url)
             fetched_comments = requests.get(comments_url)
             comments_data = fetched_comments.text
             comments_garbage = comments_data.split("[")[0]
@@ -162,7 +163,6 @@ class Command(BaseCommand):
 
     def import_comments(self, post_id, slug, *args, **options):
         comments = self.get_posts_data('dev.swoonreads.com', post_id, get_comments=True)
-        blog_post_type = ""
         for comment in comments:
             try:
                 blog_post = BlogPage.objects.get(slug=slug)
