@@ -1,16 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
-<<<<<<< HEAD
 from django.contrib.auth import get_user_model
 User = get_user_model()
-=======
 from django.conf import settings
 from django.contrib.auth.models import User
 from django_comments.models import Comment
 from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
->>>>>>> blog-comments
 from base64 import b64encode
 from blog.models import BlogPage
 from optparse import make_option
@@ -62,8 +59,12 @@ class Command(BaseCommand):
         """gets data from WordPress site"""
         if 'username' in options:
             self.username = options['username']
+        else:
+            self.username = None
         if 'password' in options:
             self.password = options['password']
+        else:
+            self.password = None
         try:
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])
@@ -100,7 +101,7 @@ class Command(BaseCommand):
         comments_url = ''.join((posts_url, '/%s/comments')) % id            
         if get_comments == True:
             comments_url = ''.join((posts_url, '/%s/comments')) % id
-            fetched_comments = requests.get(comments_url, headers=headers)
+            fetched_comments = requests.get(comments_url)
             comments_data = fetched_comments.text
             comments_garbage = comments_data.split("[")[0]
             comments_data = comments_data.strip(comments_garbage)
@@ -155,16 +156,13 @@ class Command(BaseCommand):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-<<<<<<< HEAD
             user = User.objects.create_user(
                 username=username, first_name=first_name, last_name=last_name)
         return user
 
-=======
-            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name)
-
     def import_comments(self, post_id, slug, *args, **options):
         comments = self.get_posts_data('dev.swoonreads.com', post_id, get_comments=True)
+        blog_post_type = ""
         for comment in comments:
             try:
                 blog_post = BlogPage.objects.get(slug=slug)
@@ -227,9 +225,7 @@ class Command(BaseCommand):
                 
             new_comment.save()
         return             
-            
     
->>>>>>> blog-comments
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
@@ -249,9 +245,9 @@ class Command(BaseCommand):
                         name=category_name, slug=category_slug)[0]
                     if record['parent'] is not None:
                         parent_category = BlogCategory.objects.get_or_create(name=record['parent']['name'])[0]
-                        parent_category[0].slug = record['parent']['slug']
-                        parent_category[0].save()
-                        parent = parent_category[0]
+                        parent_category.slug = record['parent']['slug']
+                        parent_category.save()
+                        parent = parent_category
                         new_category.parent = parent
                     else:
                         parent = None
