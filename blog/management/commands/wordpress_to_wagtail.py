@@ -215,8 +215,6 @@ class Command(BaseCommand):
             if type(comment_author) is int:
                 pass
             else:
-                print(comment_author)
-                #avatar = comment['author']['avatar']
                 if 'username' in comment_author:
                     user_name = comment['author']['username']
                     user_url = comment['author']['URL']
