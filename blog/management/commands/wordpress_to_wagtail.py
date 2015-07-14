@@ -184,8 +184,10 @@ class Command(BaseCommand):
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
-            print(comment_author)
-            new_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
+            try:
+                new_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
+            except ValueError:
+                continue
             comment_parent = comment.get('parent')
             thread_level = 0
             if comment_parent is not None and comment_parent is not 0:
