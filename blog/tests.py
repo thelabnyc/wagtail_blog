@@ -50,10 +50,10 @@ class BlogTests(TestCase):
         self.assertEqual(child_category.slug, "swoon-reads")
         self.assertEqual(parent_category.slug, "writing-wisdom")
         command.import_comments(10376, "collaborative-editing-further-evidence-that-holly-and-lauren-are-probably-crazy")        
-        #comments = XtdComment.objects.all()
-        #self.assertEqual(comments.count(), 2)        
-        #parent_comment = XtdComment.objects.get(thread_id=0)
-        #child_comment = XtdComment.objects.get(thread_id=1)
+        comments = XtdComment.objects.all()
+        self.assertEqual(comments.count(), 22)        
+        parent_comment = XtdComment.objects.filter(thread_id=0)[0]
+        child_comment = XtdComment.objects.filter(thread_id=1)[0]
         #test to make sure nested comments are attached to the same blog post
-        #self.assertEqual(parent_comment.content_type, child_comment.content_type)
+        self.assertEqual(parent_comment.content_type, child_comment.content_type)
         
