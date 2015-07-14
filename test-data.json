@@ -1,6 +1,6 @@
 [
   {
-    "ID": 10476,
+    "ID": 10376,
     "title": "My wordpress title",
     "status": "publish",
     "type": "post",
@@ -11,7 +11,7 @@
       "first_name": "",
       "last_name": "",
       "nickname": "Joe Example",
-      "slug": "joe-example",
+      "slug": "collaborative-editing-further-evidence-that-holly-and-lauren-are-probably-crazy",
       "URL": "",
       "avatar": "",
       "description": "I like to be an example",
@@ -23,7 +23,7 @@
     "date": "2015-05-27T09:00:39",
     "modified": "2015-05-04T09:55:34",
     "format": "standard",
-    "slug": "example-slug",
+    "slug": "collaborative-editing-further-evidence-that-holly-and-lauren-are-probably-crazy",
     "guid": "http://dev.swoonreads.com/?p=10476",
     "excerpt": "<p>Some paragraph test</p>\n",
     "menu_order": 0,
