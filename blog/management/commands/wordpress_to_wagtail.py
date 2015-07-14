@@ -120,7 +120,7 @@ class Command(BaseCommand):
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
-        soup = BeautifulSoup(body)
+        soup = BeautifulSoup(body, "html5lib")
         for img in soup.findAll('img'):
             old_url = img['src']
             if 'width' in img:
@@ -184,6 +184,7 @@ class Command(BaseCommand):
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
+            print(comment_author)
             new_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
             comment_parent = comment.get('parent')
             thread_level = 0
@@ -209,7 +210,10 @@ class Command(BaseCommand):
                             continue
             else:
                 new_comment.thread_id = 0   
-            if comment_author:
+            if type(comment_author) is int:
+                pass
+            else:
+                print(comment_author)
                 #avatar = comment['author']['avatar']
                 if 'username' in comment_author:
                     user_name = comment['author']['username']
