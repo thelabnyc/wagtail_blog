@@ -169,13 +169,13 @@ class Command(BaseCommand):
                 blog_post_type = ContentType.objects.get_for_model(blog_post)
             except BlogPage.DoesNotExist:
                 print('cannot find this blog post')
-                pass
+                continue
             try:
                 mysite = Site.objects.get_current()
                 site_id = mysite.id
             except Site.DoesNotExist:
                 print('site does not exist')
-                pass
+                continue
             comment_id = comment.get('ID')
             comment_status = comment.get('status')
             comment_parent = comment.get('parent')
