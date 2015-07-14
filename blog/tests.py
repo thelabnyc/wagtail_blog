@@ -1,10 +1,10 @@
 from django.test import TestCase
 import json
-from django_comments.models import Comment
 from django_comments_xtd.models import XtdComment
 from wagtail.wagtailcore.models import Page
 from django.contrib.auth.models import User
-from .models import BlogPage, BlogTag, BlogPageTag, BlogIndexPage, BlogCategory, BlogCategoryBlogPage
+from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
+                     BlogCategory, BlogCategoryBlogPage)
 from .management.commands.wordpress_to_wagtail import Command
 
 
@@ -18,16 +18,19 @@ class BlogTests(TestCase):
 
     def test_import(self):
         """
-        Tests migrate_wordpress command - 
-        	the command should do the following:
-        	1. create BlogPage objects from a given BlogIndex
-        	2. create category and tag objects as BlogCategory, 
-        	   BlogTag, BlogPageBlogCategory and BlogPageTag objects
-        The test imports from test-data.json which includes one wordpress blog post with 11 tags and 2 categories
+        Tests migrate_wordpress command -
+            the command should do the following:
+            1. create BlogPage objects from a given BlogIndex
+            2. create category and tag objects as BlogCategory,
+               BlogTag, BlogPageBlogCategory and BlogPageTag objects
+        The test imports from test-data.json which includes one wordpress blog
+        post with 11 tags and 2 categories
         """
         command = Command()
         command.username = None
         command.password = None
+        command.should_import_comments = True
+        command.blog_to_migrate = 'just_testing'
         with open('test-data.json') as test_json:
             posts = json.load(test_json)
         command.create_blog_pages(posts, self.blog_index)
@@ -49,11 +52,10 @@ class BlogTests(TestCase):
         self.assertEqual(child_category.parent, parent_category)
         self.assertEqual(child_category.slug, "swoon-reads")
         self.assertEqual(parent_category.slug, "writing-wisdom")
-        command.import_comments(10376, "collaborative-editing-further-evidence-that-holly-and-lauren-are-probably-crazy")        
         comments = XtdComment.objects.all()
-        self.assertEqual(comments.count(), 22)        
+        self.assertEqual(comments.count(), 22)
         parent_comment = XtdComment.objects.filter(thread_id=0)[0]
         child_comment = XtdComment.objects.filter(thread_id=1)[0]
-        #test to make sure nested comments are attached to the same blog post
-        self.assertEqual(parent_comment.content_type, child_comment.content_type)
-        
+        # test to make sure nested comments are attached to the same blog post
+        self.assertEqual(
+            parent_comment.content_type, child_comment.content_type)

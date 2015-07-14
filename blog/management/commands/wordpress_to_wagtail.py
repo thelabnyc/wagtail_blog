@@ -51,10 +51,9 @@ class Command(BaseCommand):
                             default=False,
                             help='Password for basic Auth')
         parser.add_argument('--import-comments',
-                           action='store_false',
-                           default=False,
-                           help="import Wordpress comments to Django Xtd")
-    
+                            action="store_true",
+                            help="import Wordpress comments to Django Xtd")
+
     def handle(self, *args, **options):
         """gets data from WordPress site"""
         if 'username' in options:
@@ -65,25 +64,37 @@ class Command(BaseCommand):
             self.password = options['password']
         else:
             self.password = None
+        self.blog_to_migrate = options['blog_to_migrate']
         try:
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
-        if options['blog_to_migrate'] == "just_testing":
+        if self.blog_to_migrate == "just_testing":
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
         else:
-            posts = self.get_posts_data(options['blog_to_migrate'])
-        if '--import-comments' in options:
-            print('we are really importing comments')
+            posts = self.get_posts_data(self.blog_to_migrate)
+        self.should_import_comments = options.get('import_comments')
         self.create_blog_pages(posts, blog_index)
 
     def convert_html_entities(self, text, *args, **options):
         """converts html symbols so they show up correctly in wagtail"""
         return html.unescape(text)
 
+    def clean_data(self, data):
+        # I have no idea what this junk is
+        garbage = data.split("[")[0]
+        data = data.strip(garbage)
+        for bad_data in ['8db4ac', '\r\n', '\r\n0']:
+            data = data.strip(bad_data)
+        return data
+
     def get_posts_data(self, blog, id=None, get_comments=False, *args, **options):
+        if self.blog_to_migrate == "just_testing":
+            with open('test-data-comments.json') as test_json:
+                return json.load(test_json)
+
         self.url = blog
         headers = {
             'Content-Type': 'application/json',
@@ -98,25 +109,17 @@ class Command(BaseCommand):
         else:
             base_url = ''.join(('http://', self.url))
         posts_url = ''.join((base_url, '/wp-json/posts'))
-        comments_url = ''.join((posts_url, '/%s/comments')) % id            
-        if get_comments == True:
+        comments_url = ''.join((posts_url, '/%s/comments')) % id
+        if get_comments is True:
             comments_url = ''.join((posts_url, '/%s/comments')) % id
-            print(comments_url)
             fetched_comments = requests.get(comments_url)
             comments_data = fetched_comments.text
-            comments_garbage = comments_data.split("[")[0]
-            comments_data = comments_data.strip(comments_garbage)
-            for bad_data in ['8db4ac', '\r\n', '\r\n0']:
-                comments_data = comments_data.strip(bad_data)
+            comments_data = self.clean_data(comments_data)
             return json.loads(comments_data)
         else:
             fetched_posts = requests.get(posts_url, headers=headers)
             data = fetched_posts.text
-            # I have no idea what this junk is
-            garbage_data = data.split("[")[0]
-            data = data.strip(garbage_data)
-            for bad_data in ['8db4ac', '\r\n', '\r\n0']:
-                data = data.strip(bad_data)
+            data = self.clean_data(data)
             return json.loads(data)
 
     def create_images_from_urls_in_content(self, body):
@@ -161,8 +164,19 @@ class Command(BaseCommand):
                 username=username, first_name=first_name, last_name=last_name)
         return user
 
+    def make_comment(
+        self, site_id, blog_post_type, blog_post_id, comment_text, date
+    ):
+        new_comment = XtdComment.objects.get_or_create(
+            site_id=site_id,
+            content_type=blog_post_type,
+            object_pk=blog_post_id,
+            comment=comment_text, submit_date=date)[0]
+        return new_comment
+
     def import_comments(self, post_id, slug, *args, **options):
-        comments = self.get_posts_data('dev.swoonreads.com', post_id, get_comments=True)
+        comments = self.get_posts_data(
+            self.blog_to_migrate, post_id, get_comments=True)
         for comment in comments:
             try:
                 blog_post = BlogPage.objects.get(slug=slug)
@@ -184,10 +198,8 @@ class Command(BaseCommand):
             date = comment.get('date')[:10]
             status = comment.get('status')
             comment_author = comment.get('author')
-            try:
-                new_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=comment_text, submit_date=date)[0]
-            except ValueError:
-                continue
+            new_comment = self.make_comment(
+                site_id, blog_post_type, blog_post.pk, comment_text, date)
             comment_parent = comment.get('parent')
             thread_level = 0
             if comment_parent is not None and comment_parent is not 0:
@@ -207,16 +219,14 @@ class Command(BaseCommand):
                             parent = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=parent_comment_content, submit_date=date)[0]
                             parent.thread_id = 1
                             parent.save()
-                            thread_level +=1
+                            thread_level += 1
                         else:
                             continue
             else:
-                new_comment.thread_id = 0   
+                new_comment.thread_id = 0
             if type(comment_author) is int:
                 pass
             else:
-                print(comment_author)
-                #avatar = comment['author']['avatar']
                 if 'username' in comment_author:
                     user_name = comment['author']['username']
                     user_url = comment['author']['URL']
@@ -225,13 +235,13 @@ class Command(BaseCommand):
                         new_comment.user = current_user
                     except User.DoesNotExist:
                         pass
-                
+
                     new_comment.user_name = user_name
                     new_comment.user_url = user_url
-                
+
             new_comment.save()
-        return             
-    
+        return
+
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
@@ -250,14 +260,15 @@ class Command(BaseCommand):
                     new_category = BlogCategory.objects.get_or_create(
                         name=category_name, slug=category_slug)[0]
                     if record['parent'] is not None:
-                        parent_category = BlogCategory.objects.get_or_create(name=record['parent']['name'])[0]
+                        parent_category = BlogCategory.objects.get_or_create(
+                            name=record['parent']['name'])[0]
                         parent_category.slug = record['parent']['slug']
                         parent_category.save()
                         parent = parent_category
                         new_category.parent = parent
                     else:
                         parent = None
-                    
+
                     categories_for_blog_entry.append(new_category)
                     new_category.save()
         # loop through list of BlogCategory and BlogTag objects and create
@@ -319,10 +330,5 @@ class Command(BaseCommand):
             new_entry.header_image = header_image
             new_entry.save()
             self.create_categories_and_tags(new_entry, categories)
-            #if '--import-comments' in options:
-            print('importing comments')
-            self.import_comments(post_id, slug)
-
-
-                
-                
+            if self.should_import_comments:
+                self.import_comments(post_id, slug)
