@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "wagtail-blog",
-    version = "1.4.7",
+    version = "1.4.8",
     author = "David Burke",
     author_email = "david@thelabnyc.com",
     description = ("A wordpress like blog app implemented in wagtail"),
