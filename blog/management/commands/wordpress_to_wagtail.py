@@ -164,20 +164,35 @@ class Command(BaseCommand):
                 username=username, first_name=first_name, last_name=last_name)
         return user
 
-    def make_comment(
-        self, site_id, blog_post_type, blog_post_id, comment_text, date
+    def create_comment(
+        self, blog_post_type, blog_post_id, comment_text, date,
+        reply_to=None
     ):
+        if reply_to is None:
+            reply_to = 0
         new_comment = XtdComment.objects.get_or_create(
-            site_id=site_id,
+            site_id=self.site_id,
             content_type=blog_post_type,
             object_pk=blog_post_id,
-            comment=comment_text, submit_date=date)[0]
+            comment=comment_text,
+            submit_date=date,
+            parent_id=reply_to,
+        )[0]
         return new_comment
+
+    def lookup_comment_by_wordpress_id(self, comment_id, comments):
+        """ Returns Django comment object with this wordpress id """
+        for comment in comments:
+            if comment.wordpress_id == comment_id:
+                print('found parent')
+                print(comment)
+                return comment
 
     def import_comments(self, post_id, slug, *args, **options):
         comments = self.get_posts_data(
             self.blog_to_migrate, post_id, get_comments=True)
-        for comment in comments:
+        imported_comments = []
+        for comment in reversed(comments):
             try:
                 blog_post = BlogPage.objects.get(slug=slug)
                 blog_post_type = ContentType.objects.get_for_model(blog_post)
@@ -186,44 +201,25 @@ class Command(BaseCommand):
                 continue
             try:
                 mysite = Site.objects.get_current()
-                site_id = mysite.id
+                self.site_id = mysite.id
             except Site.DoesNotExist:
                 print('site does not exist')
                 continue
-            comment_id = comment.get('ID')
-            comment_status = comment.get('status')
-            comment_parent = comment.get('parent')
-            comment_text = comment.get('content')
-            comment_text = self.convert_html_entities(comment_text)
+            comment_text = self.convert_html_entities(comment.get('content'))
             date = comment.get('date')[:10]
             status = comment.get('status')
+            if status != 'approved':
+                continue
             comment_author = comment.get('author')
-            new_comment = self.make_comment(
-                site_id, blog_post_type, blog_post.pk, comment_text, date)
             comment_parent = comment.get('parent')
-            thread_level = 0
-            if comment_parent is not None and comment_parent is not 0:
-                while thread_level <= settings.COMMENTS_XTD_MAX_THREAD_LEVEL:
-                    for parent_comment in comments:
-                        if parent_comment['ID'] == comment_parent:
-                            parent_comment_content = parent_comment['content']
-                            grandparent = parent_comment['parent']
-                            if grandparent is not None and grandparent is not 0:
-                                for grandparent_comment in comments:
-                                    if grandparent_comment['ID'] == grandparent:
-                                        grandparent_content = grandparent_comment['content']
-                                        grandparent_date = grandparent_comment['date'][:10]
-                                        gp_comment = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=grandparent_content, submit_date=grandparent_date)[0]
-                                        gp_comment.thread_id = 2
-                                        gp_comment.save()
-                            parent = XtdComment.objects.get_or_create(site_id=site_id, content_type=blog_post_type, comment=parent_comment_content, submit_date=date)[0]
-                            parent.thread_id = 1
-                            parent.save()
-                            thread_level += 1
-                        else:
-                            continue
-            else:
-                new_comment.thread_id = 0
+            parent_obj = None
+            if comment_parent and comment_parent != 0:
+                parent_obj = self.lookup_comment_by_wordpress_id(
+                    comment_parent, imported_comments).id
+            new_comment = self.create_comment(
+                blog_post_type, blog_post.pk, comment_text, date, parent_obj)
+            new_comment.wordpress_id = comment.get('ID')
+            imported_comments.append(new_comment)
             if type(comment_author) is int:
                 pass
             else:
