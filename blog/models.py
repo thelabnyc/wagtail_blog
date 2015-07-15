@@ -93,6 +93,7 @@ class BlogIndexPage(Page):
         context['blogs'] = blogs
         context['category'] = category
         context['tag'] = tag
+        context['author'] = author
         context['COMMENTS_APP'] = COMMENTS_APP
         context = get_blog_context(context)
 
