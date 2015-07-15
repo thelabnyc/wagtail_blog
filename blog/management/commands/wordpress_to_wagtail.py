@@ -2,26 +2,24 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from django.conf import settings
 from django.contrib.auth.models import User
-from django_comments.models import Comment
 from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from base64 import b64encode
 from blog.models import BlogPage
-from optparse import make_option
 import urllib.request
 import os
 import json
 import requests
+from datetime import datetime
 try:
     import html
 except ImportError:  # 2.x
     import HTMLParser
     html = HTMLParser.HTMLParser()
 from bs4 import BeautifulSoup
-from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
+from blog.models import (BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
 from wagtail.wagtailimages.models import Image
 
@@ -90,7 +88,9 @@ class Command(BaseCommand):
             data = data.strip(bad_data)
         return data
 
-    def get_posts_data(self, blog, id=None, get_comments=False, *args, **options):
+    def get_posts_data(
+        self, blog, id=None, get_comments=False, *args, **options
+    ):
         if self.blog_to_migrate == "just_testing":
             with open('test-data-comments.json') as test_json:
                 return json.load(test_json)
@@ -184,8 +184,6 @@ class Command(BaseCommand):
         """ Returns Django comment object with this wordpress id """
         for comment in comments:
             if comment.wordpress_id == comment_id:
-                print('found parent')
-                print(comment)
                 return comment
 
     def import_comments(self, post_id, slug, *args, **options):
@@ -206,7 +204,7 @@ class Command(BaseCommand):
                 print('site does not exist')
                 continue
             comment_text = self.convert_html_entities(comment.get('content'))
-            date = comment.get('date')[:10]
+            date = datetime.strptime(comment.get('date'), '%Y-%m-%dT%H:%M:%S')
             status = comment.get('status')
             if status != 'approved':
                 continue
