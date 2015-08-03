@@ -3,7 +3,7 @@ A WordPress-like blog app implemented in Wagtail.
 
 # What is it
 
-After reimplimenting wordpress like blogs over and over again in Wagtail I decided to just make this. 
+After reimplimenting WordPress-like blogs over and over again in Wagtail I decided to just make this. 
 Feel free to use as is or copy it as a starting point. 
 It's based on the Wagtail demo blog but is closer to a standard WordPress blog style. 
 
@@ -13,7 +13,7 @@ It's based on the Wagtail demo blog but is closer to a standard WordPress blog s
 - RSS
 - Basic starter templates with pagination
 - Comments
-- Wordpress importer
+- WordPress importer
 
 Work in progress?
 
@@ -29,13 +29,13 @@ Work in progress?
 
 # Settings
 
-`BLOG_PAGINATION_PER_PAGE` (Default 10) Set to change the number of blogs per page. Set to None to disable (useful if using your own pagination implimentation).
+`BLOG_PAGINATION_PER_PAGE` (Default 10) Set to change the number of blogs per page. Set to None to disable (useful if using your own pagination implementation).
 
 # Import from WordPress
 
 1. Enable WordPress JSON API
 2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
-3. Run `./manage.py wordpress_to_wagtail http://myblog.com blog username password` the username if your WordPress username with full access to the API. Without this you can't access all blog posts.
+3. Run `./manage.py wordpress_to_wagtail http://myblog.com blog username password` the username is your WordPress username with full access to the API. Without this you can't access all blog posts.
 
 # Comments
 
