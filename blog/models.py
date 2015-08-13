@@ -47,7 +47,7 @@ class BlogIndexPage(Page):
         blogs = BlogPage.objects.descendant_of(self).live()
         blogs = blogs.order_by(
             '-date'
-        ).prefetch_related(
+        ).select_related('owner').prefetch_related(
             'tagged_items__tag',
             'categories',
             'categories__category',
