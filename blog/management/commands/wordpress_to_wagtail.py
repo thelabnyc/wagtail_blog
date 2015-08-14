@@ -165,18 +165,14 @@ class Command(BaseCommand):
         return user
 
     def create_comment(
-        self, blog_post_type, blog_post_id, comment_text, date,
-        reply_to=None
+        self, blog_post_type, blog_post_id, comment_text, date
     ):
-        if reply_to is None:
-            reply_to = 0
         new_comment = XtdComment.objects.get_or_create(
             site_id=self.site_id,
             content_type=blog_post_type,
             object_pk=blog_post_id,
             comment=comment_text,
             submit_date=date,
-            parent_id=reply_to,
         )[0]
         return new_comment
 
@@ -187,21 +183,21 @@ class Command(BaseCommand):
                 return comment
 
     def import_comments(self, post_id, slug, *args, **options):
+        try:
+            mysite = Site.objects.get_current()
+            self.site_id = mysite.id
+        except Site.DoesNotExist:
+            print('site does not exist')
+            return
         comments = self.get_posts_data(
             self.blog_to_migrate, post_id, get_comments=True)
         imported_comments = []
-        for comment in reversed(comments):
+        for comment in comments:
             try:
                 blog_post = BlogPage.objects.get(slug=slug)
                 blog_post_type = ContentType.objects.get_for_model(blog_post)
             except BlogPage.DoesNotExist:
                 print('cannot find this blog post')
-                continue
-            try:
-                mysite = Site.objects.get_current()
-                self.site_id = mysite.id
-            except Site.DoesNotExist:
-                print('site does not exist')
                 continue
             comment_text = self.convert_html_entities(comment.get('content'))
             date = datetime.strptime(comment.get('date'), '%Y-%m-%dT%H:%M:%S')
@@ -209,15 +205,10 @@ class Command(BaseCommand):
             if status != 'approved':
                 continue
             comment_author = comment.get('author')
-            comment_parent = comment.get('parent')
-            parent_obj = None
-            if comment_parent and comment_parent != 0:
-                parent_obj = self.lookup_comment_by_wordpress_id(
-                    comment_parent, imported_comments).id
             new_comment = self.create_comment(
-                blog_post_type, blog_post.pk, comment_text, date, parent_obj)
+                blog_post_type, blog_post.pk, comment_text, date)
             new_comment.wordpress_id = comment.get('ID')
-            imported_comments.append(new_comment)
+            new_comment.parent_wordpress_id = comment.get('parent')
             if type(comment_author) is int:
                 pass
             else:
@@ -234,7 +225,16 @@ class Command(BaseCommand):
                     new_comment.user_url = user_url
 
             new_comment.save()
-        return
+            imported_comments.append(new_comment)
+        # Now assign parent comments
+        for comment in imported_comments:
+            if comment.parent_wordpress_id != "0":
+                for sub_comment in imported_comments:
+                    if sub_comment.wordpress_id == comment.parent_wordpress_id:
+                        comment.parent_id = sub_comment.id
+                        comment._calculate_thread_data()
+                        comment.save()
+                        break
 
     def create_categories_and_tags(self, page, categories):
         categories_for_blog_entry = []

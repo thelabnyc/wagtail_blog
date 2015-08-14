@@ -19,8 +19,8 @@
     "registered": "2014-04-19T05:27:11+00:00",
     "meta": {
       "links": {
-        "self": "http://dev.swoonreads.com/wp-json/users/7274",
-        "archives": "http://dev.swoonreads.com/wp-json/users/7274/posts"
+        "self": "/wp-json/users/7274",
+        "archives": "/wp-json/users/7274/posts"
       }
     }
   },
@@ -29,9 +29,9 @@
   "date_gmt": "2015-05-01T18:40:50",
   "meta": {
     "links": {
-      "up": "http://dev.swoonreads.com/wp-json/posts/10400",
-      "in-reply-to": "http://dev.swoonreads.com/wp-json/posts/10400/comments/10865",
-      "self": "http://dev.swoonreads.com/wp-json/posts/10400/comments/10866"
+      "up": "/wp-json/posts/10400",
+      "in-reply-to": "/wp-json/posts/10400/comments/10865",
+      "self": "/wp-json/posts/10400/comments/10866"
     }
   }
 },
@@ -56,8 +56,8 @@
     "registered": "2014-03-31T23:56:02+00:00",
     "meta": {
       "links": {
-        "self": "http://dev.swoonreads.com/wp-json/users/7001",
-        "archives": "http://dev.swoonreads.com/wp-json/users/7001/posts"
+        "self": "/wp-json/users/7001",
+        "archives": "/wp-json/users/7001/posts"
       }
     }
   },
@@ -66,8 +66,8 @@
   "date_gmt": "2015-05-01T17:57:30",
   "meta": {
     "links": {
-      "up": "http://dev.swoonreads.com/wp-json/posts/10400",
-      "self": "http://dev.swoonreads.com/wp-json/posts/10400/comments/10865"
+      "up": "/wp-json/posts/10400",
+      "self": "/wp-json/posts/10400/comments/10865"
     }
   }
 }]

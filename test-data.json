@@ -17,14 +17,14 @@
       "description": "I like to be an example",
       "registered": "2014-09-18T13:07:33+00:00"
     },
-    "content": "<p>Some paragraph test</p>\n<p><span style=\"text-decoration: underline;\"><strong>Bold here</strong></span></p>\n<img width=\"300\" height=\"200\" src=\"http:\/\/dev.swoonreads.com\/wp\/wp-content\/uploads\/2014\/12\/writing-class-shutterstock-300x200.jpg\" class=\"attachment-medium\" \/>",
+    "content": "<p>Some paragraph test</p>\n<p><span style=\"text-decoration: underline;\"><strong>Bold here</strong></span></p>",
     "parent": null,
-    "link": "http://dev.swoonreads.com/blog/leave-them-wanting-more-how-to-write-a-good-synopsis-for-your-manuscript",
+    "link": "/blog/leave-them-wanting-more-how-to-write-a-good-synopsis-for-your-manuscript",
     "date": "2015-05-27T09:00:39",
     "modified": "2015-05-04T09:55:34",
     "format": "standard",
     "slug": "collaborative-editing-further-evidence-that-holly-and-lauren-are-probably-crazy",
-    "guid": "http://dev.swoonreads.com/?p=10476",
+    "guid": "/?p=10476",
     "excerpt": "<p>Some paragraph test</p>\n",
     "menu_order": 0,
     "comment_status": "open",
@@ -36,119 +36,11 @@
     "modified_gmt": "2015-05-04T13:55:34",
     "meta": {
       "links": {
-        "self": "http://dev.swoonreads.com/wp-json/posts/10476",
-        "author": "http://dev.swoonreads.com/wp-json/users/9477",
-        "collection": "http://dev.swoonreads.com/wp-json/posts",
-        "replies": "http://dev.swoonreads.com/wp-json/posts/10476/comments",
-        "version-history": "http://dev.swoonreads.com/wp-json/posts/10476/revisions"
-      }
-    },
-    "featured_image": {
-      "ID": 8374,
-      "title": "writing class shutterstock",
-      "status": "inherit",
-      "type": "attachment",
-      "author": {
-        "ID": 156,
-        "username": "SwoonReads@macmillanusa.com",
-        "name": "Swoon Reads Staff",
-        "first_name": "",
-        "last_name": "",
-        "nickname": "example@example.com",
-        "slug": "example",
-        "URL": "http://dev.swoonreads.com",
-        "avatar": "http://0.gravatar.com/avatar/91c2fb299b085642d3c62abe9605c3f3?s=96",
-        "description": "For more information, check out the \"Meet the Team\" section of our About page (swoonreads.com/about).",
-        "registered": "2013-07-31T20:32:08+00:00",
-        "meta": {
-          "links": {
-            "self": "http://dev.swoonreads.com/wp-json/users/156",
-            "archives": "http://dev.swoonreads.com/wp-json/users/156/posts"
-          }
-        }
-      },
-      "content": "<p class=\"attachment\"><a href='http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock.jpg'><img width=\"300\" height=\"200\" src=\"http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock-300x200.jpg\" class=\"attachment-medium\" alt=\"writing class shutterstock\" /></a></p>\n",
-      "parent": null,
-      "link": "http://dev.swoonreads.com/?attachment_id=8374",
-      "date": "2014-12-11T13:27:24",
-      "modified": "2014-12-11T13:27:24",
-      "format": "standard",
-      "slug": "writing-class-shutterstock",
-      "guid": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock.jpg",
-      "excerpt": null,
-      "menu_order": 0,
-      "comment_status": "open",
-      "ping_status": "open",
-      "sticky": false,
-      "date_tz": "America/New_York",
-      "date_gmt": "2014-12-11T18:27:24",
-      "modified_tz": "America/New_York",
-      "modified_gmt": "2014-12-11T18:27:24",
-      "meta": {
-        "links": {
-          "self": "http://dev.swoonreads.com/wp-json/media/8374",
-          "author": "http://dev.swoonreads.com/wp-json/users/156",
-          "collection": "http://dev.swoonreads.com/wp-json/media",
-          "replies": "http://dev.swoonreads.com/wp-json/media/8374/comments",
-          "version-history": "http://dev.swoonreads.com/wp-json/media/8374/revisions"
-        }
-      },
-      "terms": [],
-      "source": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock.jpg",
-      "is_image": true,
-      "attachment_meta": {
-        "width": 4140,
-        "height": 2763,
-        "file": "2014/12/writing-class-shutterstock.jpg",
-        "sizes": {
-          "thumbnail": {
-            "file": "writing-class-shutterstock-150x150.jpg",
-            "width": 150,
-            "height": 150,
-            "mime-type": "image/jpeg",
-            "url": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock-150x150.jpg"
-          },
-          "medium": {
-            "file": "writing-class-shutterstock-300x200.jpg",
-            "width": 300,
-            "height": 200,
-            "mime-type": "image/jpeg",
-            "url": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock-300x200.jpg"
-          },
-          "large": {
-            "file": "writing-class-shutterstock-800x533.jpg",
-            "width": 800,
-            "height": 533,
-            "mime-type": "image/jpeg",
-            "url": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock-800x533.jpg"
-          },
-          "featured-image": {
-            "file": "writing-class-shutterstock-640x300.jpg",
-            "width": 640,
-            "height": 300,
-            "mime-type": "image/jpeg",
-            "url": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock-640x300.jpg"
-          },
-          "page-single": {
-            "file": "writing-class-shutterstock-350x350.jpg",
-            "width": 350,
-            "height": 350,
-            "mime-type": "image/jpeg",
-            "url": "http://dev.swoonreads.com/wp/wp-content/uploads/2014/12/writing-class-shutterstock-350x350.jpg"
-          }
-        },
-        "image_meta": {
-          "aperture": 0,
-          "credit": "",
-          "camera": "",
-          "caption": "",
-          "created_timestamp": 0,
-          "copyright": "",
-          "focal_length": 0,
-          "iso": 0,
-          "shutter_speed": 0,
-          "title": ""
-        }
+        "self": "/wp-json/posts/10476",
+        "author": "/wp-json/users/9477",
+        "collection": "/wp-json/posts",
+        "replies": "/wp-json/posts/10476/comments",
+        "version-history": "/wp-json/posts/10476/revisions"
       }
     },
     "terms": {
@@ -161,11 +53,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 32,
-          "link": "http://dev.swoonreads.com/blog/tag/advice",
+          "link": "/blog/tag/advice",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/270"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/270"
             }
           }
         },
@@ -177,11 +69,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 1,
-          "link": "http://dev.swoonreads.com/blog/tag/description",
+          "link": "/blog/tag/description",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/2279"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/2279"
             }
           }
         },
@@ -193,11 +85,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 7,
-          "link": "http://dev.swoonreads.com/blog/tag/erin-c",
+          "link": "/blog/tag/erin-c",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/2075"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/2075"
             }
           }
         },
@@ -209,11 +101,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 6,
-          "link": "http://dev.swoonreads.com/blog/tag/manuscript",
+          "link": "/blog/tag/manuscript",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/183"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/183"
             }
           }
         },
@@ -225,11 +117,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 3,
-          "link": "http://dev.swoonreads.com/blog/tag/plot",
+          "link": "/blog/tag/plot",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/281"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/281"
             }
           }
         },
@@ -241,11 +133,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 2,
-          "link": "http://dev.swoonreads.com/blog/tag/submission",
+          "link": "/blog/tag/submission",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/2280"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/2280"
             }
           }
         },
@@ -257,11 +149,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 102,
-          "link": "http://dev.swoonreads.com/blog/tag/swoon-reads",
+          "link": "/blog/tag/swoon-reads",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/257"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/257"
             }
           }
         },
@@ -273,11 +165,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 1,
-          "link": "http://dev.swoonreads.com/blog/tag/synopsis",
+          "link": "/blog/tag/synopsis",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/2278"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/2278"
             }
           }
         },
@@ -289,11 +181,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 37,
-          "link": "http://dev.swoonreads.com/blog/tag/tips",
+          "link": "/blog/tag/tips",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/426"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/426"
             }
           }
         },
@@ -305,11 +197,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 90,
-          "link": "http://dev.swoonreads.com/blog/tag/writing",
+          "link": "/blog/tag/writing",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/107"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/107"
             }
           }
         },
@@ -321,11 +213,11 @@
           "taxonomy": "post_tag",
           "parent": null,
           "count": 50,
-          "link": "http://dev.swoonreads.com/blog/tag/writing-wisdom",
+          "link": "/blog/tag/writing-wisdom",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/post_tag/terms/97"
+              "collection": "/wp-json/taxonomies/post_tag/terms",
+              "self": "/wp-json/taxonomies/post_tag/terms/97"
             }
           }
         }
@@ -344,18 +236,18 @@
 				"taxonomy":"category",
 				"parent":null,
 				"count":89,
-				"link":"http:\/\/dev.swoonreads.com\/blog\/category\/writing-wisdom",
+				"link":"\/blog\/category\/writing-wisdom",
 				"meta":
 					{"links":
-						{"collection":"http:\/\/dev.swoonreads.com\/wp-json\/taxonomies\/category\/terms",
-						"self":"http:\/\/dev.swoonreads.com\/wp-json\/taxonomies\/category\/terms\/97"}
+						{"collection":"\/wp-json\/taxonomies\/category\/terms",
+						"self":"\/wp-json\/taxonomies\/category\/terms\/97"}
 					}},
           "count": 58,
-          "link": "http://dev.swoonreads.com/blog/category/swoon-reads",
+          "link": "/blog/category/reads",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/category/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/category/terms/257"
+              "collection": "/wp-json/taxonomies/category/terms",
+              "self": "/wp-json/taxonomies/category/terms/257"
             }
           }
         },
@@ -367,11 +259,11 @@
           "taxonomy": "category",
           "parent": null,
           "count": 89,
-          "link": "http://dev.swoonreads.com/blog/category/writing-wisdom",
+          "link": "/blog/category/writing-wisdom",
           "meta": {
             "links": {
-              "collection": "http://dev.swoonreads.com/wp-json/taxonomies/category/terms",
-              "self": "http://dev.swoonreads.com/wp-json/taxonomies/category/terms/97"
+              "collection": "/wp-json/taxonomies/category/terms",
+              "self": "/wp-json/taxonomies/category/terms/97"
             }
           }
         }

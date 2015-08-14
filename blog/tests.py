@@ -39,7 +39,6 @@ class BlogTests(TestCase):
         page = BlogPage.objects.get()
         self.assertEqual(page.title, "My wordpress title")
         self.assertInHTML("<strong>Bold here</strong>", page.body)
-        self.assertTrue("media" in page.body)
         self.assertEqual(page.categories.count(), 2)
         self.assertEqual(page.tags.count(), 11)
         self.assertEqual(page.owner.id, 2)
