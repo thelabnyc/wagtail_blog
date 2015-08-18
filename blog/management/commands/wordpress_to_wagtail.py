@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django_comments_xtd.models import MaxThreadLevelExceededException
 from base64 import b64encode
 from blog.models import BlogPage
 import urllib.request
@@ -117,7 +118,7 @@ class Command(BaseCommand):
             comments_data = self.clean_data(comments_data)
             return json.loads(comments_data)
         else:
-            fetched_posts = requests.get(posts_url, headers=headers)
+            fetched_posts = requests.get(posts_url + '?filter[posts_per_page]=-1', headers=headers)
             data = fetched_posts.text
             data = self.clean_data(data)
             return json.loads(data)
@@ -139,18 +140,18 @@ class Command(BaseCommand):
                 continue  # Blank image
             try:
                 remote_image = urllib.request.urlretrieve(img['src'])
-            except urllib.error.HTTPError:
+            except (urllib.error.HTTPError, urllib.error.URLError, UnicodeEncodeError):
                 print("Unable to import " + img['src'])
                 continue
-            except urllib.error.URLError:
-                print("URL error - try again " + img['src'])
-                continue
             image = Image(title=file_, width=width, height=height)
-            image.file.save(file_, File(open(remote_image[0], 'rb')))
-            image.save()
-            new_url = image.file.url
-            body = body.replace(old_url, new_url)
-            body = self.convert_html_entities(body)
+            try:
+                image.file.save(file_, File(open(remote_image[0], 'rb')))
+                image.save()
+                new_url = image.file.url
+                body = body.replace(old_url, new_url)
+                body = self.convert_html_entities(body)
+            except TypeError:
+                print("Unable to import image {}".format(remote_image[0]))
         return body
 
     def create_user(self, author):
@@ -232,8 +233,11 @@ class Command(BaseCommand):
                 for sub_comment in imported_comments:
                     if sub_comment.wordpress_id == comment.parent_wordpress_id:
                         comment.parent_id = sub_comment.id
-                        comment._calculate_thread_data()
-                        comment.save()
+                        try:
+                            comment._calculate_thread_data()
+                            comment.save()
+                        except MaxThreadLevelExceededException:
+                            print("Warning, max thread level exceeded on {}".format(comment.id))
                         break
 
     def create_categories_and_tags(self, page, categories):
@@ -312,13 +316,18 @@ class Command(BaseCommand):
                 title = post['featured_image']['title']
                 source = post['featured_image']['source']
                 path, file_ = os.path.split(source)
-                remote_image = urllib.request.urlretrieve(source)
-                width = 640
-                height = 290
-                header_image = Image(title=title, width=width, height=height)
-                header_image.file.save(
-                    file_, File(open(remote_image[0], 'rb')))
-                header_image.save()
+                source = source.replace('stage.swoon', 'swoon')
+                try:
+                    remote_image = urllib.request.urlretrieve(source)
+                    width = 640
+                    height = 290
+                    header_image = Image(title=title, width=width, height=height)
+                    header_image.file.save(
+                        file_, File(open(remote_image[0], 'rb')))
+                    header_image.save()
+                except UnicodeEncodeError:
+                    header_image = None
+                    print('unable to set header image {}'.format(source))
             else:
                 header_image = None
             new_entry.header_image = header_image
