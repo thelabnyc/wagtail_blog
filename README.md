@@ -23,7 +23,7 @@ Work in progress?
 
 1. `pip install wagtail-blog`
 2. Add `blog` to INSTALLED_APPS
-3. Add `url(r'^blog/', include('blog.urls')),` to urls.py
+3. Add `url(r'^blog/', include('blog.urls', namespace="blog")),` to urls.py
 4. `python manage.py migrate`
 5. Override [templates](/blog/templates/blog/) as needed.
 

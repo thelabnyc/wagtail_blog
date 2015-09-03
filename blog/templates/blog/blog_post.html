@@ -33,7 +33,7 @@
         {% if blog.tags.all %}
             Tags: 
                 {% for tag in blog.tags.all %}
-                    <a href="/blog/tag/{{ tag.slug }}/">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{% url 'blog:tag' tag.slug %}/">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
         {% endif %}
     </div>
@@ -41,7 +41,7 @@
         {% if blog.categories.all %}
             Posted in 
                 {% for cat in blog.categories.all %}
-                    <a href="/blog/category/{{ cat.category.slug }}/">{{ cat.category.name }}</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{% url 'blog:category' cat.category.slug %}">{{ cat.category.name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %} | 
         {% endif %}
 
