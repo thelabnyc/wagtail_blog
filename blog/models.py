@@ -28,7 +28,7 @@ def get_blog_context(context):
     context['authors'] = get_user_model().objects.filter(
         owned_pages__live=True,
         owned_pages__content_type__model='blogpage'
-    ).annotate(Count('owned_pages'))
+    ).annotate(Count('owned_pages')).order_by('-owned_pages__count')
     context['all_categories'] = BlogCategory.objects.all()
     context['root_categories'] = BlogCategory.objects.filter(
         parent=None,
