@@ -73,7 +73,10 @@ class BlogIndexPage(Page):
                 category = get_object_or_404(BlogCategory, slug=category)
             blogs = blogs.filter(categories__category__name=category)
         if author:
-            blogs = blogs.filter(Q(owner_id=author) | Q(owner__username=author))
+            if isinstance(author, str):
+                blogs = blogs.filter(owner__username=author)
+            else:
+                blogs = blogs.filter(owner_id=author)
 
         # Pagination
         page = request.GET.get('page')
