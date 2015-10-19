@@ -16,6 +16,18 @@ class BlogTests(TestCase):
             title='Blog Index', slug='blog', search_description="x",
             owner=self.user))
 
+    def test_index(self):
+        url = self.blog_index.url
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+
+        blog_page = self.blog_index.add_child(instance=BlogPage(
+            title='Blog Page', slug='blog_page1', search_description="x",
+            owner=self.user))
+        url = blog_page.url
+        res = self.client.get(url)
+        self.assertContains(res, "Blog Page")
+
     def test_import(self):
         """
         Tests migrate_wordpress command -
