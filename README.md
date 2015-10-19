@@ -37,6 +37,12 @@ Work in progress?
 2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
 3. Run `./manage.py wordpress_to_wagtail http://myblog.com blog username password` the username is your WordPress username with full access to the API. Without this you can't access all blog posts.
 
+This works by getting the json data for your posts and making Wagtail pages for them. 
+It then downloads any images it finds and replaces urls to use your site instead of an external site. 
+Blog authors will become Django users.
+This is a complex process and is prone to error. You should plan to review the import code and fix some issues.
+Pull requests welcome to improve this feature.
+
 # Comments
 
 django-comments-xtd comments work out of the box. Just install it as directed [here](http://django-comments-xtd.readthedocs.org/en/latest/). 
