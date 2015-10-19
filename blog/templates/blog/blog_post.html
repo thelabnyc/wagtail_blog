@@ -5,7 +5,10 @@
 </a>
 
 {% if blog.date %}
-    <div class="meta date">{{ blog.date|date:"F jS, Y" }}</div>
+    <div class="meta date">
+        {{ blog.date|date:"F jS, Y" }}
+        {{ blog.author }}
+    </div>
 {% endif %}
 
 {% if include_context == "index_page" %}

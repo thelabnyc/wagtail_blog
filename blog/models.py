@@ -184,6 +184,14 @@ class BlogPage(Page):
         related_name='+',
         verbose_name=_('Header image')
     )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True, null=True,
+        limit_choices_to={'is_staff': True},
+        verbose_name=_('Author'),
+        on_delete=models.SET_NULL,
+        related_name='author_pages',
+    )
 
     search_fields = Page.search_fields + (
         index.SearchField('body'),
@@ -199,8 +207,13 @@ class BlogPage(Page):
             ], classname="label-above"),
         ], 'Scheduled publishing', classname="publishing"),
         FieldPanel('date'),
-        FieldPanel('owner'),
+        FieldPanel('author'),
     ]
+
+    def save_revision(self, *args, **kwargs):
+        if not self.author:
+            self.author = self.owner
+        return super(BlogPage, self).save_revision(*args, **kwargs)
 
     def get_absolute_url(self):
         return self.url
@@ -221,7 +234,6 @@ class BlogPage(Page):
         verbose_name_plural = _('Blog pages')
 
     parent_page_types = ['blog.BlogIndexPage']
-BlogPage._meta.get_field('owner').editable = True
 
 
 BlogPage.content_panels = [
