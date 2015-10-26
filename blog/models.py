@@ -168,6 +168,11 @@ class BlogTag(Tag):
         proxy = True
 
 
+LIMIT_AUTHOR_CHOICES = getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_GROUP', None)
+if LIMIT_AUTHOR_CHOICES:
+    limit_author_choices = {'groups__name': LIMIT_AUTHOR_CHOICES}
+else:
+    limit_author_choices = {'is_staff': True}
 class BlogPage(Page):
     body = RichTextField(verbose_name=_('body'))
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
@@ -187,7 +192,7 @@ class BlogPage(Page):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         blank=True, null=True,
-        limit_choices_to={'is_staff': True},
+        limit_choices_to=limit_author_choices,
         verbose_name=_('Author'),
         on_delete=models.SET_NULL,
         related_name='author_pages',
