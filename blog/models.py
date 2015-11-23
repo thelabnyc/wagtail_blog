@@ -245,7 +245,7 @@ BlogPage.content_panels = [
     FieldPanel('title', classname="full title"),
     MultiFieldPanel([
         FieldPanel('tags'),
-        InlinePanel(BlogPage, 'categories', label=_("Categories")),
+        InlinePanel('categories', label=_("Categories")),
     ], heading="Tags and Categories"),
     ImageChooserPanel('header_image'),
     FieldPanel('body', classname="full"),
