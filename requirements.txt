@@ -1,9 +1,9 @@
-Django==1.8.5
-wagtail==1.1
+Django==1.8.7
+wagtail==1.2
 django-hashers-passlib==0.1
 django-storages-redux==1.2
 boto3
 django-contrib-comments==1.6.1
-django-comments-xtd==1.4b2
+django-comments-xtd==1.5.0
 django-longerusernameandemail
 requests
