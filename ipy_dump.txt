@@ -1,0 +1,67 @@
+import xml.etree.ElementTree as etree
+In [2]:
+
+ = etree
+tree = etree.parse('greenkeyintranet.wordpress.2016-03-24.xml')
+In [ ]:
+
+​
+In [3]:
+
+root = tree.getroot()
+In [4]:
+
+len(root)
+Out[4]:
+1
+In [5]:
+
+root.keys()
+Out[5]:
+['version']
+In [6]:
+
+ = 
+chan = root[0]
+In [7]:
+
+len(chan)
+Out[7]:
+572
+In [8]:
+
+chan.attrib
+chan.attrib
+Out[8]:
+{}
+In [9]:
+
+)
+len([ e for e in chan if e])
+Out[9]:
+563
+In [17]:
+
+# how do we find all item elements??
+items = [e for e in chan.getchildren() if e.tag=='item']
+items[10]
+Out[17]:
+<Element 'item' at 0x10df769f8>
+In [11]:
+
+x
+# how to we munge the tag to remove that namespace
+import re
+test = '{http://purl.org/rss/1.0/modules/content/}encoded'
+strip_ns = lambda x : re.sub('\{.*\}','',x)
+In [14]:
+
+item_dict = lambda item : {strip_ns(e.tag):e.text for e in item}
+In [24]:
+
+0
+i_dicts = [item_dict(item) for item in items[:100]]
+In [25]:
+
+[i['encoded'] for i in i_dicts]
+[i['encoded'] for i in i_dicts]
