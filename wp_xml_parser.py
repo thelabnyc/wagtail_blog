@@ -3,11 +3,15 @@ import lxml.html as HM
 import re
 from io import BytesIO
 
-def replace_xmlns(xml_string):
+
+
+
+def prep_xml(xml_string):
     """
+    removes encoding statement and
     chagnes xmlns to tag:item to tag:tag
-    >>> test_xmlns = 'xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"'
-    >>> replace_xmlns(test_xmlns)
+    >>> test_xmlns = '<?xml encoding="some encoding" ?><rss xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/></rss>"'
+    >>> prep_xml(test_xmlns)
     'xmlns:excerpt="excerpt"'
     """
     pre_chan, chan, post_chan= xml_string.partition('<channel>')
@@ -31,16 +35,6 @@ def replace_xmlns(xml_string):
 #
 #
 # # # Can I find all the expected json vals from json import
-# # json_vals = ["slug", # {wp}post_naem
-# #             "ID", # guid?
-# #             "title", #
-# #             "description", #
-# #             "content", #
-# #             "author", # creator?
-# #             "terms", ## WTF??
-# #             "date", # post date?
-# #             "featured_image",]
-# #
 # # shared_keys
 # # items_with_img = [item for item in item_dict_gen() if "<img" in item["{content}encoded"]]
 #
@@ -74,7 +68,7 @@ def translate_item(item_dict):
     ret_dict['description']= item_dict['description']
     ret_dict['content']= item_dict['{content}encoded']
     ret_dict['author']= item_dict['{dc}creator']
-    # ret_dict['terms']= ""
+    ret_dict['terms']= item_dict.get('categories')
     ret_dict['date']= item_dict['pubDate']
     # ret_dict['featured_image'] = None
     return ret_dict
@@ -83,10 +77,22 @@ def xml_export_to_list_of_dicts(xml_location):
     """given a WordPress xml export file, will return list 
     of dictionaries with keys that match
     the expected json keys of a wordpress API call
+
+    >>> json_vals = ["slug", 
+            "ID", 
+            "title",
+            "description", 
+            "content", 
+            "author", 
+            "terms", 
+            "date", 
+            ]
+    >>> data = xml_export_to_list_of_dicts('greenkeyintranet.xml')
+    >>> 
     """
     # TODO: don't load the whole damn thing into memory
     xml_string = open(xml_location, 'r').read()
-    xml_string = replace_xmlns(xml_string)
+    xml_string = prep_xml(xml_string)
     root = etree.XML(xml_string)
     # The chanel section should be the first element, where rss is root
     chan = root.find("channel")
