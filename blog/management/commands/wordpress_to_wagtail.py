@@ -89,6 +89,8 @@ class Command(BaseCommand):
             data = data.strip(bad_data)
         return data
 
+    # TODO: this will have to take json or xml, maybe change this to
+    # _get_post_data_json
     def get_posts_data(
         self, blog, id=None, get_comments=False, *args, **options
     ):
