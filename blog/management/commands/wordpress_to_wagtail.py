@@ -1,3 +1,9 @@
+import urllib.request
+import os
+import json
+import requests
+from datetime import datetime
+
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth import get_user_model
@@ -7,21 +13,20 @@ from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django_comments_xtd.models import MaxThreadLevelExceededException
+
 from base64 import b64encode
-from blog.models import BlogPage
-import urllib.request
-import os
-import json
-import requests
-from datetime import datetime
 try:
     import html
 except ImportError:  # 2.x
     import HTMLParser
     html = HTMLParser.HTMLParser()
 from bs4 import BeautifulSoup
+
+from blog.wp_xml_parser import xml_import 
+from blog.models import BlogPage
 from blog.models import (BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
+
 from wagtail.wagtailimages.models import Image
 
 
@@ -39,22 +44,27 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
-        parser.add_argument('blog_to_migrate',
+        parser.add_argument('--blog_to_migrate',
+                            default=False,
                             help="Base url of wordpress instance")
         parser.add_argument('blog_index',
                             help="Title of blog index page to attach blogs")
-        parser.add_argument('username',
+        parser.add_argument('--username',
                             default=False,
                             help='Username for basic Auth')
-        parser.add_argument('password',
+        parser.add_argument('--password',
                             default=False,
                             help='Password for basic Auth')
         parser.add_argument('--import-comments',
                             action="store_true",
                             help="import Wordpress comments to Django Xtd")
+        parser.add_argument('--xml',
+                            # default='',
+                            help="import from XML instead of API")
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
+        # TODO: refactor these with .get
         if 'username' in options:
             self.username = options['username']
         else:
@@ -63,6 +73,8 @@ class Command(BaseCommand):
             self.password = options['password']
         else:
             self.password = None
+
+        self.xml_path = options.get('xml', None)
         self.blog_to_migrate = options['blog_to_migrate']
         try:
             blog_index = BlogIndexPage.objects.get(
@@ -72,6 +84,8 @@ class Command(BaseCommand):
         if self.blog_to_migrate == "just_testing":
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
+        elif self.xml_path:
+            posts = xml_import(self.xml_path)
         else:
             posts = self.get_posts_data(self.blog_to_migrate)
         self.should_import_comments = options.get('import_comments')
@@ -89,8 +103,7 @@ class Command(BaseCommand):
             data = data.strip(bad_data)
         return data
 
-    # TODO: this will have to take json or xml, maybe change this to
-    # _get_post_data_json
+
     def get_posts_data(
         self, blog, id=None, get_comments=False, *args, **options
     ):
@@ -120,10 +133,12 @@ class Command(BaseCommand):
             comments_data = self.clean_data(comments_data)
             return json.loads(comments_data)
         else:
-            fetched_posts = requests.get(posts_url + '?filter[posts_per_page]=-1', headers=headers)
+            fetched_posts = requests.get(posts_url + '?filter[posts_per_page]=-1', 
+                                         headers=headers)
             data = fetched_posts.text
             data = self.clean_data(data)
             return json.loads(data)
+
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
