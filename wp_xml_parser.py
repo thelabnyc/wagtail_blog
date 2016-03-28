@@ -57,6 +57,15 @@ def prep_xml(xml_string):
 # #
 #
 #
+def item_dict(item):
+        #{e.tag:e.text for e in item}
+    ret_dict = {"terms":[]}
+    for e in item:
+        if e.tag == "category":
+            ret_dict["terms"].append(e.attrib)
+            continue
+        ret_dict[e.tag] = e.text
+        return ret_dict
 
 def translate_item(item_dict):
     """cleanup item keys to match API json format"""
