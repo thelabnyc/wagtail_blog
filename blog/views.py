@@ -1,6 +1,8 @@
 from django.contrib.syndication.views import Feed
+from django.utils.feedgenerator import Atom1Feed
 from .models import BlogIndexPage, BlogPage, BlogCategory
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 
 
 def tag_view(request, tag):
@@ -19,18 +21,41 @@ def author_view(request, author):
 
 
 class LatestEntriesFeed(Feed):
-    title = "Blog"
-    link = "/blog/"
-    description = "A Blog"
+    '''
+    If a URL ends with "rss" try to find a matching BlogIndexPage
+    and return its items.
+    '''
 
-    def items(self):
-        return BlogPage.objects.order_by('-date')[:5]
+    def get_object(self, request, blog_slug):
+        return get_object_or_404(BlogIndexPage, slug=blog_slug)
+
+    def title(self, blog):
+        if blog.seo_title:
+            return blog.seo_title
+        return blog.title
+
+    def link(self, blog):
+        return blog.full_url
+
+    def description(self, blog):
+        return blog.search_description
+
+    def items(self, blog):
+        num = getattr(settings, 'BLOG_PAGINATION_PER_PAGE', 10)
+        return blog.get_descendants()[:num]
 
     def item_title(self, item):
         return item.title
 
     def item_description(self, item):
-        return item.body
+        return item.specific.body
+
+    def item_link(self, item):
+        return item.full_url
+
+
+class LatestEntriesFeedAtom(LatestEntriesFeed):
+    feed_type = Atom1Feed
 
 
 class LatestCategoryFeed(Feed):
