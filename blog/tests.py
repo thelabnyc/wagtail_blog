@@ -29,17 +29,29 @@ class BlogTests(TestCase):
         self.assertContains(res, "Blog Page")
 
     def test_latest_entries_feed(self):
+        self.blog_index.add_child(instance=BlogPage(
+                                  title='Blog Page',
+                                  slug='blog_page1',
+                                  search_description="x",
+                                  owner=self.user))
         res = self.client.get("{0}{1}/rss/".format(self.blog_index.url,
                                                    self.blog_index.slug))
-        self.assertContains(res, "Blog Index")
-        self.assertContains(res, '<rss version="2.0"')
+        self.assertContains(res, "Blog Page")
+        self.assertContains(res, '<rss')
+        self.assertContains(res, 'version="2.0"')
         self.assertContains(res, '</rss>')
 
     def test_latest_entries_feed_atom(self):
+        self.blog_index.add_child(instance=BlogPage(
+                                  title='Blog Page',
+                                  slug='blog_page1',
+                                  search_description="x",
+                                  owner=self.user))
         res = self.client.get("{0}{1}/atom/".format(self.blog_index.url,
                                                     self.blog_index.slug))
-        self.assertContains(res, "Blog Index")
-        self.assertContains(res, '<feed xmlns="http://'
+        self.assertContains(res, "Blog Page")
+        self.assertContains(res, '<feed')
+        self.assertContains(res, 'xmlns="http://'
                                  'www.w3.org/2005/Atom"')
         self.assertContains(res, '</feed>')
 
