@@ -12,5 +12,5 @@ urlpatterns = patterns('',
         name="latest_entries_feed"),
     url(r'(?P<blog_slug>[\w-]+)/atom.*/',
         views.LatestEntriesFeedAtom(),
-        name="latest_entries_feed"),
+        name="latest_entries_feed_atom"),
 )
