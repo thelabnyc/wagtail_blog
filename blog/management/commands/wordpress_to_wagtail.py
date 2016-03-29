@@ -258,6 +258,7 @@ class Command(BaseCommand):
                         break
 
     def create_categories_and_tags(self, page, categories):
+        print("creating categories and tags")
         categories_for_blog_entry = []
         tags_for_blog_entry = []
         for records in categories.values():
@@ -267,7 +268,9 @@ class Command(BaseCommand):
                     tag_slug = record['slug']
                     new_tag = BlogTag.objects.get_or_create(
                         name=tag_name, slug=tag_slug)[0]
+                    new_tag.save() 
                     tags_for_blog_entry.append(new_tag)
+
             if records[0]['taxonomy'] == 'category':
                 for record in records:
                     category_name = record['name']
@@ -284,20 +287,26 @@ class Command(BaseCommand):
                     else:
                         parent = None
 
-                    categories_for_blog_entry.append(new_category)
                     new_category.save()
+                    categories_for_blog_entry.append(new_category)
         # loop through list of BlogCategory and BlogTag objects and create
         # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
         # for each tag for this blog page
+        print('saving categories and tags')
         for category in categories_for_blog_entry:
-            BlogCategoryBlogPage.objects.get_or_create(
+            print('creating category {}'.format(category))
+            page = BlogCategoryBlogPage.objects.get_or_create(
                 category=category, page=page)[0]
+            page.save()
         for tag in tags_for_blog_entry:
-            BlogPageTag.objects.get_or_create(
-                tag=tag, content_object=page)[0]
+            print('creating tag {}'.format(tag))
+            page = BlogPageTag.objects.get_or_create(
+                tag=tag, content_object=page)[0].save()
+            page.save()
 
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
+        print("creating blog pages")
         for post in posts:
             post_id = post.get('ID')
             title = post.get('title')

@@ -80,6 +80,7 @@ class XML_parser(object):
         create a default dict of values, including
         category and tag lookup
         """
+        # mocking wierd JSON structure
         ret_dict = {"terms":{}}
         for e in item:
             # is it a category or tag??
@@ -93,14 +94,14 @@ class XML_parser(object):
                 elif e.attrib["domain"] == "media-category":
                     found_category_dict = self.tags_dict.get(slug)
                 if found_category_dict:
-                    ret_dict["terms"].update(found_category_dict) 
+                    ret_dict["terms"][slug] = [found_category_dict] 
                 # or we have no idea?
                 else:
                     # create a dummy dict as a post-tag
                     name = e.text #TODO: regex parsing here??
-                    ret_dict["terms"].update({"slug":slug,
+                    ret_dict["terms"][slug] = [{"slug":slug,
                                               "name":name,
-                                              "taxonomy":"post-tag"})
+                                              "taxonomy":"post-tag"}]
             # all other values get tag:text
             else:
                 ret_dict[e.tag] = e.text
