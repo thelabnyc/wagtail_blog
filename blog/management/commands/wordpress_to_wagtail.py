@@ -22,7 +22,7 @@ except ImportError:  # 2.x
     html = HTMLParser.HTMLParser()
 from bs4 import BeautifulSoup
 
-from blog.wp_xml_parser import xml_import 
+from blog.wp_xml_parser import XML_parser
 from blog.models import BlogPage
 from blog.models import (BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
@@ -85,7 +85,7 @@ class Command(BaseCommand):
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
         elif self.xml_path:
-            posts = xml_import(self.xml_path)
+            posts = XML_parser(self.xml_path).get_posts_data()
         else:
             posts = self.get_posts_data(self.blog_to_migrate)
         self.should_import_comments = options.get('import_comments')
@@ -274,7 +274,7 @@ class Command(BaseCommand):
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
                         name=category_name, slug=category_slug)[0]
-                    if record['parent'] is not None:
+                    if record.get('parent') is not None:
                         parent_category = BlogCategory.objects.get_or_create(
                             name=record['parent']['name'])[0]
                         parent_category.slug = record['parent']['slug']
@@ -348,7 +348,6 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            if self.xml_path is None:
-                self.create_categories_and_tags(new_entry, categories)
+            self.create_categories_and_tags(new_entry, categories)
             if self.should_import_comments:
                 self.import_comments(post_id, slug)
