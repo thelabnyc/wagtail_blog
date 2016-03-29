@@ -1,7 +1,10 @@
+from io import BytesIO
+import datetime
+import re
+import time
+
 import lxml.etree as etree
 import lxml.html as HM
-import re
-from io import BytesIO
 
 
 def remove_encoding(xml_string):
@@ -34,19 +37,33 @@ prep_xml = lambda x : remove_xmlns(remove_encoding(x))
 
 def item_dict(item):
     #{e.tag:e.text for e in item}
-    ret_dict = {"terms":[]}
+    ret_dict = {"terms":{}}
     for e in item:
         if e.tag == "category":
-            ret_dict["terms"].append(e.attrib)
-            continue
-        ret_dict[e.tag] = e.text
+            ret_dict["terms"].update({k:v for k,v in e.attrib.items()})
+        else:
+            ret_dict[e.tag] = e.text
     return ret_dict
+
+def convert_date(d, custom_date_string=None):
+    """
+    for whatever reason, sometimes WP XML has unintelligible 
+    datetime strings for pubDate.
+    In this case default to custom_date_string or today
+    """
+    try:
+        date =  time.strftime("%Y-%m-%d", time.strptime(d[:16], '%a, %d %b %Y'))
+    except ValueError:
+        date = custom_date_string or datetime.datetime.today().strftime("%Y-%m-%d")
+    return date
 
 def translate_item(item_dict):
     """cleanup item keys to match API json format"""
+    if not item_dict.get('title'):
+        return None
     ret_dict = {}
-    # assume we have the values we need, fail hard otherwise
-    ret_dict['slug']= item_dict['{wp}post_name']
+    # slugify post title if no slug exists
+    ret_dict['slug']= item_dict.get('{wp}post_name') or re.sub(item_dict['title'],' ','-')
     ret_dict['ID']= item_dict['guid']
     ret_dict['title']= item_dict['title']
     ret_dict['description']= item_dict['description']
@@ -55,8 +72,8 @@ def translate_item(item_dict):
     ret_dict['author']= {'username':item_dict['{dc}creator'],
                          'first_name':'',
                          'last_name':''}
-    ret_dict['terms']= item_dict.get('categories')
-    ret_dict['date']= item_dict['pubDate']
+    ret_dict['terms']= item_dict.get('terms')
+    ret_dict['date']= convert_date(item_dict['pubDate'])
     # ret_dict['featured_image'] = None
     return ret_dict
 
@@ -79,7 +96,7 @@ def xml_import(xml_location):
     # turn item element into a generic dict
     item_dict_gen = (item_dict(item) for item in items)
     # transform the generic dict to one with the expected JSON keys
-    all_the_data = [translate_item(item) for item in item_dict_gen]
+    all_the_data = [translate_item(item) for item in item_dict_gen if translate_item(item)]
     return all_the_data
 
 
