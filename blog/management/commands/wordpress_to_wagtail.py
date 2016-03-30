@@ -23,8 +23,7 @@ except ImportError:  # 2.x
 from bs4 import BeautifulSoup
 
 from blog.wp_xml_parser import XML_parser
-from blog.models import BlogPage
-from blog.models import (BlogTag, BlogPageTag, BlogIndexPage,
+from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
 
 from wagtail.wagtailimages.models import Image
@@ -262,19 +261,20 @@ class Command(BaseCommand):
         categories_for_blog_entry = []
         tags_for_blog_entry = []
         for records in categories.values():
+            # TODO: check this logic
             if records[0]['taxonomy'] == 'post_tag':
-                print("found category {}".format(record['name']))
+                print("found category {}".format(records[0]))
                 for record in records:
                     tag_name = record['name']
                     tag_slug = record['slug']
                     new_tag = BlogTag.objects.get_or_create(
                         name=tag_name, slug=tag_slug)[0]
-                    new_tag.save() 
+                    # new_tag.save() 
                     tags_for_blog_entry.append(new_tag)
 
             if records[0]['taxonomy'] == 'category':
                 for record in records:
-                    print("found tag {}".format(record['name']))
+                    print("found tag {}".format(records[0]))
                     category_name = record['name']
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
@@ -288,7 +288,6 @@ class Command(BaseCommand):
                         new_category.parent = parent
                     else:
                         parent = None
-                    new_category.save()
                     categories_for_blog_entry.append(new_category)
 
         print("{} tags found, {} categories found".format(len(tags_for_blog_entry),
@@ -299,14 +298,12 @@ class Command(BaseCommand):
         print('saving categories and tags')
         for category in categories_for_blog_entry:
             print('creating category {}'.format(category))
-            page = BlogCategoryBlogPage.objects.get_or_create(
+            BlogCategoryBlogPage.objects.get_or_create(
                 category=category, page=page)[0]
-            page.save()
         for tag in tags_for_blog_entry:
             print('creating tag {}'.format(tag))
-            page = BlogPageTag.objects.get_or_create(
+            BlogPageTag.objects.get_or_create(
                 tag=tag, content_object=page)[0].save()
-            page.save()
 
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""

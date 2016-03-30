@@ -42,7 +42,7 @@ class XML_parser(object):
             terms_dict[slug] = {'slug':slug}
             name = e.find('.//{wp}term_name').text # need some regex parsing here
             terms_dict[slug]['name'] = name
-            terms_dict[slug]['taxonomy'] = 'post-tag'
+            terms_dict[slug]['taxonomy'] = 'post_tag'
         return terms_dict
 
     @staticmethod
@@ -89,23 +89,21 @@ class XML_parser(object):
             # is it a category or tag??
             if "category" in e.tag:
                 slug = e.attrib.get("nicename")
+                name = e.text 
                 found_category_dict = None
                 # is it a category?
                 if e.attrib["domain"] == "category":
-                    found_category_dict = self.category_dict.get(slug)
+                    found_category_dict = self.category_dict.get(slug) or {"slug":slug,
+                                                                            "name":name,
+                                                                            "taxonomy":"category"}
                 # or is it a tag?
                 elif e.attrib["domain"] == "media-category":
-                    found_category_dict = self.tags_dict.get(slug)
-                if found_category_dict:
+                    found_category_dict = self.tags_dict.get(slug) or {"slug":slug,
+                                                                        "name":name,
+                                                                        "taxonomy":"post_tag"}
+                # update
+                if found_category_dict is not None:
                     ret_dict["terms"][slug] = [found_category_dict] 
-                # or we have no idea?
-                else:
-                    # create a dummy dict as a post-tag
-                    name = e.text #TODO: regex parsing here??
-                    ret_dict["terms"][slug] = [{"slug":slug,
-                                              "name":name,
-                                              "taxonomy":"post-tag"}]
-            # all other values get tag:text
             else:
                 ret_dict[e.tag] = e.text
         return ret_dict
