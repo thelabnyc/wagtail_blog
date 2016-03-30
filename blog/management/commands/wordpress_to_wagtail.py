@@ -263,18 +263,15 @@ class Command(BaseCommand):
         for records in categories.values():
             # TODO: check this logic
             if records[0]['taxonomy'] == 'post_tag':
-                # print("found category {}".format(records[0]))
                 for record in records:
                     tag_name = record['name']
                     tag_slug = record['slug']
                     new_tag = BlogTag.objects.get_or_create(
                         name=tag_name, slug=tag_slug)[0]
-                    # new_tag.save() 
                     tags_for_blog_entry.append(new_tag)
 
             if records[0]['taxonomy'] == 'category':
                 for record in records:
-                    # print("found tag {}".format(records[0]))
                     category_name = record['name']
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
@@ -289,6 +286,7 @@ class Command(BaseCommand):
                     else:
                         parent = None
                     categories_for_blog_entry.append(new_category)
+                    new_category.save()
 
         # loop through list of BlogCategory and BlogTag objects and create
         # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
@@ -302,8 +300,8 @@ class Command(BaseCommand):
 
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
-        # print("creating blog pages")
         for post in posts:
+            print(post.get('slug'))
             post_id = post.get('ID')
             title = post.get('title')
             if title:
