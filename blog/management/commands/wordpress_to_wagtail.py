@@ -43,11 +43,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
-        parser.add_argument('--blog_to_migrate',
-                            default=False,
-                            help="Base url of wordpress instance")
         parser.add_argument('blog_index',
                             help="Title of blog index page to attach blogs")
+        parser.add_argument('--url',
+                            default=False,
+                            help="Base url of wordpress instance")
         parser.add_argument('--username',
                             default=False,
                             help='Username for basic Auth')
@@ -74,19 +74,19 @@ class Command(BaseCommand):
             self.password = None
 
         self.xml_path = options.get('xml')
-        self.blog_to_migrate = options['blog_to_migrate']
+        self.url = options['url']
         try:
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
-        if self.blog_to_migrate == "just_testing":
+        if self.url == "just_testing":
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
         elif self.xml_path:
             posts = XML_parser(self.xml_path).get_posts_data()
         else:
-            posts = self.get_posts_data(self.blog_to_migrate)
+            posts = self.get_posts_data(self.url)
         self.should_import_comments = options.get('import_comments')
         self.create_blog_pages(posts, blog_index)
 
@@ -106,7 +106,7 @@ class Command(BaseCommand):
     def get_posts_data(
         self, blog, id=None, get_comments=False, *args, **options
     ):
-        if self.blog_to_migrate == "just_testing":
+        if self.url == "just_testing":
             with open('test-data-comments.json') as test_json:
                 return json.load(test_json)
 
@@ -207,7 +207,7 @@ class Command(BaseCommand):
             print('site does not exist')
             return
         comments = self.get_posts_data(
-            self.blog_to_migrate, post_id, get_comments=True)
+            self.url, post_id, get_comments=True)
         imported_comments = []
         for comment in comments:
             try:
@@ -263,7 +263,7 @@ class Command(BaseCommand):
         for records in categories.values():
             # TODO: check this logic
             if records[0]['taxonomy'] == 'post_tag':
-                print("found category {}".format(records[0]))
+                # print("found category {}".format(records[0]))
                 for record in records:
                     tag_name = record['name']
                     tag_slug = record['slug']
@@ -274,7 +274,7 @@ class Command(BaseCommand):
 
             if records[0]['taxonomy'] == 'category':
                 for record in records:
-                    print("found tag {}".format(records[0]))
+                    # print("found tag {}".format(records[0]))
                     category_name = record['name']
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
@@ -290,24 +290,19 @@ class Command(BaseCommand):
                         parent = None
                     categories_for_blog_entry.append(new_category)
 
-        print("{} tags found, {} categories found".format(len(tags_for_blog_entry),
-                                                          len(categories_for_blog_entry)))
         # loop through list of BlogCategory and BlogTag objects and create
         # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
         # for each tag for this blog page
-        print('saving categories and tags')
         for category in categories_for_blog_entry:
-            print('creating category {}'.format(category))
             BlogCategoryBlogPage.objects.get_or_create(
                 category=category, page=page)[0]
         for tag in tags_for_blog_entry:
-            print('creating tag {}'.format(tag))
             BlogPageTag.objects.get_or_create(
-                tag=tag, content_object=page)[0].save()
+                tag=tag, content_object=page)[0]
 
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
-        print("creating blog pages")
+        # print("creating blog pages")
         for post in posts:
             post_id = post.get('ID')
             title = post.get('title')
