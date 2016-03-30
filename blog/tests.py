@@ -1,12 +1,20 @@
-from django.test import TestCase
+import doctest
 import json
-from django_comments_xtd.models import XtdComment
-from wagtail.wagtailcore.models import Page
+
 from django.contrib.auth.models import User
+from django.test import TestCase
+from django_comments_xtd.models import XtdComment
+
+from wagtail.wagtailcore.models import Page
+
 from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                      BlogCategory, BlogCategoryBlogPage)
 from .management.commands.wordpress_to_wagtail import Command
+from . import wp_xml_parser
 
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(wp_xml_parser))
+    return tests
 
 class BlogTests(TestCase):
     def setUp(self):
@@ -69,7 +77,7 @@ class BlogTests(TestCase):
         command.username = None
         command.password = None
         command.should_import_comments = True
-        command.blog_to_migrate = 'just_testing'
+        command.url = 'just_testing'
         with open('test-data.json') as test_json:
             posts = json.load(test_json)
         command.create_blog_pages(posts, self.blog_index)
@@ -87,6 +95,7 @@ class BlogTests(TestCase):
         self.assertEqual(BlogPageTag.objects.all().count(), 11)
         parent_category = BlogCategory.objects.get(slug="writing-wisdom")
         child_category = BlogCategory.objects.get(slug="swoon-reads")
+        self.assertTrue(child_category.parent is not None)
         self.assertEqual(child_category.parent, parent_category)
         self.assertEqual(child_category.slug, "swoon-reads")
         self.assertEqual(parent_category.slug, "writing-wisdom")

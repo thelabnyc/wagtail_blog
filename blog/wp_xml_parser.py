@@ -10,8 +10,6 @@ class XML_parser(object):
 
     def __init__(self, xml_path):
         # TODO: yup, that's the whole file in memory
-        if not xml_path:
-            return None
         xml_string = self.prep_xml(open(xml_path, 'r').read())
         root = etree.XML(xml_string)
         self.chan = root.find("channel")
@@ -30,13 +28,10 @@ class XML_parser(object):
             cats_dict['taxonomy'] = 'category'
         return cats_dict
 
-    @staticmethod
-    def get_tags_dict(chan):
-        '''
-
-        '''
+    def get_tags_dict(self, chan):
         terms = [e for e in chan.getchildren() if 'term' in e.tag]
         terms_dict = {}
+        # these matches assume we've cleaned up xlmns
         for e in terms:
             slug = e.find('.//{wp}term_slug').text
             terms_dict[slug] = {'slug':slug}
@@ -50,7 +45,7 @@ class XML_parser(object):
         """
         removes encoding statement and
         changes xmlns to tag:item to tag:tag
-        >>> xp = XML_parser('')
+        >>> xp = XML_parser
         >>> test_xmlns = r'<?xml encoding="some encoding" ?> test' 
         >>> xp.remove_encoding(test_xmlns)
         ' test'
@@ -63,7 +58,7 @@ class XML_parser(object):
     @staticmethod
     def remove_xmlns(xml_string):
         """
-        >>> xp = XML_parser('')
+        >>> xp = XML_parser
         >>> test_xmlns = r'<rss version="2.0" xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/">'
         >>> xp.remove_xmlns(test_xmlns)
         '<rss version="2.0" xmlns:excerpt="excerpt">'
@@ -114,6 +109,9 @@ class XML_parser(object):
         for whatever reason, sometimes WP XML has unintelligible 
         datetime strings for pubDate.
         In this case default to custom_date_string or today
+        >>> xp = XML_parser
+        >>> xp.convert_date("Wed 30 Mar 2016")
+        '2016-03-30'
         """
         try:
             date =  time.strftime("%Y-%m-%d", time.strptime(d[:16], '%a, %d %b %Y'))
@@ -143,7 +141,8 @@ class XML_parser(object):
 
 
     def get_posts_data(self):
-        """given a WordPress xml export file, will return list 
+        """
+        given a WordPress xml export file, will return list 
         of dictionaries with keys that match
         the expected json keys of a wordpress API call
         >>> xp = XML_parser('greenkeyintranet.xml')
