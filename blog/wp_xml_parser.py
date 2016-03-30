@@ -32,6 +32,9 @@ class XML_parser(object):
 
     @staticmethod
     def get_tags_dict(chan):
+        '''
+
+        '''
         terms = [e for e in chan.getchildren() if 'term' in e.tag]
         terms_dict = {}
         for e in terms:

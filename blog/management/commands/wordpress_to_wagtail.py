@@ -263,6 +263,7 @@ class Command(BaseCommand):
         tags_for_blog_entry = []
         for records in categories.values():
             if records[0]['taxonomy'] == 'post_tag':
+                print("found category {}".format(record['name']))
                 for record in records:
                     tag_name = record['name']
                     tag_slug = record['slug']
@@ -273,6 +274,7 @@ class Command(BaseCommand):
 
             if records[0]['taxonomy'] == 'category':
                 for record in records:
+                    print("found tag {}".format(record['name']))
                     category_name = record['name']
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
@@ -286,9 +288,11 @@ class Command(BaseCommand):
                         new_category.parent = parent
                     else:
                         parent = None
-
                     new_category.save()
                     categories_for_blog_entry.append(new_category)
+
+        print("{} tags found, {} categories found".format(len(tags_for_blog_entry),
+                                                          len(categories_for_blog_entry)))
         # loop through list of BlogCategory and BlogTag objects and create
         # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
         # for each tag for this blog page
