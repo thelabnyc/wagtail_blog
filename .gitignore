@@ -48,3 +48,7 @@ docs/_build/
 
 # PyBuilder
 target/
+
+#Vim
+*.swp
+*.swo
