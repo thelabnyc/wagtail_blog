@@ -74,7 +74,7 @@ class Command(BaseCommand):
             self.password = None
 
         self.xml_path = options.get('xml')
-        self.url = options['url']
+        self.url = options.get('url')
         try:
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])

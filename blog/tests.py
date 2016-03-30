@@ -20,6 +20,7 @@ class BlogTests(TestCase):
     def setUp(self):
         home = Page.objects.get(slug='home')
         self.user = User.objects.create_user('test', 'test@test.test', 'pass')
+        self.xml_path = "example_export.xml"
         self.blog_index = home.add_child(instance=BlogIndexPage(
             title='Blog Index', slug='blog', search_description="x",
             owner=self.user))
@@ -63,7 +64,7 @@ class BlogTests(TestCase):
                                  'www.w3.org/2005/Atom"')
         self.assertContains(res, '</feed>')
 
-    def test_import(self):
+    def test_import_url(self):
         """
         Tests migrate_wordpress command -
             the command should do the following:
@@ -104,3 +105,42 @@ class BlogTests(TestCase):
         parent_comment = XtdComment.objects.get(level=0)
         child_comment = XtdComment.objects.get(level=1)
         self.assertEqual(parent_comment.id, child_comment.parent_id)
+
+    def test_import_xml(self):
+        """
+        Tests migrate_wordpress command -
+            the command should do the following:
+            1. create BlogPage objects from a given BlogIndex
+            2. create category and tag objects as BlogCategory,
+               BlogTag, BlogPageBlogCategory and BlogPageTag objects
+        The test imports from example_export.xml which includes a wordpress blog
+        """
+        command = Command()
+        # command.username = None
+        # command.password = None
+        # command.should_import_comments = True
+        command.handle(xml=self.xml_path, blog_index="blog")
+        self.assertEquals(Page.objects.all().count(), 17)
+        self.assertEquals(BlogPage.objects.all().count(), 14)
+        page = BlogPage.objects.filter(slug='staffing-industry-forecasts-for-2014')
+        self.assertEqual(page.title, "Staffing Industry Forecasts for 2014")
+        self.assertInHTML("The SIA Analysts team share", page.body)
+        self.assertEqual(page.categories.count(), 2)
+        self.assertEqual(page.tags.count(), 11)
+        self.assertEqual(page.owner.id, 2)
+        self.assertEqual(BlogCategory.objects.all().count(), 2)
+        self.assertEqual(BlogTag.objects.all().count(), 11)
+        self.assertEqual(BlogCategoryBlogPage.objects.all().count(), 2)
+        self.assertEqual(BlogPageTag.objects.all().count(), 11)
+        parent_category = BlogCategory.objects.get(slug="writing-wisdom")
+        child_category = BlogCategory.objects.get(slug="swoon-reads")
+        self.assertTrue(child_category.parent is not None)
+        self.assertEqual(child_category.parent, parent_category)
+        self.assertEqual(child_category.slug, "swoon-reads")
+        self.assertEqual(parent_category.slug, "writing-wisdom")
+        comments = XtdComment.objects.all()
+        self.assertEqual(comments.count(), 2)
+        parent_comment = XtdComment.objects.get(level=0)
+        child_comment = XtdComment.objects.get(level=1)
+        self.assertEqual(parent_comment.id, child_comment.parent_id)
+
