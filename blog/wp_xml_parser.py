@@ -145,7 +145,7 @@ class XML_parser(object):
         given a WordPress xml export file, will return list 
         of dictionaries with keys that match
         the expected json keys of a wordpress API call
-        >>> xp = XML_parser('greenkeyintranet.xml')
+        >>> xp = XML_parser('blog/example_export.xml')
         >>> json_vals = {"slug","ID", "title","description", "content", "author", "terms", "date", }
         >>> data = xp.get_posts_data()
         >>> assert [ val in json_vals for val in data[0].keys() ]
