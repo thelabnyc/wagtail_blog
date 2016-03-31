@@ -22,10 +22,9 @@ except ImportError:  # 2.x
     html = HTMLParser.HTMLParser()
 from bs4 import BeautifulSoup
 
-from blog.wp_xml_parser import XML_parser
+
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
-
 from wagtail.wagtailimages.models import Image
 
 
@@ -84,6 +83,13 @@ class Command(BaseCommand):
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
         elif self.xml_path:
+            try:
+                import lxml
+                from blog.wp_xml_parser import XML_parser
+            except ImportError as e:
+                print("You must have lxml installed to run xml imports."
+                      " Run `pip install lxml`.")
+                raise e
             posts = XML_parser(self.xml_path).get_posts_data()
         else:
             posts = self.get_posts_data(self.url)
@@ -261,8 +267,6 @@ class Command(BaseCommand):
         tags_for_blog_entry = []
         categories_for_blog_entry = []
         for records in categories.values():
-            if not records:
-                continue
             if records[0]['taxonomy'] == 'post_tag':
                 for record in records:
                     tag_name = record['name']
@@ -318,7 +322,7 @@ class Command(BaseCommand):
             # author/user data
             author = post.get('author')
             user = self.create_user(author)
-            categories = post.get('terms') or None
+            categories = post.get('terms') 
             # print('{} has these categories {}'.format(title, categories))
             # format the date
             date = post.get('date')[:10]

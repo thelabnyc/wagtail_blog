@@ -12,9 +12,11 @@ from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
 from .management.commands.wordpress_to_wagtail import Command
 from . import wp_xml_parser
 
+
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(wp_xml_parser))
     return tests
+
 
 class BlogTests(TestCase):
     def setUp(self):
@@ -116,16 +118,12 @@ class BlogTests(TestCase):
         The test imports from example_export.xml which includes a wordpress blog
         """
         command = Command()
-        # command.username = None
-        # command.password = None
-        # command.should_import_comments = True
         command.handle(xml=self.xml_path, blog_index="blog")
-        self.assertEquals(Page.objects.all().count(), 18)
-        self.assertEquals(BlogPage.objects.all().count(), 15)
+        self.assertEquals(Page.objects.all().count(), 7)
+        self.assertEquals(BlogPage.objects.all().count(), 4)
         page = BlogPage.objects.filter(slug='40-under-40-katz').get()
         self.assertEqual(page.title, "40 Under 40 Katz")
         self.assertInHTML("<strong>should</strong>", page.body)
-        # print(page.title, page.categories)
         self.assertEqual(page.categories.count(), 2)
         self.assertEqual(page.tags.count(), 1)
         self.assertEqual(page.owner.id, 2)
