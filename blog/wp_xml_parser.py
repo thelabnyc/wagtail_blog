@@ -11,8 +11,6 @@ htmlparser = HTMLParser()
 
 class XML_parser(object):
 
-    
-
     def __init__(self, xml_path):
         # TODO: yup, that's the whole file in memory
         xml_string = self.prep_xml(open(xml_path, 'r').read())
@@ -20,8 +18,6 @@ class XML_parser(object):
         self.chan = root.find("channel")
         self.category_dict = self.get_category_dict(self.chan)
         self.tags_dict = self.get_tags_dict(self.chan)
-        
-
 
     @staticmethod
     def get_category_dict(chan):
@@ -64,23 +60,28 @@ class XML_parser(object):
         >>> xp.remove_encoding(test_xmlns)
         ' test'
         """
-        # pre_chan, chan, post_chan= xml_string.partition('<channel>')
-        # remove encoding
         xml_string = re.sub(r'^<.*encoding="[^\"]*\"[^>]*>', '', xml_string)
         return xml_string
 
     @staticmethod
     def remove_xmlns(xml_string):
         """
+        changes the xmlns (XML namespace) so that values are 
+        replaced with the string representation of their key
+        this makes the import process for portable
+
         >>> xp = XML_parser
         >>> test_xmlns = r'<rss version="2.0" xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/">'
         >>> xp.remove_xmlns(test_xmlns)
         '<rss version="2.0" xmlns:excerpt="excerpt">'
         """
+        # splitting xml into sections, pre_chan is preamble before <channel> 
         pre_chan, chan, post_chan= xml_string.partition('<channel>')
+        # replace xmlns statements on preamble
         pre_chan = re.sub(r'xmlns:(?P<label>\w*)\=\"(?P<val>[^\"]*)\"',
                              r'xmlns:\g<label>="\g<label>"',
                              pre_chan)
+        # piece back together
         return pre_chan + chan + post_chan
 
     def prep_xml(self, xml): 
@@ -119,6 +120,10 @@ class XML_parser(object):
             # else use tagname:tag inner test
             else:
                 ret_dict[e.tag] = e.text
+            # remove empty accumulators
+        empty_keys = [k for k,v in ret_dict["terms"].items() if not v]
+        for k in empty_keys:
+            ret_dict["terms"].pop(k)
         return ret_dict
 
     @staticmethod

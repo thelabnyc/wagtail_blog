@@ -60,10 +60,12 @@ of the WordPress admin page.
 2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
 3. Run `./manage.py wordpress_to_wagtail blog --xml=export.xml` where export.xml is the XML export file from your source WordPress site. 
 
+The xml importer uses the lxml library.
+
 This feature was tested on wordpress XML exports from exactly one site. Like the import
 procedure above, this process is complex and prone to error. 
 
-This process currently will not import comments.
+This process **currently will not import comments**.
 
 # Comments
 
