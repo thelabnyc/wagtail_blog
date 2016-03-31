@@ -263,7 +263,6 @@ class Command(BaseCommand):
                         break
 
     def create_categories_and_tags(self, page, categories):
-        # print("creating categories and tags")
         tags_for_blog_entry = []
         categories_for_blog_entry = []
         for records in categories.values():
@@ -306,7 +305,6 @@ class Command(BaseCommand):
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
         for post in posts:
-            # print(post.get('slug'))
             post_id = post.get('ID')
             title = post.get('title')
             if title:
@@ -323,7 +321,6 @@ class Command(BaseCommand):
             author = post.get('author')
             user = self.create_user(author)
             categories = post.get('terms') 
-            # print('{} has these categories {}'.format(title, categories))
             # format the date
             date = post.get('date')[:10]
             try:

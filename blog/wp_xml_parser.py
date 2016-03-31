@@ -184,4 +184,3 @@ class XML_parser(object):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    # print(xml_export_to_list_of_dicts('greenkeyintranet.xml')[:10])
