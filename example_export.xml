@@ -159,7 +159,9 @@
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
 		<wp:attachment_url>http://intranet.greenkeyllc.com/wp-content/uploads/2013/02/40-Under-40-Katz.pdf</wp:attachment_url>
-        <wp:tag tag_name="marketing-2"><![CDATA[Marketing]]></wp:tag>
+        <category domain="media-category" nicename="marketing-2"><![CDATA[Marketing]]></category>
+        <category domain="media-category" nicename="cheat-sheets"><![CDATA[Cheat Sheets]]></category>
+        <post_tag nicename="test-tag"><![CDATA[Test tag]]></post_tag>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2013/02/40-Under-40-Katz.pdf]]></wp:meta_value>

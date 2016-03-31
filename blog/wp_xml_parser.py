@@ -1,3 +1,4 @@
+from html.parser import HTMLParser
 from io import BytesIO
 import datetime
 import re
@@ -6,7 +7,11 @@ import time
 import lxml.etree as etree
 import lxml.html as HM
 
+htmlparser = HTMLParser()
+
 class XML_parser(object):
+
+    
 
     def __init__(self, xml_path):
         # TODO: yup, that's the whole file in memory
@@ -15,6 +20,7 @@ class XML_parser(object):
         self.chan = root.find("channel")
         self.category_dict = self.get_category_dict(self.chan)
         self.tags_dict = self.get_tags_dict(self.chan)
+        
 
 
     @staticmethod
@@ -23,9 +29,17 @@ class XML_parser(object):
         cats_dict = {}
         for cat in cats:
             slug = cat.find('.//{wp}category_nicename').text
-            cats_dict['slug'] = {'slug':cat.find("./{wp}category_nicename").text, 
-                                 'name':cat.find("./{wp}cat_name").text}
-            cats_dict['taxonomy'] = 'category'
+            cats_dict[slug] = {'slug':slug,
+                               'name': htmlparser.unescape(cat.find("./{wp}cat_name").text),
+                               'parent':cat.find("./{wp}category_parent").text,
+                               'taxonomy': 'category'}
+
+        # replace parent strings with parent dicts:
+        for slug, item in cats_dict.items():
+            parent_name = item.get('parent')
+            if parent_name:
+                cats_dict[slug]['parent'] = cats_dict[parent_name]
+
         return cats_dict
 
     def get_tags_dict(self, chan):
@@ -35,7 +49,7 @@ class XML_parser(object):
         for e in tags:
             slug = e.find('.//{wp}tag_slug').text
             tags_dict[slug] = {'slug':slug}
-            name = e.find('.//{wp}tag_name').text # need some regex parsing here
+            name = htmlparser.unescape(e.find('.//{wp}tag_name').text) # need some regex parsing here
             tags_dict[slug]['name'] = name
             tags_dict[slug]['taxonomy'] = 'post_tag'
         return tags_dict
@@ -79,25 +93,29 @@ class XML_parser(object):
         category and tag lookup
         """
         # mocking wierd JSON structure
-        ret_dict = {"terms":{}}
+        ret_dict = {"terms":{"category":[],"post_tag":[]}}
         for e in item:
             # is it a category or tag??
-            found_category_dict = None
             if "category" in e.tag:
-                slug = e.attrib.get("nicename")
-                name = e.text 
-                found_category_dict = self.category_dict.get(slug) or {"slug":slug,
-                                                                        "name":name,
-                                                                        "taxonomy":"category"}
-            elif e.tag[-3] == e.tag:
-                slug = e.attrib.get("tag_slug")
-                name = e.text
-                found_category_dict = self.tags_dict.get(slug) or {"slug":slug,
-                                                                    "name":name,
-                                                                    "taxonomy":"post_tag"}
-            if found_category_dict is not None:
-                ret_dict["terms"][slug] = [found_category_dict] 
+                # get details
+                slug = e.attrib["nicename"]
+                name = htmlparser.unescape(e.text)
+                # lookup the category or create one
+                cat_dict = self.category_dict.get(slug) or {"slug":slug,
+                                                             "name":name,
+                                                             "taxonomy":"category"}
+                ret_dict['terms']['category'].append(cat_dict)
 
+            elif e.tag[-3:] == 'tag':
+                # get details
+                slug = e.attrib.get("tag_slug")
+                name = htmlparser.unescape(e.text)
+                # lookup the tag or create one
+                tag_dict = self.tags_dict.get(slug) or {"slug":slug,
+                                                        "name":name,
+                                                        "taxonomy":"post_tag"}
+
+                ret_dict['terms']['post_tag'].append(tag_dict)
             # else use tagname:tag inner test
             else:
                 ret_dict[e.tag] = e.text

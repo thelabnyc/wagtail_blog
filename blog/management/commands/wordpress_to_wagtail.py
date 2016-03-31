@@ -257,11 +257,12 @@ class Command(BaseCommand):
                         break
 
     def create_categories_and_tags(self, page, categories):
-        print("creating categories and tags")
-        categories_for_blog_entry = []
+        # print("creating categories and tags")
         tags_for_blog_entry = []
+        categories_for_blog_entry = []
         for records in categories.values():
-            # TODO: check this logic
+            if not records:
+                continue
             if records[0]['taxonomy'] == 'post_tag':
                 for record in records:
                     tag_name = record['name']
@@ -301,7 +302,7 @@ class Command(BaseCommand):
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
         for post in posts:
-            print(post.get('slug'))
+            # print(post.get('slug'))
             post_id = post.get('ID')
             title = post.get('title')
             if title:
@@ -317,7 +318,8 @@ class Command(BaseCommand):
             # author/user data
             author = post.get('author')
             user = self.create_user(author)
-            categories = post.get('terms')
+            categories = post.get('terms') or None
+            # print('{} has these categories {}'.format(title, categories))
             # format the date
             date = post.get('date')[:10]
             try:
@@ -351,6 +353,7 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            self.create_categories_and_tags(new_entry, categories)
+            if categories: 
+                self.create_categories_and_tags(new_entry, categories)
             if self.should_import_comments:
                 self.import_comments(post_id, slug)
