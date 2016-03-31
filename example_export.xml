@@ -35,10 +35,12 @@
 	<wp:base_site_url>http://intranet.greenkeyllc.com</wp:base_site_url>
 	<wp:base_blog_url>http://intranet.greenkeyllc.com</wp:base_blog_url>
 
-	<wp:author><wp:author_id>2</wp:author_id><wp:author_login>randib@greenkeyllc.com</wp:author_login><wp:author_email>randib@greenkeyllc.com</wp:author_email><wp:author_display_name><![CDATA[Randi Bleichfeld]]></wp:author_display_name><wp:author_first_name><![CDATA[Randi Bleichfeld]]></wp:author_first_name><wp:author_last_name><![CDATA[Bleichfeld]]></wp:author_last_name></wp:author>
-	<wp:author><wp:author_id>242</wp:author_id><wp:author_login>Marina-White</wp:author_login><wp:author_email>mwhite@greenkeyllc.com</wp:author_email><wp:author_display_name><![CDATA[Marina White]]></wp:author_display_name><wp:author_first_name><![CDATA[Marina]]></wp:author_first_name><wp:author_last_name><![CDATA[White]]></wp:author_last_name></wp:author>
+    <wp:author><wp:author_id>2</wp:author_id><wp:author_login>randib@greenkeyllc.com</wp:author_login><wp:author_email>randib@greenkeyllc.com</wp:author_email><wp:author_display_name><![CDATA[Randi Bleichfeld]]></wp:author_display_name><wp:author_first_name><![CDATA[Randi Bleichfeld]]></wp:author_first_name><wp:author_last_name><![CDATA[Bleichfeld]]></wp:author_last_name></wp:author>    
+    <wp:author><wp:author_id>242</wp:author_id><wp:author_login>Marina-White</wp:author_login><wp:author_email>mwhite@greenkeyllc.com</wp:author_email><wp:author_display_name><![CDATA[Marina White]]></wp:author_display_name><wp:author_first_name><![CDATA[Marina]]></wp:author_first_name><wp:author_last_name><![CDATA[White]]></wp:author_last_name></wp:author>	
 
-	<wp:category><wp:term_id>1</wp:term_id><wp:category_nicename>employee-news-articles</wp:category_nicename><wp:category_parent></wp:category_parent><wp:cat_name><![CDATA[Employee News Articles]]></wp:cat_name></wp:category>
+    <wp:category>
+                <wp:term_id>1</wp:term_id>
+                        <wp:category_nicename>employee-news-articles</wp:category_nicename><wp:category_parent></wp:category_parent><wp:cat_name><![CDATA[Employee News Articles]]></wp:cat_name></wp:category>
 	<wp:category><wp:term_id>4</wp:term_id><wp:category_nicename>marketing-2</wp:category_nicename><wp:category_parent></wp:category_parent><wp:cat_name><![CDATA[Marketing]]></wp:cat_name></wp:category>
 	<wp:category><wp:term_id>22</wp:term_id><wp:category_nicename>marketing</wp:category_nicename><wp:category_parent></wp:category_parent><wp:cat_name><![CDATA[Marketing]]></wp:cat_name></wp:category>
 	<wp:category><wp:term_id>16</wp:term_id><wp:category_nicename>perks-benefits-policies</wp:category_nicename><wp:category_parent></wp:category_parent><wp:cat_name><![CDATA[Perks, Benefits &amp; Policies]]></wp:cat_name></wp:category>
@@ -58,7 +60,10 @@
 	<wp:category><wp:term_id>10</wp:term_id><wp:category_nicename>intro-emails</wp:category_nicename><wp:category_parent>marketing-2</wp:category_parent><wp:cat_name><![CDATA[Intro Emails]]></wp:cat_name></wp:category>
 	<wp:category><wp:term_id>9</wp:term_id><wp:category_nicename>letters</wp:category_nicename><wp:category_parent>marketing-2</wp:category_parent><wp:cat_name><![CDATA[Letters]]></wp:cat_name></wp:category>
 	<wp:category><wp:term_id>17</wp:term_id><wp:category_nicename>medicaldental</wp:category_nicename><wp:category_parent>perks-benefits-policies</wp:category_parent><wp:cat_name><![CDATA[Medical/Dental]]></wp:cat_name></wp:category>
+
 	<wp:tag><wp:term_id>81</wp:term_id><wp:tag_slug>httpwww-greenkeyllc-comblog201405green-key-to-exhibit-present-at-sas-pharma-show</wp:tag_slug><wp:tag_name><![CDATA[http://www.greenkeyllc.com/blog/2014/05/green-key-to-exhibit-present-at-sas-pharma-show/]]></wp:tag_name></wp:tag>
+	<wp:tag><wp:term_id>1</wp:term_id><wp:tag_slug>test-tag</wp:tag_slug><wp:tag_name><![CDATA[Test tag]]></wp:tag_name></wp:tag>
+
 	<wp:term><wp:term_id>19</wp:term_id><wp:term_taxonomy>media-category</wp:term_taxonomy><wp:term_slug>401k</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[401K]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>48</wp:term_id><wp:term_taxonomy>media-category</wp:term_taxonomy><wp:term_slug>401k-enrollment-forms</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[401K Enrollment Forms]]></wp:term_name></wp:term>
 	<wp:term><wp:term_id>49</wp:term_id><wp:term_taxonomy>media-category</wp:term_taxonomy><wp:term_slug>401k-faq</wp:term_slug><wp:term_parent></wp:term_parent><wp:term_name><![CDATA[401K Faq]]></wp:term_name></wp:term>
@@ -139,7 +144,7 @@
 		<dc:creator>randib@greenkeyllc.com</dc:creator>
 		<guid isPermaLink="false">http://intranet.greenkeyllc.com/wp-content/uploads/2013/02/40-Under-40-Katz.pdf</guid>
 		<description></description>
-		<content:encoded><![CDATA[]]></content:encoded>
+        <content:encoded><![CDATA[<p>There <strong>should</strong> be some test text here</p>]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
 		<wp:post_id>185</wp:post_id>
 		<wp:post_date>2013-02-21 17:44:40</wp:post_date>
@@ -154,8 +159,7 @@
 		<wp:post_password></wp:post_password>
 		<wp:is_sticky>0</wp:is_sticky>
 		<wp:attachment_url>http://intranet.greenkeyllc.com/wp-content/uploads/2013/02/40-Under-40-Katz.pdf</wp:attachment_url>
-		<category domain="media-category" nicename="news-press"><![CDATA[news &amp; Press]]></category>
-		<category domain="media-category" nicename="press-2"><![CDATA[press]]></category>
+        <wp:tag tag_name="marketing-2"><![CDATA[Marketing]]></wp:tag>
 		<wp:postmeta>
 			<wp:meta_key>_wp_attached_file</wp:meta_key>
 			<wp:meta_value><![CDATA[2013/02/40-Under-40-Katz.pdf]]></wp:meta_value>

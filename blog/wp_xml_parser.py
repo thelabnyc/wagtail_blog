@@ -29,16 +29,16 @@ class XML_parser(object):
         return cats_dict
 
     def get_tags_dict(self, chan):
-        terms = [e for e in chan.getchildren() if 'term' in e.tag]
-        terms_dict = {}
+        tags = [e for e in chan.getchildren() if e.tag[-3:] == "tag"]
+        tags_dict = {}
         # these matches assume we've cleaned up xlmns
-        for e in terms:
-            slug = e.find('.//{wp}term_slug').text
-            terms_dict[slug] = {'slug':slug}
-            name = e.find('.//{wp}term_name').text # need some regex parsing here
-            terms_dict[slug]['name'] = name
-            terms_dict[slug]['taxonomy'] = 'post_tag'
-        return terms_dict
+        for e in tags:
+            slug = e.find('.//{wp}tag_slug').text
+            tags_dict[slug] = {'slug':slug}
+            name = e.find('.//{wp}tag_name').text # need some regex parsing here
+            tags_dict[slug]['name'] = name
+            tags_dict[slug]['taxonomy'] = 'post_tag'
+        return tags_dict
 
     @staticmethod
     def remove_encoding(xml_string):
@@ -82,23 +82,23 @@ class XML_parser(object):
         ret_dict = {"terms":{}}
         for e in item:
             # is it a category or tag??
+            found_category_dict = None
             if "category" in e.tag:
                 slug = e.attrib.get("nicename")
                 name = e.text 
-                found_category_dict = None
-                # is it a category?
-                if e.attrib["domain"] == "category":
-                    found_category_dict = self.category_dict.get(slug) or {"slug":slug,
-                                                                            "name":name,
-                                                                            "taxonomy":"category"}
-                # or is it a tag?
-                elif e.attrib["domain"] == "media-category":
-                    found_category_dict = self.tags_dict.get(slug) or {"slug":slug,
+                found_category_dict = self.category_dict.get(slug) or {"slug":slug,
                                                                         "name":name,
-                                                                        "taxonomy":"post_tag"}
-                # update
-                if found_category_dict is not None:
-                    ret_dict["terms"][slug] = [found_category_dict] 
+                                                                        "taxonomy":"category"}
+            elif e.tag[-3] == e.tag:
+                slug = e.attrib.get("tag_slug")
+                name = e.text
+                found_category_dict = self.tags_dict.get(slug) or {"slug":slug,
+                                                                    "name":name,
+                                                                    "taxonomy":"post_tag"}
+            if found_category_dict is not None:
+                ret_dict["terms"][slug] = [found_category_dict] 
+
+            # else use tagname:tag inner test
             else:
                 ret_dict[e.tag] = e.text
         return ret_dict
@@ -110,11 +110,11 @@ class XML_parser(object):
         datetime strings for pubDate.
         In this case default to custom_date_string or today
         >>> xp = XML_parser
-        >>> xp.convert_date("Wed 30 Mar 2016")
-        '2016-03-30'
+        >>> xp.convert_date("Mon, 30 Mar 2015 11:11:11 +0000")
+        '2015-03-30'
         """
         try:
-            date =  time.strftime("%Y-%m-%d", time.strptime(d[:16], '%a, %d %b %Y'))
+            date =  time.strftime("%Y-%m-%d", time.strptime(d, '%a, %d %b %Y %H:%M:%S %z'))
         except ValueError:
             date = custom_date_string or datetime.datetime.today().strftime("%Y-%m-%d")
         return date
