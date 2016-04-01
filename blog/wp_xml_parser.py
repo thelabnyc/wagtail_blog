@@ -9,6 +9,7 @@ import lxml.html as HM
 
 htmlparser = HTMLParser()
 
+
 class XML_parser(object):
 
     def __init__(self, xml_path):
@@ -56,7 +57,7 @@ class XML_parser(object):
         removes encoding statement and
         changes xmlns to tag:item to tag:tag
         >>> xp = XML_parser
-        >>> test_xmlns = r'<?xml encoding="some encoding" ?> test' 
+        >>> test_xmlns = r'<?xml encoding="some encoding" ?> test'
         >>> xp.remove_encoding(test_xmlns)
         ' test'
         """
@@ -66,7 +67,7 @@ class XML_parser(object):
     @staticmethod
     def remove_xmlns(xml_string):
         """
-        changes the xmlns (XML namespace) so that values are 
+        changes the xmlns (XML namespace) so that values are
         replaced with the string representation of their key
         this makes the import process for portable
 
@@ -75,7 +76,7 @@ class XML_parser(object):
         >>> xp.remove_xmlns(test_xmlns)
         '<rss version="2.0" xmlns:excerpt="excerpt">'
         """
-        # splitting xml into sections, pre_chan is preamble before <channel> 
+        # splitting xml into sections, pre_chan is preamble before <channel>
         pre_chan, chan, post_chan= xml_string.partition('<channel>')
         # replace xmlns statements on preamble
         pre_chan = re.sub(r'xmlns:(?P<label>\w*)\=\"(?P<val>[^\"]*)\"',
@@ -84,7 +85,7 @@ class XML_parser(object):
         # piece back together
         return pre_chan + chan + post_chan
 
-    def prep_xml(self, xml): 
+    def prep_xml(self, xml):
         return self.remove_xmlns(self.remove_encoding(xml))
 
 
@@ -129,7 +130,7 @@ class XML_parser(object):
     @staticmethod
     def convert_date(d, custom_date_string=None):
         """
-        for whatever reason, sometimes WP XML has unintelligible 
+        for whatever reason, sometimes WP XML has unintelligible
         datetime strings for pubDate.
         In this case default to custom_date_string or today
         >>> xp = XML_parser
@@ -165,7 +166,7 @@ class XML_parser(object):
 
     def get_posts_data(self):
         """
-        given a WordPress xml export file, will return list 
+        given a WordPress xml export file, will return list
         of dictionaries with keys that match
         the expected json keys of a wordpress API call
         >>> xp = XML_parser('example_export.xml')
