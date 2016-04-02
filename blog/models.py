@@ -170,7 +170,15 @@ class BlogTag(Tag):
 
 LIMIT_AUTHOR_CHOICES = getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_GROUP', None)
 if LIMIT_AUTHOR_CHOICES:
-    limit_author_choices = {'groups__name': LIMIT_AUTHOR_CHOICES}
+    if isinstance(LIMIT_AUTHOR_CHOICES, str):
+        limit_author_choices = {'groups__name': LIMIT_AUTHOR_CHOICES}
+    else:
+        if getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_ADMIN', False):
+            limit_author_choices = Q(is_staff=True)
+        else:
+            limit_author_choices = Q()
+        for s in LIMIT_AUTHOR_CHOICES:
+            limit_author_choices = limit_author_choices | Q(groups__name=s)
 else:
     limit_author_choices = {'is_staff': True}
 class BlogPage(Page):
