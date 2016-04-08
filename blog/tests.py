@@ -6,6 +6,10 @@ from django.contrib.auth.models import User
 from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                      BlogCategory, BlogCategoryBlogPage)
 from .management.commands.wordpress_to_wagtail import Command
+from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
 
 
 class BlogTests(TestCase):
@@ -27,6 +31,33 @@ class BlogTests(TestCase):
         url = blog_page.url
         res = self.client.get(url)
         self.assertContains(res, "Blog Page")
+
+    def test_author(self):
+        # make super to access admin
+        self.user.is_superuser = True
+        self.user.save()
+        self.assertTrue(self.client.login(username='test', password='pass'))
+
+        staff_user = User.objects.create_user('mr.staff', 'staff@test.test', 'pass')
+        staff_user.is_staff = True
+        staff_user.save()
+
+        author_user = User.objects.create_user('mr.author', 'author@test.test', 'pass')
+        author_user.save()
+
+        blog_page = self.blog_index.add_child(instance=BlogPage(
+            title='Blog Page', slug='blog_page1', search_description="x",
+            owner=self.user))
+
+        setattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_GROUP', None)
+
+        response = self.client.get(
+            reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'mr.staff')
+        self.assertNotContains(response, 'mr.author')
 
     def test_latest_entries_feed(self):
         self.blog_index.add_child(instance=BlogPage(
