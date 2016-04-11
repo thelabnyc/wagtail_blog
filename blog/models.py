@@ -182,7 +182,6 @@ def limit_author_choices():
             limit = limit | Q(is_staff=True)
     else:
         limit = {'is_staff': True}
-    print(limit)
     return limit
 
 
