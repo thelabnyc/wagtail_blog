@@ -1,3 +1,15 @@
+from base64 import b64encode
+from datetime import datetime
+try:
+    import html
+except ImportError:  # 2.x
+    import HTMLParser
+    html = HTMLParser.HTMLParser()
+import json
+import os
+import urllib.request
+
+
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth import get_user_model
@@ -7,20 +19,12 @@ from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django_comments_xtd.models import MaxThreadLevelExceededException
-from base64 import b64encode
-from blog.models import BlogPage
-import urllib.request
-import os
-import json
-import requests
-from datetime import datetime
-try:
-    import html
-except ImportError:  # 2.x
-    import HTMLParser
-    html = HTMLParser.HTMLParser()
+
+
 from bs4 import BeautifulSoup
-from blog.models import (BlogTag, BlogPageTag, BlogIndexPage,
+import requests
+
+from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
 from wagtail.wagtailimages.models import Image
 
@@ -39,22 +43,27 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
-        parser.add_argument('blog_to_migrate',
-                            help="Base url of wordpress instance")
         parser.add_argument('blog_index',
                             help="Title of blog index page to attach blogs")
-        parser.add_argument('username',
+        parser.add_argument('--url',
+                            default=False,
+                            help="Base url of wordpress instance")
+        parser.add_argument('--username',
                             default=False,
                             help='Username for basic Auth')
-        parser.add_argument('password',
+        parser.add_argument('--password',
                             default=False,
                             help='Password for basic Auth')
         parser.add_argument('--import-comments',
                             action="store_true",
                             help="import Wordpress comments to Django Xtd")
+        parser.add_argument('--xml',
+                            # default='',
+                            help="import from XML instead of API")
 
     def handle(self, *args, **options):
         """gets data from WordPress site"""
+        # TODO: refactor these with .get
         if 'username' in options:
             self.username = options['username']
         else:
@@ -63,17 +72,28 @@ class Command(BaseCommand):
             self.password = options['password']
         else:
             self.password = None
-        self.blog_to_migrate = options['blog_to_migrate']
+
+        self.xml_path = options.get('xml')
+        self.url = options.get('url')
         try:
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
             raise CommandError("Have you created an index yet?")
-        if self.blog_to_migrate == "just_testing":
+        if self.url == "just_testing":
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
+        elif self.xml_path:
+            try:
+                import lxml
+                from blog.wp_xml_parser import XML_parser
+            except ImportError as e:
+                print("You must have lxml installed to run xml imports."
+                      " Run `pip install lxml`.")
+                raise e
+            posts = XML_parser(self.xml_path).get_posts_data()
         else:
-            posts = self.get_posts_data(self.blog_to_migrate)
+            posts = self.get_posts_data(self.url)
         self.should_import_comments = options.get('import_comments')
         self.create_blog_pages(posts, blog_index)
 
@@ -92,7 +112,7 @@ class Command(BaseCommand):
     def get_posts_data(
         self, blog, id=None, get_comments=False, *args, **options
     ):
-        if self.blog_to_migrate == "just_testing":
+        if self.url == "just_testing":
             with open('test-data-comments.json') as test_json:
                 return json.load(test_json)
 
@@ -118,7 +138,9 @@ class Command(BaseCommand):
             comments_data = self.clean_data(comments_data)
             return json.loads(comments_data)
         else:
-            fetched_posts = requests.get(posts_url + '?filter[posts_per_page]=-1', headers=headers)
+            fetched_posts = requests.get(posts_url +
+                                         '?filter[posts_per_page]=-1',
+                                         headers=headers)
             data = fetched_posts.text
             data = self.clean_data(data)
             return json.loads(data)
@@ -140,7 +162,9 @@ class Command(BaseCommand):
                 continue  # Blank image
             try:
                 remote_image = urllib.request.urlretrieve(img['src'])
-            except (urllib.error.HTTPError, urllib.error.URLError, UnicodeEncodeError):
+            except (urllib.error.HTTPError,
+                    urllib.error.URLError,
+                    UnicodeEncodeError):
                 print("Unable to import " + img['src'])
                 continue
             image = Image(title=file_, width=width, height=height)
@@ -191,7 +215,7 @@ class Command(BaseCommand):
             print('site does not exist')
             return
         comments = self.get_posts_data(
-            self.blog_to_migrate, post_id, get_comments=True)
+            self.url, post_id, get_comments=True)
         imported_comments = []
         for comment in comments:
             try:
@@ -237,12 +261,13 @@ class Command(BaseCommand):
                             comment._calculate_thread_data()
                             comment.save()
                         except MaxThreadLevelExceededException:
-                            print("Warning, max thread level exceeded on {}".format(comment.id))
+                            print("Warning, max thread level exceeded on {}"
+                                  .format(comment.id))
                         break
 
     def create_categories_and_tags(self, page, categories):
-        categories_for_blog_entry = []
         tags_for_blog_entry = []
+        categories_for_blog_entry = []
         for records in categories.values():
             if records[0]['taxonomy'] == 'post_tag':
                 for record in records:
@@ -251,13 +276,14 @@ class Command(BaseCommand):
                     new_tag = BlogTag.objects.get_or_create(
                         name=tag_name, slug=tag_slug)[0]
                     tags_for_blog_entry.append(new_tag)
+
             if records[0]['taxonomy'] == 'category':
                 for record in records:
                     category_name = record['name']
                     category_slug = record['slug']
                     new_category = BlogCategory.objects.get_or_create(
                         name=category_name, slug=category_slug)[0]
-                    if record['parent'] is not None:
+                    if record.get('parent') is not None:
                         parent_category = BlogCategory.objects.get_or_create(
                             name=record['parent']['name'])[0]
                         parent_category.slug = record['parent']['slug']
@@ -266,9 +292,9 @@ class Command(BaseCommand):
                         new_category.parent = parent
                     else:
                         parent = None
-
                     categories_for_blog_entry.append(new_category)
                     new_category.save()
+
         # loop through list of BlogCategory and BlogTag objects and create
         # BlogCategoryBlogPages(bcbp) for each category and BlogPageTag objects
         # for each tag for this blog page
@@ -282,7 +308,6 @@ class Command(BaseCommand):
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
         for post in posts:
-            print(post.get('slug'))
             post_id = post.get('ID')
             title = post.get('title')
             if title:
@@ -332,6 +357,7 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            self.create_categories_and_tags(new_entry, categories)
+            if categories:
+                self.create_categories_and_tags(new_entry, categories)
             if self.should_import_comments:
                 self.import_comments(post_id, slug)

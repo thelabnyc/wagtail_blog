@@ -42,15 +42,31 @@ See http://docs.wagtail.io/en/v1.2/getting_started/index.html
 
 # Import from WordPress
 
+## JSON API Import
+
 1. Enable WordPress JSON API
 2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
-3. Run `./manage.py wordpress_to_wagtail http://myblog.com blog username password` the username is your WordPress username with full access to the API. Without this you can't access all blog posts.
+3. Run `./manage.py wordpress_to_wagtail blog --url=http://myblog.com username password` the username is your WordPress username with full access to the API. Without this you can't access all blog posts.
 
 This works by getting the json data for your posts and making Wagtail pages for them. 
 It then downloads any images it finds and replaces urls to use your site instead of an external site. 
 Blog authors will become Django users.
 This is a complex process and is prone to error. You should plan to review the import code and fix some issues.
 Pull requests welcome to improve this feature.
+
+## XML file import **Experimental**
+
+1. Create a WordPress XML dump by selecting "export" from the "Tools" section 
+of the WordPress admin page.
+2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
+3. Run `./manage.py wordpress_to_wagtail blog --xml=export.xml` where export.xml is the XML export file from your source WordPress site. 
+
+The xml importer uses the lxml library.
+
+This feature was tested on wordpress XML exports from exactly one site. Like the import
+procedure above, this process is complex and prone to error. 
+
+This process **currently will not import comments**.
 
 # Comments
 
