@@ -1,8 +1,14 @@
-import urllib.request
-import os
-import json
-import requests
+from base64 import b64encode
 from datetime import datetime
+try:
+    import html
+except ImportError:  # 2.x
+    import HTMLParser
+    html = HTMLParser.HTMLParser()
+import json
+import os
+import urllib.request
+
 
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
@@ -14,14 +20,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django_comments_xtd.models import MaxThreadLevelExceededException
 
-from base64 import b64encode
-try:
-    import html
-except ImportError:  # 2.x
-    import HTMLParser
-    html = HTMLParser.HTMLParser()
-from bs4 import BeautifulSoup
 
+from bs4 import BeautifulSoup
+import requests
 
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
@@ -108,7 +109,6 @@ class Command(BaseCommand):
             data = data.strip(bad_data)
         return data
 
-
     def get_posts_data(
         self, blog, id=None, get_comments=False, *args, **options
     ):
@@ -138,12 +138,12 @@ class Command(BaseCommand):
             comments_data = self.clean_data(comments_data)
             return json.loads(comments_data)
         else:
-            fetched_posts = requests.get(posts_url + '?filter[posts_per_page]=-1', 
+            fetched_posts = requests.get(posts_url +
+                                         '?filter[posts_per_page]=-1',
                                          headers=headers)
             data = fetched_posts.text
             data = self.clean_data(data)
             return json.loads(data)
-
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
@@ -162,7 +162,9 @@ class Command(BaseCommand):
                 continue  # Blank image
             try:
                 remote_image = urllib.request.urlretrieve(img['src'])
-            except (urllib.error.HTTPError, urllib.error.URLError, UnicodeEncodeError):
+            except (urllib.error.HTTPError,
+                    urllib.error.URLError,
+                    UnicodeEncodeError):
                 print("Unable to import " + img['src'])
                 continue
             image = Image(title=file_, width=width, height=height)
@@ -259,11 +261,11 @@ class Command(BaseCommand):
                             comment._calculate_thread_data()
                             comment.save()
                         except MaxThreadLevelExceededException:
-                            print("Warning, max thread level exceeded on {}".format(comment.id))
+                            print("Warning, max thread level exceeded on {}"
+                                  .format(comment.id))
                         break
 
     def create_categories_and_tags(self, page, categories):
-        # print("creating categories and tags")
         tags_for_blog_entry = []
         categories_for_blog_entry = []
         for records in categories.values():
@@ -306,7 +308,6 @@ class Command(BaseCommand):
     def create_blog_pages(self, posts, blog_index, *args, **options):
         """create Blog post entries from wordpress data"""
         for post in posts:
-            # print(post.get('slug'))
             post_id = post.get('ID')
             title = post.get('title')
             if title:
@@ -322,8 +323,7 @@ class Command(BaseCommand):
             # author/user data
             author = post.get('author')
             user = self.create_user(author)
-            categories = post.get('terms') 
-            # print('{} has these categories {}'.format(title, categories))
+            categories = post.get('terms')
             # format the date
             date = post.get('date')[:10]
             try:
@@ -357,7 +357,7 @@ class Command(BaseCommand):
                 header_image = None
             new_entry.header_image = header_image
             new_entry.save()
-            if categories: 
+            if categories:
                 self.create_categories_and_tags(new_entry, categories)
             if self.should_import_comments:
                 self.import_comments(post_id, slug)
