@@ -168,19 +168,24 @@ class BlogTag(Tag):
         proxy = True
 
 
-LIMIT_AUTHOR_CHOICES = getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_GROUP', None)
-if LIMIT_AUTHOR_CHOICES:
-    if isinstance(LIMIT_AUTHOR_CHOICES, str):
-        limit_author_choices = {'groups__name': LIMIT_AUTHOR_CHOICES}
-    else:
-        if getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_ADMIN', False):
-            limit_author_choices = Q(is_staff=True)
+def limit_author_choices():
+    """ Limit choices in blog author field based on config settings """
+    LIMIT_AUTHOR_CHOICES = getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_GROUP', None)
+    if LIMIT_AUTHOR_CHOICES:
+        if isinstance(LIMIT_AUTHOR_CHOICES, str):
+            limit = Q(groups__name=LIMIT_AUTHOR_CHOICES)
         else:
-            limit_author_choices = Q()
-        for s in LIMIT_AUTHOR_CHOICES:
-            limit_author_choices = limit_author_choices | Q(groups__name=s)
-else:
-    limit_author_choices = {'is_staff': True}
+            limit = Q()
+            for s in LIMIT_AUTHOR_CHOICES:
+                limit = limit | Q(groups__name=s)
+        if getattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_ADMIN', False):
+            limit = limit | Q(is_staff=True)
+    else:
+        limit = {'is_staff': True}
+    print(limit)
+    return limit
+
+
 class BlogPage(Page):
     body = RichTextField(verbose_name=_('body'))
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
