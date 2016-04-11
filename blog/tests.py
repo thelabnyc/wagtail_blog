@@ -6,10 +6,8 @@ from django.contrib.auth.models import User
 from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                      BlogCategory, BlogCategoryBlogPage)
 from .management.commands.wordpress_to_wagtail import Command
-from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import Permission
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 
 class BlogTests(TestCase):
@@ -37,27 +35,68 @@ class BlogTests(TestCase):
         self.user.is_superuser = True
         self.user.save()
         self.assertTrue(self.client.login(username='test', password='pass'))
-
+        # make an is_staff admin
         staff_user = User.objects.create_user('mr.staff', 'staff@test.test', 'pass')
         staff_user.is_staff = True
         staff_user.save()
-
+        # make some groups
+        bloggers = 'Bloggers'
+        Group.objects.create(name=bloggers)
+        others = 'Others'
+        Group.objects.create(name=others)
+        # make a non-admin Blogger author
         author_user = User.objects.create_user('mr.author', 'author@test.test', 'pass')
+        author_user.groups.add(Group.objects.get(name=bloggers))
         author_user.save()
-
+        # make a blog page
         blog_page = self.blog_index.add_child(instance=BlogPage(
             title='Blog Page', slug='blog_page1', search_description="x",
             owner=self.user))
 
-        setattr(settings, 'BLOG_LIMIT_AUTHOR_CHOICES_GROUP', None)
+        with self.settings(BLOG_LIMIT_AUTHOR_CHOICES_GROUP=None, BLOG_LIMIT_AUTHOR_CHOICES_ADMIN=False):
+            response = self.client.get(
+                reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'mr.staff')
+            self.assertNotContains(response, 'mr.author')
 
-        response = self.client.get(
-            reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
-            follow=True
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'mr.staff')
-        self.assertNotContains(response, 'mr.author')
+        with self.settings(BLOG_LIMIT_AUTHOR_CHOICES_GROUP=bloggers, BLOG_LIMIT_AUTHOR_CHOICES_ADMIN=False):
+            response = self.client.get(
+                reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertNotContains(response, 'mr.staff')
+            self.assertContains(response, 'mr.author')
+
+        with self.settings(BLOG_LIMIT_AUTHOR_CHOICES_GROUP=bloggers, BLOG_LIMIT_AUTHOR_CHOICES_ADMIN=True):
+            response = self.client.get(
+                reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'mr.staff')
+            self.assertContains(response, 'mr.author')
+
+        with self.settings(BLOG_LIMIT_AUTHOR_CHOICES_GROUP=[bloggers, others], BLOG_LIMIT_AUTHOR_CHOICES_ADMIN=False):
+            response = self.client.get(
+                reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertNotContains(response, 'mr.staff')
+            self.assertContains(response, 'mr.author')
+
+        with self.settings(BLOG_LIMIT_AUTHOR_CHOICES_GROUP=[bloggers, others], BLOG_LIMIT_AUTHOR_CHOICES_ADMIN=True):
+            response = self.client.get(
+                reverse('wagtailadmin_pages:edit', args=(blog_page.id, )),
+                follow=True
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'mr.staff')
+            self.assertContains(response, 'mr.author')
 
     def test_latest_entries_feed(self):
         self.blog_index.add_child(instance=BlogPage(
