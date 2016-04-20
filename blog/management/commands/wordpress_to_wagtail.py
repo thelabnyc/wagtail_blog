@@ -274,17 +274,13 @@ class Command(BaseCommand):
             if records[0]['taxonomy'] == 'post_tag':
                 for record in records:
                     tag_name = record['name']
-                    tag_slug = record['slug']
-                    new_tag = BlogTag.objects.get_or_create(
-                        name=tag_name, slug=tag_slug)[0]
+                    new_tag = BlogTag.objects.get_or_create(name=tag_name)[0]
                     tags_for_blog_entry.append(new_tag)
 
             if records[0]['taxonomy'] == 'category':
                 for record in records:
                     category_name = record['name']
-                    category_slug = record['slug']
-                    new_category = BlogCategory.objects.get_or_create(
-                        name=category_name, slug=category_slug)[0]
+                    new_category = BlogCategory.objects.get_or_create(name=category_name)[0]
                     if record.get('parent') is not None:
                         parent_category = BlogCategory.objects.get_or_create(
                             name=record['parent']['name'])[0]
