@@ -160,6 +160,8 @@ class Command(BaseCommand):
             path, file_ = os.path.split(img['src'])
             if not img['src']:
                 continue  # Blank image
+            if img['src'].startswith('data:'):
+                continue # Embedded image
             try:
                 remote_image = urllib.request.urlretrieve(img['src'])
             except (urllib.error.HTTPError,
