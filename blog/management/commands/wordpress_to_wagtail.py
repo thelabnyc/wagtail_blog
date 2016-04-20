@@ -29,11 +29,6 @@ from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
 from wagtail.wagtailimages.models import Image
 
 
-def prepare_url(url):
-    if url.startswith('//'):
-        url = 'http:' + url
-    return url
-
 class Command(BaseCommand):
     """
     This is a management command to migrate a Wordpress site to Wagtail.
@@ -102,6 +97,16 @@ class Command(BaseCommand):
         self.should_import_comments = options.get('import_comments')
         self.create_blog_pages(posts, blog_index)
 
+    def prepare_url(self, url):
+        if url.startswith('//'):
+            url = 'http:{}'.format(url)
+        if url.startswith('/'):
+            prefix_url = self.url
+            if prefix_url.endswith('/'):
+                prefix_url = prefix_url[:-1]
+            url = '{}{}'.format(prefix_url, url)
+        return url
+
     def convert_html_entities(self, text, *args, **options):
         """converts html symbols so they show up correctly in wagtail"""
         return html.unescape(text)
@@ -169,7 +174,7 @@ class Command(BaseCommand):
                 continue # Embedded image
             try:
                 remote_image = urllib.request.urlretrieve(
-                    prepare_url(img['src']))
+                    self.prepare_url(img['src']))
             except (urllib.error.HTTPError,
                     urllib.error.URLError,
                     UnicodeEncodeError):
@@ -348,7 +353,7 @@ class Command(BaseCommand):
                 source = source.replace('stage.swoon', 'swoon')
                 try:
                     remote_image = urllib.request.urlretrieve(
-                        prepare_url(source))
+                        self.prepare_url(source))
                     width = 640
                     height = 290
                     header_image = Image(title=title, width=width, height=height)
