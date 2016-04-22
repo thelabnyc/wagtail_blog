@@ -97,6 +97,16 @@ class Command(BaseCommand):
         self.should_import_comments = options.get('import_comments')
         self.create_blog_pages(posts, blog_index)
 
+    def prepare_url(self, url):
+        if url.startswith('//'):
+            url = 'http:{}'.format(url)
+        if url.startswith('/'):
+            prefix_url = self.url
+            if prefix_url.endswith('/'):
+                prefix_url = prefix_url[:-1]
+            url = '{}{}'.format(prefix_url, url)
+        return url
+
     def convert_html_entities(self, text, *args, **options):
         """converts html symbols so they show up correctly in wagtail"""
         return html.unescape(text)
@@ -160,8 +170,11 @@ class Command(BaseCommand):
             path, file_ = os.path.split(img['src'])
             if not img['src']:
                 continue  # Blank image
+            if img['src'].startswith('data:'):
+                continue # Embedded image
             try:
-                remote_image = urllib.request.urlretrieve(img['src'])
+                remote_image = urllib.request.urlretrieve(
+                    self.prepare_url(img['src']))
             except (urllib.error.HTTPError,
                     urllib.error.URLError,
                     UnicodeEncodeError):
@@ -272,17 +285,13 @@ class Command(BaseCommand):
             if records[0]['taxonomy'] == 'post_tag':
                 for record in records:
                     tag_name = record['name']
-                    tag_slug = record['slug']
-                    new_tag = BlogTag.objects.get_or_create(
-                        name=tag_name, slug=tag_slug)[0]
+                    new_tag = BlogTag.objects.get_or_create(name=tag_name)[0]
                     tags_for_blog_entry.append(new_tag)
 
             if records[0]['taxonomy'] == 'category':
                 for record in records:
                     category_name = record['name']
-                    category_slug = record['slug']
-                    new_category = BlogCategory.objects.get_or_create(
-                        name=category_name, slug=category_slug)[0]
+                    new_category = BlogCategory.objects.get_or_create(name=category_name)[0]
                     if record.get('parent') is not None:
                         parent_category = BlogCategory.objects.get_or_create(
                             name=record['parent']['name'])[0]
@@ -343,7 +352,8 @@ class Command(BaseCommand):
                 path, file_ = os.path.split(source)
                 source = source.replace('stage.swoon', 'swoon')
                 try:
-                    remote_image = urllib.request.urlretrieve(source)
+                    remote_image = urllib.request.urlretrieve(
+                        self.prepare_url(source))
                     width = 640
                     height = 290
                     header_image = Image(title=title, width=width, height=height)

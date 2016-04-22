@@ -145,7 +145,11 @@ class BlogCategory(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            slug = slugify(self.name)
+            count = BlogCategory.objects.filter(slug=slug).count()
+            if count > 0:
+                slug = '{}-{}'.format(slug, count)
+            self.slug = slug
         return super(BlogCategory, self).save(*args, **kwargs)
 
 
