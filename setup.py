@@ -23,5 +23,13 @@ setup(
     ],
     install_requires=[
         'wagtail>=1.0.0',
+        'django-hashers-passlib',
+        'django-storages>=1.4.1',
+        'boto3',
+        'django-contrib-comments>=1.6.1',
+        'django-comments-xtd>=1.5.3',
+        'django-longerusernameandemail',
+        'requests',
+        'lxml'
     ]
 )
