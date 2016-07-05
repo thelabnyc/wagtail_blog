@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from . import views
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^tag/(?P<tag>[-\w]+)/', views.tag_view, name="tag"),
     url(r'^category/(?P<category>[-\w]+)/feed/$', views.LatestCategoryFeed(), name="category_feed"),
     url(r'^category/(?P<category>[-\w]+)/', views.category_view, name="category"),
@@ -13,4 +13,4 @@ urlpatterns = patterns('',
     url(r'(?P<blog_slug>[\w-]+)/atom.*/',
         views.LatestEntriesFeedAtom(),
         name="latest_entries_feed_atom"),
-)
+]
