@@ -26,7 +26,7 @@ Work in progress?
 # Installation
 
 You should start with a existing wagtail django project and have a basic understanding of Wagtail before starting.
-See http://docs.wagtail.io/en/v1.2/getting_started/index.html
+See http://docs.wagtail.io
 
 1. `pip install wagtail-blog`
 2. Add `blog` to INSTALLED_APPS
@@ -54,7 +54,7 @@ Blog authors will become Django users.
 This is a complex process and is prone to error. You should plan to review the import code and fix some issues.
 Pull requests welcome to improve this feature.
 
-## XML file import **Experimental**
+## XML file import
 
 1. Create a WordPress XML dump by selecting "export" from the "Tools" section 
 of the WordPress admin page.
