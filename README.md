@@ -42,6 +42,8 @@ See http://docs.wagtail.io
 
 # Import from WordPress
 
+The import feature requires `django-contrib-comments` and `django-comments-xtd`
+
 ## JSON API Import
 
 1. Enable WordPress JSON API

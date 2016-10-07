@@ -23,5 +23,7 @@ setup(
     ],
     install_requires=[
         'wagtail>=1.0.0',
+        'requests',
+        'lxml'
     ]
 )
