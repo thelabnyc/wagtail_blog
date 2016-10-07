@@ -23,8 +23,6 @@ setup(
     ],
     install_requires=[
         'wagtail>=1.0.0',
-        'django-contrib-comments>=1.6.1',
-        'django-comments-xtd>=1.5.3',
         'requests',
         'lxml'
     ]
