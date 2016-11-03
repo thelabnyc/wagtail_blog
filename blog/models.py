@@ -214,7 +214,7 @@ class BlogPage(Page):
         related_name='author_pages',
     )
 
-    search_fields = Page.search_fields + [ 
+    search_fields = Page.search_fields + [
         index.SearchField('body'),
     ]
     blog_categories = models.ManyToManyField(
