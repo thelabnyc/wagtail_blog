@@ -9,7 +9,7 @@ setup(
     license = "Apache License",
     keywords = "django wagtail blog",
     url = "https://github.com/thelabnyc/wagtail_blog",
-    packages=find_packages(),
+    packages=find_packages('.', exclude=('tests', 'demo')),
     include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
