@@ -91,7 +91,8 @@ class Command(BaseCommand):
                 print("You must have lxml installed to run xml imports."
                       " Run `pip install lxml`.")
                 raise e
-            posts = XML_parser(self.xml_path).get_posts_data()
+            self.xml_parser = XML_parser(self.xml_path)
+            posts = self.xml_parser.get_posts_data()
         else:
             posts = self.get_posts_data(self.url)
         self.should_import_comments = options.get('import_comments')
@@ -228,8 +229,11 @@ class Command(BaseCommand):
         except Site.DoesNotExist:
             print('site does not exist')
             return
-        comments = self.get_posts_data(
-            self.url, post_id, get_comments=True)
+        if self.xml_path:
+            comments = self.xml_parser.get_comments_data(slug)
+        else:
+            comments = self.get_posts_data(
+                self.url, post_id, get_comments=True)
         imported_comments = []
         for comment in comments:
             try:
@@ -267,10 +271,10 @@ class Command(BaseCommand):
             imported_comments.append(new_comment)
         # Now assign parent comments
         for comment in imported_comments:
-            if comment.parent_wordpress_id != "0":
+            if str(comment.parent_wordpress_id or 0) != "0":
                 for sub_comment in imported_comments:
                     if sub_comment.wordpress_id == comment.parent_wordpress_id:
-                        comment.parent_id = sub_comment.id
+                        comment.parent = sub_comment
                         try:
                             comment._calculate_thread_data()
                             comment.save()
