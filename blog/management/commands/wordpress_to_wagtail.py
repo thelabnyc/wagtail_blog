@@ -292,7 +292,7 @@ class Command(BaseCommand):
                 for record in records:
                     category_name = record['name']
                     new_category = BlogCategory.objects.get_or_create(name=category_name)[0]
-                    if record.get('parent') is not None:
+                    if record.get('parent'):
                         parent_category = BlogCategory.objects.get_or_create(
                             name=record['parent']['name'])[0]
                         parent_category.slug = record['parent']['slug']
