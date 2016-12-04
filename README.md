@@ -65,10 +65,8 @@ of the WordPress admin page.
 
 The xml importer uses the lxml library.
 
-This feature was tested on wordpress XML exports from exactly one site. Like the import
-procedure above, this process is complex and prone to error. 
-
-This process **currently will not import comments**.
+This feature was tested on wordpress XML exports from exactly a few sites.
+Like the import procedure above, this process is complex and prone to error.
 
 # Comments
 
