@@ -155,6 +155,9 @@ class XML_parser(object):
         """cleanup item keys to match API json format"""
         if not item_dict.get('title'):
             return None
+        # Skip attachments
+        if item_dict.get('{wp}post_type', None) == 'attachment':
+            return None
         ret_dict = {}
         # slugify post title if no slug exists
         ret_dict['slug']= item_dict.get('{wp}post_name') or re.sub(item_dict['title'],' ','-')
