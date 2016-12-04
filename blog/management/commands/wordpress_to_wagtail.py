@@ -102,9 +102,9 @@ class Command(BaseCommand):
             url = 'http:{}'.format(url)
         if url.startswith('/'):
             prefix_url = self.url
-            if prefix_url.endswith('/'):
+            if prefix_url and prefix_url.endswith('/'):
                 prefix_url = prefix_url[:-1]
-            url = '{}{}'.format(prefix_url, url)
+            url = '{}{}'.format(prefix_url or "", url)
         return url
 
     def convert_html_entities(self, text, *args, **options):
@@ -177,7 +177,8 @@ class Command(BaseCommand):
                     self.prepare_url(img['src']))
             except (urllib.error.HTTPError,
                     urllib.error.URLError,
-                    UnicodeEncodeError):
+                    UnicodeEncodeError,
+                    ValueError):
                 print("Unable to import " + img['src'])
                 continue
             image = Image(title=file_, width=width, height=height)
