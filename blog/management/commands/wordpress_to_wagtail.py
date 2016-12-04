@@ -79,7 +79,7 @@ class Command(BaseCommand):
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
-            raise CommandError("Have you created an index yet?")
+            raise CommandError("Incorrect blog index title - have you created it?")
         if self.url == "just_testing":
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
