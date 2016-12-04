@@ -128,17 +128,25 @@ class XML_parser(object):
         return ret_dict
 
     @staticmethod
-    def convert_date(d, custom_date_string=None):
+    def convert_date(d, custom_date_string=None, fallback=None):
         """
         for whatever reason, sometimes WP XML has unintelligible
         datetime strings for pubDate.
         In this case default to custom_date_string or today
+        Use fallback in case a secondary date string is available.
+
+        Incidentally, somehow the string 'Mon, 30 Nov -0001 00:00:00 +0000'
+        shows up.
         >>> xp = XML_parser
         >>> xp.convert_date("Mon, 30 Mar 2015 11:11:11 +0000")
         '2015-03-30'
         """
+        if d == 'Mon, 30 Nov -0001 00:00:00 +0000' and fallback:
+            d = fallback
         try:
-            date =  time.strftime("%Y-%m-%d", time.strptime(d, '%a, %d %b %Y %H:%M:%S %z'))
+            date = time.strftime("%Y-%m-%d", time.strptime(d, '%a, %d %b %Y %H:%M:%S %z'))
+        except ValueError:
+            date = time.strftime("%Y-%m-%d", time.strptime(d, '%Y-%m-%d %H:%M:%S'))
         except ValueError:
             date = custom_date_string or datetime.datetime.today().strftime("%Y-%m-%d")
         return date
@@ -159,8 +167,10 @@ class XML_parser(object):
                              'first_name':'',
                              'last_name':''}
         ret_dict['terms']= item_dict.get('terms')
-        ret_dict['date']= self.convert_date(item_dict['pubDate'])
-        # ret_dict['featured_image'] = None
+        ret_dict['date']= self.convert_date(
+            item_dict['pubDate'],
+            fallback=item_dict.get('{wp}post_date','')
+        )
         return ret_dict
 
 
