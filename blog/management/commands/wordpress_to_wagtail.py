@@ -271,17 +271,18 @@ class Command(BaseCommand):
             imported_comments.append(new_comment)
         # Now assign parent comments
         for comment in imported_comments:
-            if str(comment.parent_wordpress_id or 0) != "0":
-                for sub_comment in imported_comments:
-                    if sub_comment.wordpress_id == comment.parent_wordpress_id:
-                        comment.parent = sub_comment
-                        try:
-                            comment._calculate_thread_data()
-                            comment.save()
-                        except MaxThreadLevelExceededException:
-                            print("Warning, max thread level exceeded on {}"
-                                  .format(comment.id))
-                        break
+            if str(comment.parent_wordpress_id or 0) == "0":
+                continue
+            for sub_comment in imported_comments:
+                if sub_comment.wordpress_id == comment.parent_wordpress_id:
+                    comment.parent_id = sub_comment.id
+                    try:
+                        comment._calculate_thread_data()
+                        comment.save()
+                    except MaxThreadLevelExceededException:
+                        print("Warning, max thread level exceeded on {}"
+                              .format(comment.id))
+                    break
 
     def create_categories_and_tags(self, page, categories):
         tags_for_blog_entry = []
