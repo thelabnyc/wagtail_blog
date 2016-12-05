@@ -123,6 +123,9 @@
 			<wp:meta_key>custom_order</wp:meta_key>
 			<wp:meta_value><![CDATA[39]]></wp:meta_value>
 		</wp:postmeta>
+        <category domain="media-category" nicename="marketing-2"><![CDATA[Marketing]]></category>
+        <category domain="media-category" nicename="cheat-sheets"><![CDATA[Cheat Sheets]]></category>
+        <post_tag nicename="test-tag"><![CDATA[Test tag]]></post_tag>
 	</item>
 	<item>
 		<title>ASA Releases 2013 Economic Analysis of Staffing Industry Trends</title>

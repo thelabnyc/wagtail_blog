@@ -229,7 +229,7 @@ class Command(BaseCommand):
         except Site.DoesNotExist:
             print('site does not exist')
             return
-        if self.xml_path:
+        if getattr(self, 'xml_path', None):
             comments = self.xml_parser.get_comments_data(slug)
         else:
             comments = self.get_posts_data(
