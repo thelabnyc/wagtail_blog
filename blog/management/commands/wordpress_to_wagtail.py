@@ -10,6 +10,7 @@ import os
 import urllib.request
 
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth import get_user_model
@@ -18,6 +19,7 @@ from django.contrib.auth.models import User
 from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.utils import timezone
 from django_comments_xtd.models import MaxThreadLevelExceededException
 
 
@@ -207,6 +209,10 @@ class Command(BaseCommand):
     def create_comment(
         self, blog_post_type, blog_post_id, comment_text, date
     ):
+        # Assume that the timezone wanted is the one that's active during parsing
+        if date is not None and settings.USE_TZ and timezone.is_naive(date):
+            date = timezone.make_aware(date, timezone.get_current_timezone())
+
         new_comment = XtdComment.objects.get_or_create(
             site_id=self.site_id,
             content_type=blog_post_type,

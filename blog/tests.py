@@ -1,6 +1,7 @@
 import doctest
 import json
 
+from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django_comments_xtd.models import XtdComment
@@ -207,4 +208,21 @@ class BlogTests(TestCase):
         self.assertEqual(child_category.parent, parent_category)
         self.assertEqual(child_category.slug, "cheat-sheets")
         self.assertEqual(parent_category.slug, "marketing-2")
+
+
+    def test_import_xml_comments(self):
+        """
+        Comment data in XML should be inserted and threaded correctly
+        """
+        call_command(
+            "wordpress_to_wagtail",
+            "blog",
+            xml=self.xml_path,
+            import_comments=True
+        )
+        comments = XtdComment.objects.all()
+        self.assertEqual(comments.count(), 2)
+        parent_comment = XtdComment.objects.get(level=0)
+        child_comment = XtdComment.objects.get(level=1)
+        self.assertEqual(parent_comment.id, child_comment.parent_id)
 
