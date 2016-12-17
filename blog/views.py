@@ -42,7 +42,7 @@ class LatestEntriesFeed(Feed):
 
     def items(self, blog):
         num = getattr(settings, 'BLOG_PAGINATION_PER_PAGE', 10)
-        return blog.get_descendants()[:num]
+        return blog.get_descendants().order_by('-first_published_at')[:num]
 
     def item_title(self, item):
         return item.title
