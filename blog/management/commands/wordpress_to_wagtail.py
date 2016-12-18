@@ -20,6 +20,7 @@ from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.utils import timezone
+from django.utils.html import linebreaks
 from django_comments_xtd.models import MaxThreadLevelExceededException
 
 
@@ -338,7 +339,7 @@ class Command(BaseCommand):
             description = post.get('description')
             if description:
                 description = self.convert_html_entities(description)
-            body = post.get('content')
+            body = linebreaks(post.get('content'))
             # get image info from content and create image objects
             body = self.create_images_from_urls_in_content(body)
             # author/user data
