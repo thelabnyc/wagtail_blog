@@ -209,6 +209,10 @@ class BlogTests(TestCase):
         self.assertEqual(child_category.slug, "cheat-sheets")
         self.assertEqual(parent_category.slug, "marketing-2")
 
+        # Assert that <p> tags were added to the post that didn't contain them         
+        page = BlogPage.objects.filter(slug='asa-releases-2013-economic-analysis-of-staffing-industry-trends').get()
+        self.assertEqual(page.body, "<p>The American Staffing Association has released its 2013 economic analysis,\"Navigating the 1% Economy.\" Written by ASA chief operating officer Steven P. Berchem, CSP, the report takes an in-depth look at recent staffing employment trends and what these suggest about the current economic environment and future labor market conditions.</p>")
+
 
     def test_import_xml_comments(self):
         """

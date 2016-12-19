@@ -1,4 +1,5 @@
 from base64 import b64encode
+
 from datetime import datetime
 try:
     import html
@@ -339,9 +340,14 @@ class Command(BaseCommand):
             description = post.get('description')
             if description:
                 description = self.convert_html_entities(description)
-            body = linebreaks(post.get('content'))
+
+            body = post.get('content')
+            if not "<p>" in body:
+                body = linebreaks(body)
+
             # get image info from content and create image objects
             body = self.create_images_from_urls_in_content(body)
+
             # author/user data
             author = post.get('author')
             user = self.create_user(author)
