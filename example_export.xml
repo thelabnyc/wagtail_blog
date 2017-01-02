@@ -123,6 +123,63 @@
 			<wp:meta_key>custom_order</wp:meta_key>
 			<wp:meta_value><![CDATA[39]]></wp:meta_value>
 		</wp:postmeta>
+        <category domain="media-category" nicename="marketing-2"><![CDATA[Marketing]]></category>
+        <category domain="media-category" nicename="cheat-sheets"><![CDATA[Cheat Sheets]]></category>
+        <post_tag nicename="test-tag"><![CDATA[Test tag]]></post_tag>
+		<wp:comment>
+			<wp:comment_id>123</wp:comment_id>
+			<wp:comment_author><![CDATA[John Doe]]></wp:comment_author>
+			<wp:comment_author_email><![CDATA[john@doe.com]]></wp:comment_author_email>
+			<wp:comment_author_url></wp:comment_author_url>
+			<wp:comment_author_IP><![CDATA[123.123.123.123]]></wp:comment_author_IP>
+			<wp:comment_date><![CDATA[2013-12-25 18:09:29]]></wp:comment_date>
+			<wp:comment_date_gmt><![CDATA[2012-07-25 17:09:29]]></wp:comment_date_gmt>
+			<wp:comment_content><![CDATA[Hi! I have put a script here:
+
+http://ge.tt/3vXSsvK/v/0?c
+
+Your syntax error simply has to come from some kind of copy paste thing. There is no syntax error in the code you've pasted, so most likely it's the less-than sign being converted to HTML code.]]></wp:comment_content>
+			<wp:comment_approved><![CDATA[1]]></wp:comment_approved>
+			<wp:comment_type><![CDATA[]]></wp:comment_type>
+			<wp:comment_parent>0</wp:comment_parent>
+			<wp:comment_user_id>1</wp:comment_user_id>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_result]]></wp:meta_key>
+				<wp:meta_value><![CDATA[false]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:4:{s:4:"time";s:15:"1343236169.3374";s:7:"message";s:28:"Akismet cleared this comment";s:5:"event";s:9:"check-ham";s:4:"user";s:5:"admin";}]]></wp:meta_value>
+			</wp:commentmeta>
+		</wp:comment>
+		<wp:comment>
+			<wp:comment_id>124</wp:comment_id>
+			<wp:comment_author><![CDATA[Jane Doe]]></wp:comment_author>
+			<wp:comment_author_email><![CDATA[jane@doe.com]]></wp:comment_author_email>
+			<wp:comment_author_url></wp:comment_author_url>
+			<wp:comment_author_IP><![CDATA[12.34.56.78]]></wp:comment_author_IP>
+			<wp:comment_date><![CDATA[2013-11-13 15:07:20]]></wp:comment_date>
+			<wp:comment_date_gmt><![CDATA[2013-11-13 14:07:20]]></wp:comment_date_gmt>
+			<wp:comment_content><![CDATA[I use Ubuntu Pynhon 2.7 
+Error:
+File "/usr/sbin/script.py", line 8
+    if len(sys.argv) &gt; 1:
+                        ^
+SyntaxError: invalid syntax
+Sorry that not work]]></wp:comment_content>
+			<wp:comment_approved><![CDATA[1]]></wp:comment_approved>
+			<wp:comment_type><![CDATA[]]></wp:comment_type>
+			<wp:comment_parent>123</wp:comment_parent>
+			<wp:comment_user_id>0</wp:comment_user_id>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_result]]></wp:meta_key>
+				<wp:meta_value><![CDATA[false]]></wp:meta_value>
+			</wp:commentmeta>
+			<wp:commentmeta>
+				<wp:meta_key><![CDATA[akismet_history]]></wp:meta_key>
+				<wp:meta_value><![CDATA[a:4:{s:4:"time";s:13:"1342188440.71";s:7:"message";s:28:"Akismet cleared this comment";s:5:"event";s:9:"check-ham";s:4:"user";s:0:"";}]]></wp:meta_value>
+			</wp:commentmeta>
+		</wp:comment>
 	</item>
 	<item>
 		<title>ASA Releases 2013 Economic Analysis of Staffing Industry Trends</title>
@@ -131,7 +188,7 @@
 		<dc:creator>test@test.test</dc:creator>
 		<guid isPermaLink="false">http://blog.blog.com/?post_type=articles&#038;p=521</guid>
 		<description></description>
-		<content:encoded><![CDATA[<p>The American Staffing Association has released its 2013 economic analysis,"Navigating the 1% Economy." Written by ASA chief operating officer Steven P. Berchem, CSP, the report takes an in-depth look at recent staffing employment trends and what these suggest about the current economic environment and future labor market conditions.</p>]]></content:encoded>
+		<content:encoded><![CDATA[The American Staffing Association has released its 2013 economic analysis,"Navigating the 1% Economy." Written by ASA chief operating officer Steven P. Berchem, CSP, the report takes an in-depth look at recent staffing employment trends and what these suggest about the current economic environment and future labor market conditions.]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
 		<wp:post_id>521</wp:post_id>
 		<wp:post_date>2013-11-19 17:27:33</wp:post_date>

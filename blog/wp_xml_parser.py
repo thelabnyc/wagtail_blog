@@ -7,6 +7,7 @@ import time
 import lxml.etree as etree
 import lxml.html as HM
 
+
 htmlparser = HTMLParser()
 
 
@@ -128,17 +129,25 @@ class XML_parser(object):
         return ret_dict
 
     @staticmethod
-    def convert_date(d, custom_date_string=None):
+    def convert_date(d, custom_date_string=None, fallback=None):
         """
         for whatever reason, sometimes WP XML has unintelligible
         datetime strings for pubDate.
         In this case default to custom_date_string or today
+        Use fallback in case a secondary date string is available.
+
+        Incidentally, somehow the string 'Mon, 30 Nov -0001 00:00:00 +0000'
+        shows up.
         >>> xp = XML_parser
         >>> xp.convert_date("Mon, 30 Mar 2015 11:11:11 +0000")
         '2015-03-30'
         """
+        if d == 'Mon, 30 Nov -0001 00:00:00 +0000' and fallback:
+            d = fallback
         try:
-            date =  time.strftime("%Y-%m-%d", time.strptime(d, '%a, %d %b %Y %H:%M:%S %z'))
+            date = time.strftime("%Y-%m-%d", time.strptime(d, '%a, %d %b %Y %H:%M:%S %z'))
+        except ValueError:
+            date = time.strftime("%Y-%m-%d", time.strptime(d, '%Y-%m-%d %H:%M:%S'))
         except ValueError:
             date = custom_date_string or datetime.datetime.today().strftime("%Y-%m-%d")
         return date
@@ -146,6 +155,9 @@ class XML_parser(object):
     def translate_item(self, item_dict):
         """cleanup item keys to match API json format"""
         if not item_dict.get('title'):
+            return None
+        # Skip attachments
+        if item_dict.get('{wp}post_type', None) == 'attachment':
             return None
         ret_dict = {}
         # slugify post title if no slug exists
@@ -159,9 +171,41 @@ class XML_parser(object):
                              'first_name':'',
                              'last_name':''}
         ret_dict['terms']= item_dict.get('terms')
-        ret_dict['date']= self.convert_date(item_dict['pubDate'])
-        # ret_dict['featured_image'] = None
+        ret_dict['date']= self.convert_date(
+            item_dict['pubDate'],
+            fallback=item_dict.get('{wp}post_date','')
+        )
         return ret_dict
+
+
+    def translate_wp_comment(self, e):
+        """
+		    <wp:comment>
+			    <wp:comment_id>1234</wp:comment_id>
+			    <wp:comment_author><![CDATA[John Doe]]></wp:comment_author>
+			    <wp:comment_author_email><![CDATA[info@adsasd.com]]></wp:comment_author_email>
+			    <wp:comment_author_url>http://myhomepage.com/</wp:comment_author_url>
+			    <wp:comment_author_IP><![CDATA[12.123.123.123]]></wp:comment_author_IP>
+			    <wp:comment_date><![CDATA[2008-09-25 14:24:51]]></wp:comment_date>
+			    <wp:comment_date_gmt><![CDATA[2008-09-25 13:24:51]]></wp:comment_date_gmt>
+			    <wp:comment_content><![CDATA[Hey dude :)]]></wp:comment_content>
+			    <wp:comment_approved><![CDATA[1]]></wp:comment_approved>
+			    <wp:comment_type><![CDATA[]]></wp:comment_type>
+			    <wp:comment_parent>0</wp:comment_parent>
+			    <wp:comment_user_id>0</wp:comment_user_id>
+		    </wp:comment>
+		    """
+        comment_dict = {}
+        comment_dict['ID'] = e.find('./{wp}comment_id').text
+        comment_dict['date'] = e.find('{wp}comment_date').text
+        comment_dict['content'] = e.find('{wp}comment_content').text
+        comment_dict['status'] = e.find('{wp}comment_approved').text
+        comment_dict['status'] = "approved" if comment_dict['status'] == "1" else "rejected"
+        comment_dict['parent'] = e.find('{wp}comment_parent').text
+        comment_dict['author'] = e.find('{wp}comment_author').text
+        comment_dict['date'] = time.strptime(comment_dict['date'], '%Y-%m-%d %H:%M:%S')
+        comment_dict['date'] = time.strftime('%Y-%m-%dT%H:%M:%S', comment_dict['date'])
+        return comment_dict
 
 
     def get_posts_data(self):
@@ -179,6 +223,33 @@ class XML_parser(object):
         item_dict_gen = (self.item_dict(item) for item in items)
         # transform the generic dict to one with the expected JSON keys
         all_the_data = [self.translate_item(item) for item in item_dict_gen if self.translate_item(item)]
+        return all_the_data
+
+
+    def get_comments_data(self, slug):
+        """
+        Returns a flat list of all comments in XML dump. Formatted as the JSON
+        output from Wordpress API.
+        
+        Keys:
+        ('content', 'slug', 'date', 'status', 'author', 'ID', 'parent')
+        
+        date format: '%Y-%m-%dT%H:%M:%S'
+        
+        author: {'username': 'Name', 'URL': ''}
+        """
+        all_the_data = []
+        for item in self.chan.findall("item"):
+            if not item.find('{wp}post_name').text == slug:
+                continue
+            item_dict = self.item_dict(item)
+            if not item_dict or not item_dict.get('title'):
+                continue
+            slug = item_dict.get('{wp}post_name') or re.sub(item_dict['title'],' ','-')
+            for comment in item.findall("{wp}comment"):
+                comment = self.translate_wp_comment(comment)
+                comment['slug'] = slug
+                all_the_data.append(comment)
         return all_the_data
 
 

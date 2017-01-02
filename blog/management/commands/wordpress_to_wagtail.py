@@ -1,4 +1,5 @@
 from base64 import b64encode
+
 from datetime import datetime
 try:
     import html
@@ -10,6 +11,7 @@ import os
 import urllib.request
 
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth import get_user_model
@@ -18,6 +20,8 @@ from django.contrib.auth.models import User
 from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.utils import timezone
+from django.utils.html import linebreaks
 from django_comments_xtd.models import MaxThreadLevelExceededException
 
 
@@ -79,7 +83,7 @@ class Command(BaseCommand):
             blog_index = BlogIndexPage.objects.get(
                 title__icontains=options['blog_index'])
         except BlogIndexPage.DoesNotExist:
-            raise CommandError("Have you created an index yet?")
+            raise CommandError("Incorrect blog index title - have you created it?")
         if self.url == "just_testing":
             with open('test-data.json') as test_json:
                 posts = json.load(test_json)
@@ -91,7 +95,8 @@ class Command(BaseCommand):
                 print("You must have lxml installed to run xml imports."
                       " Run `pip install lxml`.")
                 raise e
-            posts = XML_parser(self.xml_path).get_posts_data()
+            self.xml_parser = XML_parser(self.xml_path)
+            posts = self.xml_parser.get_posts_data()
         else:
             posts = self.get_posts_data(self.url)
         self.should_import_comments = options.get('import_comments')
@@ -102,9 +107,9 @@ class Command(BaseCommand):
             url = 'http:{}'.format(url)
         if url.startswith('/'):
             prefix_url = self.url
-            if prefix_url.endswith('/'):
+            if prefix_url and prefix_url.endswith('/'):
                 prefix_url = prefix_url[:-1]
-            url = '{}{}'.format(prefix_url, url)
+            url = '{}{}'.format(prefix_url or "", url)
         return url
 
     def convert_html_entities(self, text, *args, **options):
@@ -177,7 +182,8 @@ class Command(BaseCommand):
                     self.prepare_url(img['src']))
             except (urllib.error.HTTPError,
                     urllib.error.URLError,
-                    UnicodeEncodeError):
+                    UnicodeEncodeError,
+                    ValueError):
                 print("Unable to import " + img['src'])
                 continue
             image = Image(title=file_, width=width, height=height)
@@ -205,6 +211,10 @@ class Command(BaseCommand):
     def create_comment(
         self, blog_post_type, blog_post_id, comment_text, date
     ):
+        # Assume that the timezone wanted is the one that's active during parsing
+        if date is not None and settings.USE_TZ and timezone.is_naive(date):
+            date = timezone.make_aware(date, timezone.get_current_timezone())
+
         new_comment = XtdComment.objects.get_or_create(
             site_id=self.site_id,
             content_type=blog_post_type,
@@ -227,8 +237,11 @@ class Command(BaseCommand):
         except Site.DoesNotExist:
             print('site does not exist')
             return
-        comments = self.get_posts_data(
-            self.url, post_id, get_comments=True)
+        if getattr(self, 'xml_path', None):
+            comments = self.xml_parser.get_comments_data(slug)
+        else:
+            comments = self.get_posts_data(
+                self.url, post_id, get_comments=True)
         imported_comments = []
         for comment in comments:
             try:
@@ -266,17 +279,18 @@ class Command(BaseCommand):
             imported_comments.append(new_comment)
         # Now assign parent comments
         for comment in imported_comments:
-            if comment.parent_wordpress_id != "0":
-                for sub_comment in imported_comments:
-                    if sub_comment.wordpress_id == comment.parent_wordpress_id:
-                        comment.parent_id = sub_comment.id
-                        try:
-                            comment._calculate_thread_data()
-                            comment.save()
-                        except MaxThreadLevelExceededException:
-                            print("Warning, max thread level exceeded on {}"
-                                  .format(comment.id))
-                        break
+            if str(comment.parent_wordpress_id or 0) == "0":
+                continue
+            for sub_comment in imported_comments:
+                if sub_comment.wordpress_id == comment.parent_wordpress_id:
+                    comment.parent_id = sub_comment.id
+                    try:
+                        comment._calculate_thread_data()
+                        comment.save()
+                    except MaxThreadLevelExceededException:
+                        print("Warning, max thread level exceeded on {}"
+                              .format(comment.id))
+                    break
 
     def create_categories_and_tags(self, page, categories):
         tags_for_blog_entry = []
@@ -292,7 +306,7 @@ class Command(BaseCommand):
                 for record in records:
                     category_name = record['name']
                     new_category = BlogCategory.objects.get_or_create(name=category_name)[0]
-                    if record.get('parent') is not None:
+                    if record.get('parent'):
                         parent_category = BlogCategory.objects.get_or_create(
                             name=record['parent']['name'])[0]
                         parent_category.slug = record['parent']['slug']
@@ -326,9 +340,14 @@ class Command(BaseCommand):
             description = post.get('description')
             if description:
                 description = self.convert_html_entities(description)
+
             body = post.get('content')
+            if not "<p>" in body:
+                body = linebreaks(body)
+
             # get image info from content and create image objects
             body = self.create_images_from_urls_in_content(body)
+
             # author/user data
             author = post.get('author')
             user = self.create_user(author)
