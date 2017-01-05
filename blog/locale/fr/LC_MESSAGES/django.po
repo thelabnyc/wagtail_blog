@@ -1,0 +1,85 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-01-05 20:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: blog/models.py:106
+msgid "Blog index"
+msgstr ""
+
+#: blog/models.py:113
+msgid "Category Name"
+msgstr "Nom de la Catégorie"
+
+#: blog/models.py:118
+msgid ""
+"Categories, unlike tags, can have a hierarchy. You might have a Jazz "
+"category, and under that have children categories for Bebop and Big Band. "
+"Totally optional."
+msgstr ""
+"Les catégories, contrairement aux libellés, peuvent avoir une "
+"hiérarchie. Vous pouvez avoir une catégorie Jazz, qui aura pour "
+"sous-catégorie Bebop et Big Band. Optionnel."
+
+#: blog/models.py:126
+msgid "Blog Category"
+msgstr "Catégorie du Blog"
+
+#: blog/models.py:127
+msgid "Blog Categories"
+msgstr "Catégories du Blog"
+
+#: blog/models.py:158
+msgid "Category"
+msgstr "Catégorie"
+
+#: blog/models.py:193
+msgid "body"
+msgstr "corps"
+
+#: blog/models.py:196
+msgid "Post date"
+msgstr "Date de publication"
+
+#: blog/models.py:197
+msgid ""
+"This date may be displayed on the blog post. It is not used to schedule "
+"posts to go live at a later date."
+msgstr ""
+"Cette date peut être affichée dans l'article. Elle n'est pas utilisée pour "
+"planifier la publication de l'article."
+
+#: blog/models.py:206
+msgid "Header image"
+msgstr "Image d'en-tête"
+
+#: blog/models.py:212
+msgid "Author"
+msgstr "Auteur"
+
+#: blog/models.py:254
+msgid "Blog page"
+msgstr "page de blog"
+
+#: blog/models.py:255
+msgid "Blog pages"
+msgstr "Pages de blog"
+
+#: blog/models.py:264
+msgid "Categories"
+msgstr "Catégories"
