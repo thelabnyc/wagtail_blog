@@ -52,5 +52,5 @@ class Migration(migrations.Migration):
             name='date',
             field=models.DateField(default=datetime.datetime.today, help_text='This date may be displayed on the blog post. It is not used to schedule posts to go live at a later date.', verbose_name='Post date'),
         ),
-        migrations.RunPython(default_author),
+        migrations.RunPython(default_author, reverse_code=migrations.RunPython.noop),
     ]
