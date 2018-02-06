@@ -1,8 +1,6 @@
 # wagtail_blog
 A WordPress-like blog app implemented in Wagtail.
 
-[![Build Status](https://travis-ci.org/thelabnyc/wagtail_blog.svg?branch=master)](https://travis-ci.org/thelabnyc/wagtail_blog)
-
 # What is it
 
 After reimplimenting WordPress-like blogs over and over again in Wagtail I decided to just make this. 

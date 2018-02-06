@@ -1,0 +1,13 @@
+image: python:3.6
+
+cache:
+  paths:
+  - ~/.cache/pip/
+
+before_script:
+  - pip install .
+  - pip install -r requirements.txt
+
+test:
+  script:
+  - ./manage.py test

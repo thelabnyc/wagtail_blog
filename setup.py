@@ -8,7 +8,7 @@ setup(
     description = ("A wordpress like blog app implemented in wagtail"),
     license = "Apache License",
     keywords = "django wagtail blog",
-    url = "https://github.com/thelabnyc/wagtail_blog",
+    url = "https://gitlab.com/thelabnyc/wagtail_blog",
     packages=find_packages('.', exclude=('tests', 'demo')),
     include_package_data=True,
     classifiers=[
@@ -16,8 +16,7 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Intended Audience :: Developers',
         "License :: OSI Approved :: Apache Software License",
     ],
