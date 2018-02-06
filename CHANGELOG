@@ -1,0 +1,5 @@
+# 1.7.0
+
+- Added full django 1.11 and wagtail 1.13 support
+- Notice of intent to remove python 2 support (no changes have been made yet and python 2 will still work at this time)
+- Moved to Gitlab (because freedom!) and gitlab CI for testing
