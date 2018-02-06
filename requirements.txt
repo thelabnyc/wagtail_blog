@@ -1,9 +1,9 @@
-Django==1.8.16
-wagtail==1.7
-django-hashers-passlib==0.1
-django-storages==1.5.1
+Django==1.11.10
+wagtail==1.13.1
+django-hashers-passlib==0.4
+django-storages==1.6.5
 boto3
-django-contrib-comments==1.7.3
-django-comments-xtd==1.6.3
+django-contrib-comments==1.8.0
+django-comments-xtd==2.0.10
 requests
 lxml
