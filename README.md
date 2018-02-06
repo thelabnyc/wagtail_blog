@@ -1,4 +1,7 @@
-# wagtail_blog
+# Wagtail Blog
+
+[![pipeline status](https://gitlab.com/thelabnyc/wagtail_blog/badges/master/pipeline.svg)](https://gitlab.com/thelabnyc/wagtail_blog/commits/master)
+
 A WordPress-like blog app implemented in Wagtail.
 
 # What is it
@@ -17,7 +20,7 @@ This is a starting point for your wagtail based blog, especially if you are migr
 - Comments
 - WordPress importer
 
-Work in progress?
+Things you could contribute:
 
 - Disqus comments
 
@@ -52,7 +55,7 @@ This works by getting the json data for your posts and making Wagtail pages for 
 It then downloads any images it finds and replaces urls to use your site instead of an external site. 
 Blog authors will become Django users.
 This is a complex process and is prone to error. You should plan to review the import code and fix some issues.
-Pull requests welcome to improve this feature.
+Merge requests welcome to improve this feature.
 
 ## XML file import
 
