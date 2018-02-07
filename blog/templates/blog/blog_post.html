@@ -36,7 +36,7 @@
         {% if blog.tags.all %}
             Tags: 
                 {% for tag in blog.tags.all %}
-                    <a href="{% url 'blog:tag' tag.slug %}/">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                    <a href="{% url 'blog:tag' tag.slug %}">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
         {% endif %}
     </div>
