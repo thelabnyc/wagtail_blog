@@ -78,7 +78,7 @@ Out of box Disqus coming someday - but it's pretty easy to add manually followin
 
 Feel free to contribute other comment implimentations.
 
-# Hacking
+# Development and Contributing
 
 The included docker-compose file should make it easy to get up and running. 
 
@@ -87,3 +87,10 @@ The included docker-compose file should make it easy to get up and running.
 3. `docker-compose run --rm web ./manage.py migrate`
 4. `docker-compose run --rm web ./manage.py createsuperuser`
 5. Log in and create a blog index page with blog pages to see a very basic implementation.
+
+Please submit issues and merge requests only on [gitlab](https://gitlab.com/thelabnyc/wagtail_blog). The github page is a read only mirror.
+
+A good merge request should have:
+
+- Based on of the master branch. It should contain only changes that are yours and not from merging.
+- Include tests whenever possible. Are you fixing a bug? Add a test that breaks before your patch and works after.
