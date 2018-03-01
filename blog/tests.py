@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django_comments_xtd.models import XtdComment
 
-from wagtail.wagtailcore.models import Page
+from wagtail.core.models import Page
 
 from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                      BlogCategory, BlogCategoryBlogPage)

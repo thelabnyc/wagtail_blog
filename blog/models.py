@@ -7,13 +7,13 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
-from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailcore.models import Page
-from wagtail.wagtailadmin.edit_handlers import (
+from wagtail.core.fields import RichTextField
+from wagtail.core.models import Page
+from wagtail.admin.edit_handlers import (
     FieldPanel, InlinePanel, MultiFieldPanel, FieldRowPanel)
-from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
-from wagtail.wagtailsnippets.models import register_snippet
-from wagtail.wagtailsearch import index
+from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.snippets.models import register_snippet
+from wagtail.search import index
 from taggit.models import TaggedItemBase, Tag
 from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey

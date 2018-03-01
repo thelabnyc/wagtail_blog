@@ -1,11 +1,7 @@
 from base64 import b64encode
 
 from datetime import datetime
-try:
-    import html
-except ImportError:  # 2.x
-    import HTMLParser
-    html = HTMLParser.HTMLParser()
+import html
 import json
 import os
 import urllib.request
@@ -30,7 +26,7 @@ import requests
 
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
-from wagtail.wagtailimages.models import Image
+from wagtail.images.models import Image
 
 
 class Command(BaseCommand):

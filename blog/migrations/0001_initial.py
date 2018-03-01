@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import wagtail.wagtailcore.fields
+import wagtail.core.fields
 import django.db.models.deletion
 import modelcluster.fields
 import modelcluster.tags
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
             name='BlogPage',
             fields=[
                 ('page_ptr', models.OneToOneField(serialize=False, to='wagtailcore.Page', primary_key=True, auto_created=True, parent_link=True)),
-                ('body', wagtail.wagtailcore.fields.RichTextField()),
+                ('body', wagtail.core.fields.RichTextField()),
                 ('header_image', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailimages.Image', blank=True)),
             ],
             options={

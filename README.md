@@ -29,6 +29,10 @@ Things you could contribute:
 You should start with a existing wagtail django project and have a basic understanding of Wagtail before starting.
 See http://docs.wagtail.io
 
+For Wagtail 2 and Django 1.11+ use wagtail-blog 2.x
+
+For Wagtail 1.x use wagtail-blog 1.7.x
+
 1. `pip install wagtail-blog`
 2. Add `blog` to INSTALLED_APPS
 3. Add `url(r'^blog/', include('blog.urls', namespace="blog")),` to urls.py
