@@ -118,7 +118,8 @@ class BlogCategory(models.Model):
         help_text=_(
             'Categories, unlike tags, can have a hierarchy. You might have a '
             'Jazz category, and under that have children categories for Bebop'
-            ' and Big Band. Totally optional.')
+            ' and Big Band. Totally optional.'),
+        on_delete=models.CASCADE,
     )
     description = models.CharField(max_length=500, blank=True)
 
@@ -156,7 +157,9 @@ class BlogCategory(models.Model):
 
 class BlogCategoryBlogPage(models.Model):
     category = models.ForeignKey(
-        BlogCategory, related_name="+", verbose_name=_('Category'))
+        BlogCategory, related_name="+", verbose_name=_('Category'),
+        on_delete=models.CASCADE,
+    )
     page = ParentalKey('BlogPage', related_name='categories')
     panels = [
         FieldPanel('category'),
