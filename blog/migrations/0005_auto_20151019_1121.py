@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='blogpage',
             name='author',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, blank=True),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT),
         ),
         migrations.AddField(
             model_name='blogpage',
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='blogcategory',
             name='parent',
-            field=models.ForeignKey(to='blog.BlogCategory', help_text='Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have children categories for Bebop and Big Band. Totally optional.', related_name='children', null=True, blank=True),
+            field=models.ForeignKey(to='blog.BlogCategory', help_text='Categories, unlike tags, can have a hierarchy. You might have a Jazz category, and under that have children categories for Bebop and Big Band. Totally optional.', related_name='children', null=True, blank=True, on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='blogpage',

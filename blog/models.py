@@ -12,6 +12,7 @@ from wagtail.core.models import Page
 from wagtail.admin.edit_handlers import (
     FieldPanel, InlinePanel, MultiFieldPanel, FieldRowPanel)
 from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.images import get_image_model_string
 from wagtail.snippets.models import register_snippet
 from wagtail.search import index
 from taggit.models import TaggedItemBase, Tag
@@ -117,7 +118,8 @@ class BlogCategory(models.Model):
         help_text=_(
             'Categories, unlike tags, can have a hierarchy. You might have a '
             'Jazz category, and under that have children categories for Bebop'
-            ' and Big Band. Totally optional.')
+            ' and Big Band. Totally optional.'),
+        on_delete=models.CASCADE,
     )
     description = models.CharField(max_length=500, blank=True)
 
@@ -155,7 +157,9 @@ class BlogCategory(models.Model):
 
 class BlogCategoryBlogPage(models.Model):
     category = models.ForeignKey(
-        BlogCategory, related_name="+", verbose_name=_('Category'))
+        BlogCategory, related_name="+", verbose_name=_('Category'),
+        on_delete=models.CASCADE,
+    )
     page = ParentalKey('BlogPage', related_name='categories')
     panels = [
         FieldPanel('category'),
@@ -198,7 +202,7 @@ class BlogPage(Page):
                     "used to schedule posts to go live at a later date.")
     )
     header_image = models.ForeignKey(
-        'wagtailimages.Image',
+        get_image_model_string(),
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
