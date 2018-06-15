@@ -18,6 +18,7 @@ from wagtail.search import index
 from taggit.models import TaggedItemBase, Tag
 from modelcluster.tags import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
+from .utils import unique_slugify
 import datetime
 
 
@@ -147,11 +148,7 @@ class BlogCategory(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            slug = slugify(self.name)
-            count = BlogCategory.objects.filter(slug=slug).count()
-            if count > 0:
-                slug = '{}-{}'.format(slug, count)
-            self.slug = slug
+            unique_slugify(self, self.name)
         return super(BlogCategory, self).save(*args, **kwargs)
 
 
