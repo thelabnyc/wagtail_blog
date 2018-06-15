@@ -96,5 +96,5 @@ Please submit issues and merge requests only on [gitlab](https://gitlab.com/thel
 
 A good merge request should have:
 
-- Based on of the master branch. It should contain only changes that are yours and not from merging.
+- Based off of the master branch. It should contain only changes that are yours and not from merging.
 - Include tests whenever possible. Are you fixing a bug? Add a test that breaks before your patch and works after.
