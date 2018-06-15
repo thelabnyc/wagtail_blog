@@ -1,3 +1,7 @@
+# 2.0.2
+
+- Fixed slug generation on category
+
 # 2.0.1
 
 - Set requires wagtail>=2.0.0

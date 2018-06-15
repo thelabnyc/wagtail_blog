@@ -6,7 +6,7 @@ A WordPress-like blog app implemented in Wagtail.
 
 # What is it
 
-After reimplimenting WordPress-like blogs over and over again in Wagtail I decided to just make this. 
+After reimplementing WordPress-like blogs over and over again in Wagtail I decided to just make this.
 Feel free to use as is or copy it as a starting point. 
 It's based on the Wagtail demo blog but is closer to a standard WordPress blog style. 
 
