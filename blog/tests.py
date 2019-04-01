@@ -17,7 +17,7 @@ from . import wp_xml_parser
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(wp_xml_parser))
     return tests
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.models import Group
 
 
