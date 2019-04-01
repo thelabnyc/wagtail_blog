@@ -53,6 +53,9 @@ class LatestEntriesFeed(Feed):
     def item_link(self, item):
         return item.full_url
 
+    def item_pubdate(self, blog):
+        return blog.first_published_at
+
 
 class LatestEntriesFeedAtom(LatestEntriesFeed):
     feed_type = Atom1Feed
