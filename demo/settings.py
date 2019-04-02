@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     #'compressor',
     'taggit',
     'modelcluster',
+    'rest_framework',
 
     'wagtail.core',
     'wagtail.admin',
@@ -53,6 +54,7 @@ INSTALLED_APPS = (
     'wagtail.contrib.redirects',
     'wagtail.contrib.forms',
     'wagtail.sites',
+    'wagtail.api.v2',
 
     'blog',
 )

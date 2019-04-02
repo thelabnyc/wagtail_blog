@@ -39,6 +39,10 @@ For Wagtail 1.x use wagtail-blog 1.7.x
 4. `python manage.py migrate`
 5. Override [templates](/blog/templates/blog/) as needed.
 
+## Extending
+
+Wagtail blog features abstract base models. If you want to change functionality you may extend this models from `blog.abstract` and use them how you'd like. Do not add `blog` to your INSTALLED_APPS if you do this. You'll need to create your own logic to gather context variables. See blog/models.py for an example of this. Wagtail blog doesn't support any way to "drop in" the blog app and just make minor changes to models.
+
 # Settings
 
 - `BLOG_PAGINATION_PER_PAGE` (Default 10) Set to change the number of blogs per page. Set to None to disable (useful if using your own pagination implementation).
