@@ -1,3 +1,10 @@
+# 2.1.0
+
+- Update Django version to 2.1 on demo app
+- Added abstract base models for all models. Shouldn't change or break anything.
+- Removed some unneeded python 2.x syntax
+- Added publication date to atom feed
+
 # 2.0.2
 
 - Fixed slug generation on category
