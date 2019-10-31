@@ -240,8 +240,12 @@ class BlogTests(TestCase):
 
 class BlogAPIImportTests(TestCase):
     def test_import(self):
-        importer = WordpressImport()
-        url = "https://www.example.com/blog"
-        username = ""
-        password = ""
-        importer.get_api(url, username, password)
+        home = Page.objects.get(slug='home')
+        self.user = User.objects.create_user('test', 'test@test.test', 'pass')
+        blog_index = home.add_child(instance=BlogIndexPage(
+            title='Blog Index', slug='blog', search_description="x",
+            owner=self.user))
+
+        url = "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com"
+        importer = WordpressImport(url)
+        importer.get_posts()
