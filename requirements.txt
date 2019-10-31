@@ -7,3 +7,5 @@ django-contrib-comments==1.9.1
 django-comments-xtd==2.4.1
 requests
 lxml
+wordpress-api==1.2.9
+ipdb

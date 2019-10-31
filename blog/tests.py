@@ -12,6 +12,7 @@ from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                      BlogCategory, BlogCategoryBlogPage)
 from .management.commands.wordpress_to_wagtail import Command
 from . import wp_xml_parser
+from .wordpress_import import WordpressImport
 
 
 def load_tests(loader, tests, ignore):
@@ -235,3 +236,12 @@ class BlogTests(TestCase):
         BlogCategory.objects.create(name="one")
         BlogCategory.objects.create(name="one#")
         BlogCategory.objects.create(name="one!")
+
+
+class BlogAPIImportTests(TestCase):
+    def test_import(self):
+        importer = WordpressImport()
+        url = "https://www.example.com/blog"
+        username = ""
+        password = ""
+        importer.get_api(url, username, password)
