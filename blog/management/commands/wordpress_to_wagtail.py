@@ -1,35 +1,31 @@
 from base64 import b64encode
 
 from datetime import datetime
-import html
 import json
 import os
 import urllib.request
-
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
 from django.contrib.auth import get_user_model
-User = get_user_model()
 from django.contrib.auth.models import User
-from django_comments_xtd.models import XtdComment
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.utils import timezone
 from django.utils.html import linebreaks
-from django_comments_xtd.models import MaxThreadLevelExceededException
-
-
-from bs4 import BeautifulSoup
+from django_comments_xtd.models import MaxThreadLevelExceededException, XtdComment
+from wagtail.images.models import Image
 import requests
 
 from blog.models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                          BlogCategory, BlogCategoryBlogPage)
-from wagtail.images.models import Image
+from blog.wordpress_import import WordpressImport
+
+User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(WordpressImport, BaseCommand):
     """
     This is a management command to migrate a Wordpress site to Wagtail.
     Two arguments should be used - the site to be migrated and the site it is
@@ -40,6 +36,8 @@ class Command(BaseCommand):
     Next users will need to create a BlogIndex object in this GUI.
     This will be used as a parent object for the child blog page objects.
     """
+    def __init__(self):
+        pass
 
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""
@@ -98,20 +96,6 @@ class Command(BaseCommand):
         self.should_import_comments = options.get('import_comments')
         self.create_blog_pages(posts, blog_index)
 
-    def prepare_url(self, url):
-        if url.startswith('//'):
-            url = 'http:{}'.format(url)
-        if url.startswith('/'):
-            prefix_url = self.url
-            if prefix_url and prefix_url.endswith('/'):
-                prefix_url = prefix_url[:-1]
-            url = '{}{}'.format(prefix_url or "", url)
-        return url
-
-    def convert_html_entities(self, text, *args, **options):
-        """converts html symbols so they show up correctly in wagtail"""
-        return html.unescape(text)
-
     def clean_data(self, data):
         # I have no idea what this junk is
         garbage = data.split("[")[0]
@@ -155,43 +139,6 @@ class Command(BaseCommand):
             data = fetched_posts.text
             data = self.clean_data(data)
             return json.loads(data)
-
-    def create_images_from_urls_in_content(self, body):
-        """create Image objects and transfer image files to media root"""
-        soup = BeautifulSoup(body, "html5lib")
-        for img in soup.findAll('img'):
-            old_url = img['src']
-            if 'width' in img:
-                width = img['width']
-            if 'height' in img:
-                height = img['height']
-            else:
-                width = 100
-                height = 100
-            path, file_ = os.path.split(img['src'])
-            if not img['src']:
-                continue  # Blank image
-            if img['src'].startswith('data:'):
-                continue # Embedded image
-            try:
-                remote_image = urllib.request.urlretrieve(
-                    self.prepare_url(img['src']))
-            except (urllib.error.HTTPError,
-                    urllib.error.URLError,
-                    UnicodeEncodeError,
-                    ValueError):
-                print("Unable to import " + img['src'])
-                continue
-            image = Image(title=file_, width=width, height=height)
-            try:
-                image.file.save(file_, File(open(remote_image[0], 'rb')))
-                image.save()
-                new_url = image.file.url
-                body = body.replace(old_url, new_url)
-                body = self.convert_html_entities(body)
-            except TypeError:
-                print("Unable to import image {}".format(remote_image[0]))
-        return body
 
     def create_user(self, author):
         username = author['username']

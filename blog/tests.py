@@ -5,13 +5,14 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django_comments_xtd.models import XtdComment
-
 from wagtail.core.models import Page
+import responses
 
 from .models import (BlogPage, BlogTag, BlogPageTag, BlogIndexPage,
                      BlogCategory, BlogCategoryBlogPage)
 from .management.commands.wordpress_to_wagtail import Command
 from . import wp_xml_parser
+from .wordpress_import import WordpressImport
 
 
 def load_tests(loader, tests, ignore):
@@ -235,3 +236,30 @@ class BlogTests(TestCase):
         BlogCategory.objects.create(name="one")
         BlogCategory.objects.create(name="one#")
         BlogCategory.objects.create(name="one!")
+
+
+class BlogAPIImportTests(TestCase):
+    @responses.activate
+    def test_import(self):
+        url = "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com"
+        with open("test_v2_resp.json") as json_file:
+            data = json.load(json_file)
+            responses.add(
+                responses.GET,
+                url + '/posts?per_page=50&_embed=1',
+                json=data,
+                status=404,
+                headers={'X-WP-TotalPages': '1'}
+            )
+
+        home = Page.objects.get(slug='home')
+        self.user = User.objects.create_user('test', 'test@test.test', 'pass')
+        blog_index = home.add_child(instance=BlogIndexPage(
+            title='Blog Index', slug='blog', search_description="x",
+            owner=self.user))
+
+        importer = WordpressImport(url)
+        importer.convert_images = True
+        importer.get_posts()
+        posts = BlogPage.objects.all()
+        self.assertEqual(len(posts), 1)

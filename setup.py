@@ -18,6 +18,7 @@ setup(
         'Framework :: Wagtail',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Intended Audience :: Developers',
         "License :: OSI Approved :: Apache Software License",
     ],

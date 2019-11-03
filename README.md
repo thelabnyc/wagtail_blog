@@ -20,18 +20,12 @@ This is a starting point for your wagtail based blog, especially if you are migr
 - Comments
 - WordPress importer
 
-Things you could contribute:
-
-- Disqus comments
-
 # Installation
 
 You should start with a existing wagtail django project and have a basic understanding of Wagtail before starting.
 See http://docs.wagtail.io
 
-For Wagtail 2 and Django 1.11+ use wagtail-blog 2.x
-
-For Wagtail 1.x use wagtail-blog 1.7.x
+Tested with Wagtail 2.x and Django 2.2.
 
 1. `pip install wagtail-blog`
 2. Add `blog` to INSTALLED_APPS
@@ -51,9 +45,35 @@ Wagtail blog features abstract base models. If you want to change functionality 
 
 # Import from WordPress
 
-The import feature requires `django-contrib-comments` and `django-comments-xtd`
+The v2 API is the recommended way to import. It has a cleaner, more recent implementation that is easy to extend as needed.
+The v1 API and xml import use an older, less maintained, codebase and are kept here just in case they are useful to anyone.
+
+## Wordpress API v2
+
+This method works with any reasonably modern Wordpress instance and requires no changes to Wordpress and no authentication is needed. It's tested in both wordpress.com and privately hosted Wordpress instances.
+
+### Usage
+
+Use the Django management command `import_wordpress` and provide the slug of the Blog Index Page you wish to add the pages to. For example if you made a Blog Index Page called "blog" and wanted to import my personal wordpress.com hosted blog run:
+
+`./manage.py import_wordpress blog --url=https://public-api.wordpress.com/wp/v2/sites/davidmburke.com`
+
+Notice the special wordpress.com url schema. For a private wordpress instance it would typically look like `https://example.com/wp-json/wp/v2` instead.
+
+**Optional Arguments**
+
+- --convert-images (False) set to True to attempt converting images to Wagtail Image objects. Requires `beautifulsoup4`.
+- --create-users (False) set to True to create new users out of authors.
+
+**Extending**
+
+See [wordpress_import.py](/blog/wordpress_import.py). This project can't predict how you host images or implement comments. It's intended to be modified to suit your project's needs.
 
 ## JSON API Import
+
+*Legacy feature*
+
+The import feature requires `django-contrib-comments` and `django-comments-xtd`
 
 1. Enable WordPress JSON API
 2. Create a Blog index page and note the title. Let's pretend my blog index page title is "blog"
@@ -66,6 +86,8 @@ This is a complex process and is prone to error. You should plan to review the i
 Merge requests welcome to improve this feature.
 
 ## XML file import
+
+*Legacy feature*
 
 1. Create a WordPress XML dump by selecting "export" from the "Tools" section 
 of the WordPress admin page.
@@ -82,9 +104,7 @@ Like the import procedure above, this process is complex and prone to error.
 django-comments-xtd comments work out of the box. Just install it as directed [here](http://django-comments-xtd.readthedocs.org/en/latest/). 
 Customizing the xtd comment templates should be all you need - but feel free to review this app's templates which you may want to override.
 
-Out of box Disqus coming someday - but it's pretty easy to add manually following the Disqus documentation and overriding templates.
-
-Feel free to contribute other comment implimentations.
+Feel free to contribute other comment implementations.
 
 # Development and Contributing
 

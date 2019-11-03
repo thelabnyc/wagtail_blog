@@ -1,0 +1,281 @@
+[
+  {
+    "id": 882,
+    "date": "2019-10-20T20:22:20",
+    "date_gmt": "2019-10-20T20:22:20",
+    "guid": { "rendered": "http://davidmburke.com/?p=882" },
+    "modified": "2019-11-03T18:39:44",
+    "modified_gmt": "2019-11-03T18:39:44",
+    "slug": "angular-wagtail-1-0-and-getting-started",
+    "status": "publish",
+    "type": "post",
+    "link": "https://davidmburke.com/2019/10/20/angular-wagtail-1-0-and-getting-started/",
+    "title": { "rendered": "Angular Wagtail 1.0 and getting&nbsp;started" },
+    "content": { "rendered": "<p>test</p>" },
+    "protected": false,
+    "excerpt": {
+      "rendered": "<p>Angular Wagtail and Wagtail Single Page App Integration are officially 1.0 and stable. It&#8217;s time for a more complete getting started guide. Let&#8217;s build a new app together. Our goal will be to make a multi-site enabled Wagtail CMS with a separate Angular front-end.\u00a0 When done, we&#8217;ll be set up for features such as Map&hellip; <a class=\"more-link\" href=\"https://davidmburke.com/2019/10/20/angular-wagtail-1-0-and-getting-started/\">Continue reading <span class=\"screen-reader-text\">Angular Wagtail 1.0 and getting&nbsp;started</span> <span class=\"meta-nav\" aria-hidden=\"true\">&rarr;</span></a></p>\n",
+      "protected": false
+    },
+    "author": 110030650,
+    "featured_media": 0,
+    "comment_status": "open",
+    "ping_status": "open",
+    "sticky": false,
+    "template": "",
+    "format": "standard",
+    "meta": {
+      "_coblocks_attr": "",
+      "_coblocks_dimensions": "",
+      "_coblocks_responsive_height": "",
+      "_coblocks_accordion_ie_support": "",
+      "advanced_seo_description": "",
+      "amp_status": "",
+      "spay_email": "",
+      "jetpack_publicize_message": ""
+    },
+    "categories": [8, 1],
+    "tags": [463744, 832],
+    "jetpack-related-posts": [],
+    "jetpack_featured_media_url": "",
+    "jetpack_publicize_connections": [],
+    "jetpack_shortlink": "https://wp.me/p9Boya-ee",
+    "jetpack_sharing_enabled": true,
+    "jetpack_likes_enabled": true,
+    "_links": {
+      "self": [
+        {
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts/882"
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/types/post"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/users/110030650"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/comments?post=882"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 15,
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts/882/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 901,
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts/882/revisions/901"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/media?parent=882"
+        }
+      ],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/categories?post=882"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/tags?post=882"
+        }
+      ],
+      "curies": [
+        { "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }
+      ]
+    },
+    "_embedded": {
+      "author": [
+        {
+          "id": 110030650,
+          "name": "David",
+          "url": "http://davidandmariana.wordpress.com",
+          "description": "",
+          "link": "https://davidmburke.com/author/bufke/",
+          "slug": "bufke",
+          "_links": {
+            "self": [
+              {
+                "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/users/110030650"
+              }
+            ],
+            "collection": [
+              {
+                "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/users"
+              }
+            ]
+          }
+        }
+      ],
+      "wp:term": [
+        [
+          {
+            "id": 8,
+            "link": "https://davidmburke.com/category/test/",
+            "name": "test",
+            "slug": "test",
+            "taxonomy": "category",
+            "_links": {
+              "self": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/categories/8"
+                }
+              ],
+              "collection": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/categories"
+                }
+              ],
+              "about": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/taxonomies/category"
+                }
+              ],
+              "wp:post_type": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts?categories=8"
+                }
+              ],
+              "curies": [
+                {
+                  "name": "wp",
+                  "href": "https://api.w.org/{rel}",
+                  "templated": true
+                }
+              ]
+            }
+          },
+          {
+            "id": 1,
+            "link": "https://davidmburke.com/category/uncategorized/",
+            "name": "Uncategorized",
+            "slug": "uncategorized",
+            "taxonomy": "category",
+            "_links": {
+              "self": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/categories/1"
+                }
+              ],
+              "collection": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/categories"
+                }
+              ],
+              "about": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/taxonomies/category"
+                }
+              ],
+              "wp:post_type": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts?categories=1"
+                }
+              ],
+              "curies": [
+                {
+                  "name": "wp",
+                  "href": "https://api.w.org/{rel}",
+                  "templated": true
+                }
+              ]
+            }
+          }
+        ],
+        [
+          {
+            "id": 463744,
+            "link": "https://davidmburke.com/tag/angular/",
+            "name": "angular",
+            "slug": "angular",
+            "taxonomy": "post_tag",
+            "_links": {
+              "self": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/tags/463744"
+                }
+              ],
+              "collection": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/tags"
+                }
+              ],
+              "about": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/taxonomies/post_tag"
+                }
+              ],
+              "wp:post_type": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts?tags=463744"
+                }
+              ],
+              "curies": [
+                {
+                  "name": "wp",
+                  "href": "https://api.w.org/{rel}",
+                  "templated": true
+                }
+              ]
+            }
+          },
+          {
+            "id": 832,
+            "link": "https://davidmburke.com/tag/python/",
+            "name": "python",
+            "slug": "python",
+            "taxonomy": "post_tag",
+            "_links": {
+              "self": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/tags/832"
+                }
+              ],
+              "collection": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/tags"
+                }
+              ],
+              "about": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/taxonomies/post_tag"
+                }
+              ],
+              "wp:post_type": [
+                {
+                  "href": "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com/posts?tags=832"
+                }
+              ],
+              "curies": [
+                {
+                  "name": "wp",
+                  "href": "https://api.w.org/{rel}",
+                  "templated": true
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    }
+  }
+]
