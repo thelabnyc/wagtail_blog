@@ -8,3 +8,4 @@ django-comments-xtd==2.4.1
 requests
 lxml
 ipdb
+responses

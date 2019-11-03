@@ -169,7 +169,7 @@ class BlogPageAbstract(Page):
         FieldPanel('title', classname="full title"),
         MultiFieldPanel([
             FieldPanel('tags'),
-            InlinePanel('categories', label=_("Categories")),
+            FieldPanel('blog_categories'),
         ], heading="Tags and Categories"),
         ImageChooserPanel('header_image'),
         FieldPanel('body', classname="full"),

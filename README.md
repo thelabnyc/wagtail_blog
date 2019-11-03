@@ -58,11 +58,12 @@ Use the Django management command `import_wordpress` and provide the slug of the
 
 `./manage.py import_wordpress blog --url=https://public-api.wordpress.com/wp/v2/sites/davidmburke.com`
 
-Notice the special wordpress.com url schema. For a private wordpress instance it would typically look like `https://example.com/wp-json` instead.
+Notice the special wordpress.com url schema. For a private wordpress instance it would typically look like `https://example.com/wp-json/wp/v2` instead.
 
 **Optional Arguments**
 
 - --convert-images (False) set to True to attempt converting images to Wagtail Image objects. Requires `beautifulsoup4`.
+- --create-users (False) set to True to create new users out of authors.
 
 **Extending**
 
