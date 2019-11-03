@@ -5,12 +5,14 @@ import os
 from io import BytesIO
 
 import requests
-from bs4 import BeautifulSoup
 from django.core.files import File
+from django.contrib.auth import get_user_model
 from wagtail.core.models import Page
 from wagtail.images.models import Image
 
 from .models import BlogPage
+
+User = get_user_model()
 
 
 class WordpressImport():
@@ -19,8 +21,10 @@ class WordpressImport():
     blog_index = None
     per_page = 50  # Number of items per page for wordpress rest api
     convert_images = False
+    create_users = True  # Create users from Author data, if they don't exist
+    first_page_only = False # Only process one page. Useful in testing and previewing.
 
-    def __init__(self, url: str, blog_index_slug='', convert_images=True):
+    def __init__(self, url: str, blog_index_slug='', convert_images=False):
         """
         Set optional configuration
 
@@ -34,12 +38,15 @@ class WordpressImport():
         self.blog_index = Page.objects.filter(slug=self.blog_index_slug).first()
 
     def get_headers(self):
-        """ Place custom headers here if needed """
+        """ 
+        Place custom headers here if needed
+        """
         return {}
 
     def get_posts(self):
         params = {
-            "per_page": self.per_page
+            "per_page": self.per_page,
+            '_embed': '1'
         }
         endpoint = self.url + "/posts"
         resp = requests.get(endpoint, headers=self.get_headers(), params=params)
@@ -49,12 +56,13 @@ class WordpressImport():
         for post in first_page:
             self.process_post(post)
 
-        # for i in range(total_pages - 1):
-        #     params['page'] = i + 2
-        #     resp = requests.get(endpoint, headers=self.get_headers(), params=params)
-        #     page = json.loads(resp.content)
-        #     for post in page:
-        #         self.process_post(post)
+        if self.first_page_only is False:
+            for i in range(total_pages - 1):
+                params['page'] = i + 2
+                resp = requests.get(endpoint, headers=self.get_headers(), params=params)
+                page = json.loads(resp.content)
+                for post in page:
+                    self.process_post(post)
 
     def process_post(self, post):
         logging.debug(post['content']['rendered'])
@@ -69,6 +77,7 @@ class WordpressImport():
             page.body = self.create_images_from_urls_in_content(page.body)
         page.search_description = self.convert_html_entities(post['excerpt']['rendered'])
         page.date = post['date'][:10]
+        self.set_blog_authors(page, post)
         if page.id:
             page.save()
         else:
@@ -87,9 +96,29 @@ class WordpressImport():
                 prefix_url = prefix_url[:-1]
             url = '{}{}'.format(prefix_url or "", url)
         return url
+    
+    def set_blog_authors(self, page: BlogPage, post):
+        if not post['_embedded'].get('author'):
+            return
+        wp_author = post['_embedded']['author'][0]
+        wag_author = User.objects.filter(username=wp_author['slug']).first()
+        if wag_author:
+            page.owner = wag_author
+        elif self.create_users:
+            name = wp_author['name']
+            last_name = ''
+            if len(name.split()) >= 2:
+                last_name = name.split()[1]
+            wag_author = User.objects.create(
+                username=wp_author['slug'],
+                first_name=name.split()[0],
+                last_name=last_name
+            )
+            page.owner = wag_author
 
     def create_images_from_urls_in_content(self, body):
         """create Image objects and transfer image files to media root"""
+        from bs4 import BeautifulSoup
         soup = BeautifulSoup(body, "html5lib")
         for img in soup.findAll('img'):
             old_url = img['src']

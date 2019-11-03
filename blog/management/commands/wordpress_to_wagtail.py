@@ -36,6 +36,8 @@ class Command(WordpressImport, BaseCommand):
     Next users will need to create a BlogIndex object in this GUI.
     This will be used as a parent object for the child blog page objects.
     """
+    def __init__(self):
+        pass
 
     def add_arguments(self, parser):
         """have to add this to use args in django 1.8"""

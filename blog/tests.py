@@ -248,4 +248,6 @@ class BlogAPIImportTests(TestCase):
 
         url = "https://public-api.wordpress.com/wp/v2/sites/davidmburke.com"
         importer = WordpressImport(url)
+        importer.first_page_only = True
+        importer.convert_images = True
         importer.get_posts()
