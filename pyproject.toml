@@ -6,6 +6,7 @@ authors = ["David Burke"]
 license = "Apache License"
 keywords = ["django", "wagtail", "blog"]
 homepage = "https://gitlab.com/thelabnyc/wagtail_blog"
+readme = "README.md"
 classifiers=[
   "Development Status :: 5 - Production/Stable",
   'Environment :: Web Environment',
@@ -13,6 +14,9 @@ classifiers=[
   'Framework :: Wagtail',
   'Intended Audience :: Developers',
   "License :: OSI Approved :: Apache Software License",
+]
+packages = [
+  { include = "blog" }
 ]
 
 [tool.poetry.dependencies]
