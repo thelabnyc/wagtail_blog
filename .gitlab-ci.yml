@@ -1,12 +1,12 @@
-image: python:3.6
+image: python:3.8-slim
 
 cache:
   paths:
   - ~/.cache/pip/
 
 before_script:
-  - pip install .
-  - pip install -r requirements.txt
+  - pip install poetry
+  - poetry install --no-interaction --no-ansi
 
 test:
   script:

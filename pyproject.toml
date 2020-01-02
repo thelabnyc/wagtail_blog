@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "wagtail_blog"
+version = "2.2.0"
+description = "A wordpress like blog app implemented in wagtail"
+authors = ["David Burke"]
+license = "Apache License"
+keywords = ["django", "wagtail", "blog"]
+homepage = "https://gitlab.com/thelabnyc/wagtail_blog",
+classifiers=[
+  "Development Status :: 5 - Production/Stable",
+  'Environment :: Web Environment',
+  'Framework :: Django',
+  'Framework :: Wagtail',
+  'Intended Audience :: Developers',
+  "License :: OSI Approved :: Apache Software License",
+],
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Django = "*"
+wagtail = "^2"
+requests = "*"
+lxml = "*"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+django-hashers-passlib = "^0.4"
+django-storages = "^1.8"
+django-contrib-comments = "^1.9.1"
+django-comments-xtd = "^2.4.1"
+ipdb = "^0.12.3"
+pylint = "^2.4.4"
+pylint-django = "^2.0.13"
+boto3 = "^1.10.46"
+responses = "^0.10.9"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+

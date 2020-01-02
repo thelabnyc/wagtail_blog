@@ -52,3 +52,4 @@ target/
 #Vim
 *.swp
 *.swo
+db.sqlite3

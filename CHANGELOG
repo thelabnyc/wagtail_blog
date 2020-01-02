@@ -1,3 +1,8 @@
+# 2.2.0
+
+- New Wordpress API importer (Old ones still exist but haven't been updated in years)
+- Switch to poetry to dependencies management
+
 # 2.1.0
 
 - Update Django version to 2.1 on demo app
