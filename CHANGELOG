@@ -1,3 +1,7 @@
+# 2.3.0
+
+- Wordpress API importer works better with --convert-images by removing wordpress srcset attribute and other minor fixes
+
 # 2.2.0
 
 - New Wordpress API importer (Old ones still exist but haven't been updated in years)
