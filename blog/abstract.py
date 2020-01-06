@@ -10,7 +10,7 @@ from wagtail.core.fields import RichTextField
 from wagtail.images import get_image_model_string
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
-from modelcluster.fields import ParentalKey
+from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.tags import ClusterTaggableManager
 from taggit.models import TaggedItemBase
 
@@ -137,7 +137,7 @@ class BlogPageAbstract(Page):
     search_fields = Page.search_fields + [
         index.SearchField('body'),
     ]
-    blog_categories = models.ManyToManyField(
+    blog_categories = ParentalManyToManyField(
         'BlogCategory', through='BlogCategoryBlogPage', blank=True)
 
     settings_panels = [
