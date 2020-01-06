@@ -173,7 +173,10 @@ class WordpressImport:
         for feature_media in featured_medias:
             if feature_media.get("id") == featured_media_id:
                 source_url = feature_media["source_url"]
-                title = feature_media["title"]
+                try:  # Wordpress 5.3 API nests title in "rendered"
+                    title = feature_media["title"]["rendered"]
+                except TypeError:  # Fallback for older (or newer?) wordpress
+                    title = feature_media["title"]
                 details = feature_media["media_details"]
                 resp = requests.get(source_url, stream=True)
                 if resp.status_code != requests.codes.ok:
