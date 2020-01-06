@@ -1,6 +1,7 @@
 # 2.3.0
 
 - Wordpress API importer works better with --convert-images by removing wordpress srcset attribute and other minor fixes
+- Categories now uses ParentalManyToManyField instead of ManyToManyField which may be required for newer versions django-modelcluster and should support drafts better
 
 # 2.2.0
 
