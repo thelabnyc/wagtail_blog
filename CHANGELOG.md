@@ -1,3 +1,7 @@
+# 2.3.4
+
+- Fix import of categories and tags
+
 # 2.3.3
 
 - Fix issue where author import fails when name is blank.

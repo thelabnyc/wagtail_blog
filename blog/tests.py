@@ -309,3 +309,5 @@ class BlogAPIImportTests(TestCase):
         importer.get_posts()
         posts = BlogPage.objects.all()
         self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].blog_categories.all().count(), 2)
+        self.assertEqual(posts[0].tags.all().count(), 2)

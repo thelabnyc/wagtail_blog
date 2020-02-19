@@ -91,6 +91,7 @@ class WordpressImport:
             self.blog_index.add_child(instance=page)
         self.set_categories(page, post)
         self.set_tags(page, post)
+        page.save()  # Save is required after adding ParentalManyToManyField
 
     def convert_html_entities(self, text):
         """converts html symbols so they show up correctly in wagtail"""
@@ -141,14 +142,10 @@ class WordpressImport:
                         embed_category["id"] == category
                         and embed_category["taxonomy"] == "category"
                     ):
-                        try:
-                            blog_category = BlogCategory.objects.get(
-                                slug=embed_category["slug"]
-                            )
-                        except BlogCategory.DoesNotExist:
-                            blog_category = BlogCategory.objects.create(
-                                slug=embed_category["slug"], name=embed_category["name"]
-                            )
+                        blog_category, _ = BlogCategory.objects.get_or_create(
+                            slug=embed_category["slug"],
+                            defaults={"name": embed_category["name"]},
+                        )
                         page.blog_categories.add(blog_category)
 
     def set_tags(self, page: BlogPage, post):
@@ -158,12 +155,9 @@ class WordpressImport:
             for embed_tag_list in embed_terms:
                 for embed_tag in embed_tag_list:
                     if embed_tag["id"] == tag and embed_tag["taxonomy"] == "post_tag":
-                        try:
-                            blog_tag = BlogTag.objects.get(slug=embed_tag["slug"])
-                        except BlogTag.DoesNotExist:
-                            blog_tag = BlogTag.objects.create(
-                                slug=embed_tag["slug"], name=embed_tag["name"]
-                            )
+                        blog_tag, _ = BlogTag.objects.get_or_create(
+                            slug=embed_tag["slug"], defaults={"name": embed_tag["name"]}
+                        )
                         page.tags.add(blog_tag)
 
     def set_featured_media(self, page: BlogPage, post):
