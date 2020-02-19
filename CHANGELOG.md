@@ -1,3 +1,8 @@
+# 2.3.2
+
+- Fix issue where import crashes when encountering truncated image
+https://stackoverflow.com/questions/12984426/python-pil-ioerror-image-file-truncated-with-big-images
+
 # 2.3.0
 
 - Wordpress API importer works better with --convert-images by removing wordpress srcset attribute and other minor fixes

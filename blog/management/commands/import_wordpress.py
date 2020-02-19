@@ -1,5 +1,10 @@
+from PIL import ImageFile
 from django.core.management.base import BaseCommand
 from blog.wordpress_import import WordpressImport
+
+
+# https://stackoverflow.com/questions/12984426/python-pil-ioerror-image-file-truncated-with-big-images
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Command(BaseCommand):
