@@ -1,7 +1,11 @@
+# 2.3.3
+
+- Fix issue where author import fails when name is blank.
+
 # 2.3.2
 
 - Fix issue where import crashes when encountering truncated image
-https://stackoverflow.com/questions/12984426/python-pil-ioerror-image-file-truncated-with-big-images
+  https://stackoverflow.com/questions/12984426/python-pil-ioerror-image-file-truncated-with-big-images
 
 # 2.3.0
 

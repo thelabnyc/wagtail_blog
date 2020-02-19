@@ -119,9 +119,12 @@ class WordpressImport:
             last_name = ""
             if len(name.split()) >= 2:
                 last_name = name.split()[1]
+            first_name = ""
+            if len(name.split()) >= 1:
+                first_name = name.split()[0]
             wag_author = User.objects.create(
                 username=wp_author["slug"],
-                first_name=name.split()[0],
+                first_name=first_name,
                 last_name=last_name,
                 is_staff=True,
             )
