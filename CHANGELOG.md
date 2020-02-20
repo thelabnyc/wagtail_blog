@@ -1,3 +1,7 @@
+# 2.3.5
+
+- For truncated images, do not import instead of allow truncated image. Wagtail can't support them so it breaks later in Wagtail usage.
+
 # 2.3.4
 
 - Fix import of categories and tags

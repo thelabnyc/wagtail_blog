@@ -15,6 +15,8 @@ from .models import BlogPage, BlogCategory, BlogTag
 
 User = get_user_model()
 
+logger = logging.getLogger(__name__)
+
 
 class WordpressImport:
     url = ""
@@ -66,8 +68,8 @@ class WordpressImport:
                     self.process_post(post)
 
     def process_post(self, post):
-        logging.debug(post["content"]["rendered"])
-        logging.info(".")
+        logger.debug(post["content"]["rendered"])
+        logger.info(".")
         try:
             page = BlogPage.objects.descendant_of(self.blog_index).get(
                 slug=post["slug"]
@@ -217,7 +219,12 @@ class WordpressImport:
             image.save()
             if img.has_attr("srcset"):
                 img["srcset"] = ""
-            new_url = image.get_rendition("original").url
-            img["src"] = new_url
+            try:
+                new_url = image.get_rendition("original").url
+                img["src"] = new_url
+            except OSError:
+                # Avoid https://github.com/wagtail/wagtail/issues/1326 by not importing it
+                logger.warning(f"image {image} is unable to be imported")
+                image.delete()
         soup.body.hidden = True
         return soup.body
